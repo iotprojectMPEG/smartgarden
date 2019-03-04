@@ -1,17 +1,22 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import sys
 import Adafruit_DHT
-import time
 
 SENSOR = 11
 PIN = 17
 
-def main():
+def dht11():
     while True:
-        humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN)
-        print 'Temp: {0:0.1f} C  Humidity: {1:0.1f} %'.format(temperature, humidity)
-        time.sleep(10)
+        humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN, retries=3, delay_seconds=2)
 
-if __name__ == '__main__':
-    main()
+        if humidity == None:
+            humidity = -1
+
+        if temperature == None:
+            temperature = -1
+
+        return (humidity, temperature)
+
+
+
