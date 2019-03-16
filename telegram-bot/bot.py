@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-""" Bot for smart gardening
+
+""" Telegram bot for smart gardening.
+    Use a file named "token" for the token.
 """
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
