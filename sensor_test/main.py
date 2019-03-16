@@ -16,8 +16,8 @@ def main():
         print('Temp: %.1f  Humidity: %.1f' %(temperature, humidity))
 
         # Wind (simulated)
-        wind = wind.get_data()
-        print('Wind: %d N' %(wind))
+        intensity = wind.get_data()
+        print('Wind: %d N' %(intensity))
         time.sleep(10)
 
 
