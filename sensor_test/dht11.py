@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Real humidity and temperature sensor.
+"""
 
 import sys
 import Adafruit_DHT
@@ -6,17 +9,25 @@ import Adafruit_DHT
 SENSOR = 11
 PIN = 17
 
-def dht11():
-    while True:
-        humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN, retries=3, delay_seconds=2)
 
-        if humidity == None:
-            humidity = -1
+def get_data():
+    humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN,
+                                                    retries=3,
+                                                    delay_seconds=2)
 
-        if temperature == None:
-            temperature = -1
+    if humidity == None:
+        humidity = -1
 
-        return (humidity, temperature)
+    if temperature == None:
+        temperature = -1
+
+    return (humidity, temperature)
 
 
+def main():
+    hum, temp = get_data()
+    print('Temp: %.1f  Humidity: %.1f' %(temp, hum))
 
+
+if __name__ == '__main__':
+    main()
