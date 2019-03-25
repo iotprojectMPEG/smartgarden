@@ -1,0 +1,37 @@
+{
+  "gardens": [{
+      "ID": "garden1",
+      "location": "Torino",
+      "plants": [{
+        "ID": "plant1",
+        "name": "Eden Rose",
+        "sensors": [{
+          "ID": "dev2"
+        }, {
+          "ID": "dev5"
+        }]
+      }, {
+        "ID": "plant2",
+        "name": "Sarracenia",
+        "sensors": [{
+          "ID": "dev3"
+        }, {
+          "ID": "dev5"
+        }]
+      }]
+    },
+    {
+      "ID": "garden2",
+      "location": "Palermo",
+      "plants": [{
+        "ID": "plant1",
+        "name": "Eden Rose",
+        "sensors": [{
+          "ID": "dev2"
+        }, {
+          "ID": "dev5"
+        }]
+      }]
+    }
+  ]
+}
