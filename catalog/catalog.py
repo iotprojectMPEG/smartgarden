@@ -7,7 +7,7 @@ import datetime
 import requests
 import threading
 
-JSON_FILE = 'catalog.json'
+JSON_FILE = 'static.json'
 CONF_FILE = 'conf'
 
 class Catalog(object):
