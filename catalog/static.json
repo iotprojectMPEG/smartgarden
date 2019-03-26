@@ -8,7 +8,7 @@
     "type": "type1"
   }, {
     "ID": "dev2",
-    "type": "DHT11",
+    "type": "DHT11"
   }, {
     "ID": "dev3",
     "type": "wind sensor"
