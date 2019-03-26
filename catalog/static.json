@@ -1,22 +1,37 @@
 {
   "broker": {
-    "IP": "192.168.1.100",
+    "IP": "192.168.1.254",
     "port": "1883"
   },
+  "users": [{
+    "userID": "mpeg123",
+    "name": "MPEG",
+    "telegramID": "mpeg_123"
+  }],
   "devices": [{
-    "ID": "dev1",
-    "type": "type1"
+    "timestamp": 1553616543,
+    "devID": "dht11",
+    "endpoints": ["MQTT"],
+    "resources": ["Humidity", "Temperature"]
   }, {
-    "ID": "dev2",
-    "type": "DHT11"
+    "timestamp": 1553616543,
+    "devID": "windsensor",
+    "endpoints": ["MQTT"],
+    "resources": ["Wind"]
   }, {
-    "ID": "dev3",
-    "type": "wind sensor"
+    "timestamp": 1553616543,
+    "devID": "UVsensor",
+    "endpoints": ["MQTT"],
+    "resources": ["UV"]
   }, {
-    "ID": "dev4",
-    "type": "UV sensor"
+    "timestamp": 1553616543,
+    "devID": "dev4",
+    "endpoints": ["MQTT", "REST"],
+    "resources": []
   }, {
-    "ID": "dev5",
-    "type": "irrigator"
+    "timestamp": 1553616543,
+    "devID": "dev5",
+    "endpoints": ["MQTT"],
+    "resources": []
   }]
 }
