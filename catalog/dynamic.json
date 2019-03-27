@@ -6,17 +6,17 @@
         "ID": "plant1",
         "name": "Eden Rose",
         "sensors": [{
-          "ID": "dev2"
+          "ID": "dht11"
         }, {
-          "ID": "dev5"
+          "ID": "windsensor"
         }]
       }, {
         "ID": "plant2",
         "name": "Sarracenia",
         "sensors": [{
-          "ID": "dev3"
+          "ID": "dht11"
         }, {
-          "ID": "dev5"
+          "ID": "UVsensor"
         }]
       }]
     },
@@ -27,9 +27,9 @@
         "ID": "plant1",
         "name": "Eden Rose",
         "sensors": [{
-          "ID": "dev2"
+          "ID": "dht11"
         }, {
-          "ID": "dev5"
+          "ID": "UVsensor"
         }]
       }]
     }

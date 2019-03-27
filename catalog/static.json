@@ -4,10 +4,16 @@
     "port": "1883"
   },
   "users": [{
-    "userID": "mpeg123",
-    "name": "MPEG",
-    "telegramID": "mpeg_123"
-  }],
+      "userID": "mpeg123",
+      "name": "MPEG",
+      "telegramID": "mpeg_123"
+    },
+    {
+      "userID": "guest007",
+      "name": "Guest",
+      "telegramID": "guest_007"
+    }
+  ],
   "devices": [{
     "timestamp": 1553616543,
     "devID": "dht11",
@@ -25,7 +31,7 @@
     "resources": ["UV"]
   }, {
     "timestamp": 1553616543,
-    "devID": "dev4",
+    "devID": "raspi3B",
     "endpoints": ["MQTT", "REST"],
     "resources": []
   }, {
