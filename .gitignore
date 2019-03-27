@@ -3,6 +3,8 @@ nohup.out
 
 # API keys
 token
+writeAPI
+readAPI
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
