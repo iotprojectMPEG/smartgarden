@@ -12,12 +12,12 @@ import json
 import requests
 import paho.mqtt.client as PahoMQTT
 
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
@@ -33,13 +33,22 @@ def help(bot, update):
 
 def echo(bot, update):
     """Echo the user message."""
-    update.message.reply_text(update.message.text)
+    #update.message.reply_text(update.message.text)
+    update.message.reply_text("Stai zitto!")
 
 
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
 
+def irrigation(bot, update):
+    update.message.reply_text("Avvio irrigazione...")
+    update.message.reply_text("Irrigazione fallita!")
+    # funzione...
+
+def status(bot, update):
+    update.message.reply_text("Magari metti qualche sensore")
+    # funzione...
 
 def main():
     """Start the bot."""
@@ -55,6 +64,8 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("status", status))
+    dp.add_handler(CommandHandler("irrigate", irrigation))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
