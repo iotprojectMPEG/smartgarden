@@ -18,7 +18,7 @@ def get_data():
 def main():
     for i in range(30):
         wind = get_data()
-        print('Wind: %d N' %(wind))
+        print('Wind: %d kn' %(wind))
 
 
 if __name__ == '__main__':
