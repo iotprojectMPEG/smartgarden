@@ -2,22 +2,38 @@
   "gardens": [{
       "ID": "garden1",
       "location": "Torino",
+      "users": [{
+        "userID": "mpeg123",
+        "admin": 1
+        }],
       "plants": [{
         "ID": "plant1",
         "name": "Eden Rose",
-        "sensors": [{
-          "ID": "dht11"
+        "hours":["0800"],
+        "devices": [{
+          "ID": "dht11",
+          "timestamp": 100
         }, {
-          "ID": "windsensor"
-        }]
+          "ID": "dev5",
+          "timestamp": 100
+        }, {
+          "ID": "irrigator",
+          "timestamp": 101
+          }]
       }, {
         "ID": "plant2",
         "name": "Sarracenia",
-        "sensors": [{
-          "ID": "dht11"
+        "hours": ["0700", "1750"],
+        "devices": [{
+          "ID": "dev3",
+          "timestamp": 100
         }, {
-          "ID": "UVsensor"
-        }]
+          "ID": "dev5",
+          "timestamp": 100
+        },{
+          "ID": "irrigator",
+          "timestamp": 101
+          }]
       }]
     },
     {
@@ -30,7 +46,10 @@
           "ID": "dht11"
         }, {
           "ID": "UVsensor"
-        }]
+        },{
+          "ID": "irrigator",
+          "timestamp": 101
+          }]
       }]
     }
   ]

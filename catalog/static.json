@@ -15,29 +15,48 @@
     }
   ],
   "devices": [{
-    "timestamp": 1553616543,
     "devID": "dht11",
     "endpoints": ["MQTT"],
     "resources": ["Humidity", "Temperature"]
   }, {
-    "timestamp": 1553616543,
     "devID": "windsensor",
     "endpoints": ["MQTT"],
     "resources": ["Wind"]
   }, {
-    "timestamp": 1553616543,
     "devID": "UVsensor",
     "endpoints": ["MQTT"],
     "resources": ["UV"]
   }, {
-    "timestamp": 1553616543,
-    "devID": "raspi3B",
-    "endpoints": ["MQTT", "REST"],
-    "resources": []
+    "devID": "brightness",
+    "endpoints": ["MQTT"],
+    "resources": ["Brightness"]
   }, {
-    "timestamp": 1553616543,
-    "devID": "dev5",
+    "devID": "irrigator",
     "endpoints": ["MQTT"],
     "resources": []
-  }]
+  }],
+  "plants": [{
+    "plantID": "p1",
+    "name": "Sarracenia",
+    "environment": {
+      "water": 100,
+      "humidity": 90,
+      "temperature": 30}
+    },{
+    "plantID": "p2",
+    "name": "Dionea",
+    "environment": {
+      "water": 100,
+      "humidity": 80,
+      "temperature": 25
+    }
+    },{
+      "plantID": "p3",
+      "name": "Aloe vera",
+      "environment":{
+        "water": 40,
+        "humidity": 30,
+        "temperature": 40
+      }
+      }]
 }
