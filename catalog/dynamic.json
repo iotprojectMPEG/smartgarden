@@ -1,56 +1,59 @@
 {
-  "gardens": [{
-      "ID": "garden1",
-      "location": "Torino",
-      "users": [{
-        "userID": "mpeg123",
-        "admin": 1
+  "users": [{
+    "userID": "mpeg123",
+    "gardens": [{
+        "ID": "garden1",
+        "location": "Torino",
+        "users": [{
+          "userID": "mpeg123",
+          "admin": 1
         }],
-      "plants": [{
-        "ID": "plant1",
-        "name": "Eden Rose",
-        "hours":["0800"],
-        "devices": [{
-          "ID": "dht11",
-          "timestamp": 100
-        }, {
-          "ID": "dev5",
-          "timestamp": 100
-        }, {
-          "ID": "irrigator",
-          "timestamp": 101
+        "plants": [{
+          "ID": "plant1",
+          "name": "Eden Rose",
+          "hours": ["0800"],
+          "devices": [{
+            "ID": "dht11",
+            "timestamp": 100
+          }, {
+            "ID": "dev5",
+            "timestamp": 100
+          }, {
+            "ID": "irrigator",
+            "timestamp": 101
           }]
-      }, {
-        "ID": "plant2",
-        "name": "Sarracenia",
-        "hours": ["0700", "1750"],
-        "devices": [{
-          "ID": "dev3",
-          "timestamp": 100
         }, {
-          "ID": "dev5",
-          "timestamp": 100
-        },{
-          "ID": "irrigator",
-          "timestamp": 101
+          "ID": "plant2",
+          "name": "Sarracenia",
+          "hours": ["0700", "1750"],
+          "devices": [{
+            "ID": "dev3",
+            "timestamp": 100
+          }, {
+            "ID": "dev5",
+            "timestamp": 100
+          }, {
+            "ID": "irrigator",
+            "timestamp": 101
           }]
-      }]
-    },
-    {
-      "ID": "garden2",
-      "location": "Palermo",
-      "plants": [{
-        "ID": "plant1",
-        "name": "Eden Rose",
-        "sensors": [{
-          "ID": "dht11"
-        }, {
-          "ID": "UVsensor"
-        },{
-          "ID": "irrigator",
-          "timestamp": 101
+        }]
+      },
+      {
+        "ID": "garden2",
+        "location": "Palermo",
+        "plants": [{
+          "ID": "plant1",
+          "name": "Eden Rose",
+          "sensors": [{
+            "ID": "dht11"
+          }, {
+            "ID": "UVsensor"
+          }, {
+            "ID": "irrigator",
+            "timestamp": 101
           }]
-      }]
-    }
-  ]
+        }]
+      }
+    ]
+  }]
 }
