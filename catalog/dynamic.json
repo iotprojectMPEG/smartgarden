@@ -1,51 +1,52 @@
-{    "gardens": [{
-        "gardenID": "garden1",
-        "location": "Torino",
-        "plants": [{
-          "plantID": "plant1",
-          "name": "Eden Rose",
-          "hours": ["0800"],
-          "devices": [{
-            "devID": "dht11",
-            "timestamp": 100
-          }, {
-            "devID": "dev5",
-            "timestamp": 100
-          }, {
-            "devID": "irrigator",
-            "timestamp": 101
-          }]
+{
+  "gardens": [{
+      "gardenID": "garden1",
+      "location": "Torino",
+      "plants": [{
+        "plantID": "plant1",
+        "name": "Eden Rose",
+        "hours": ["0800"],
+        "devices": [{
+          "devID": "dht11",
+          "timestamp": 100
         }, {
-          "plantID": "plant2",
-          "name": "Sarracenia",
-          "hours": ["0700", "1750"],
-          "devices": [{
-            "devID": "dev3",
-            "timestamp": 100
-          }, {
-            "devID": "dev5",
-            "timestamp": 100
-          }, {
-            "devID": "irrigator",
-            "timestamp": 101
-          }]
+          "devID": "dev5",
+          "timestamp": 100
+        }, {
+          "devID": "irrigator",
+          "timestamp": 101
         }]
-      },
-      {
-        "gardenID": "garden2",
-        "location": "Palermo",
-        "plants": [{
-          "plantID": "plant1",
-          "name": "Eden Rose",
-          "sensors": [{
-            "devID": "dht11"
-          }, {
-            "devID": "UVsensor"
-          }, {
-            "devID": "irrigator",
-            "timestamp": 101
-          }]
+      }, {
+        "plantID": "plant2",
+        "name": "Sarracenia",
+        "hours": ["0700", "1750"],
+        "devices": [{
+          "devID": "dev3",
+          "timestamp": 100
+        }, {
+          "devID": "dev5",
+          "timestamp": 100
+        }, {
+          "devID": "irrigator",
+          "timestamp": 101
         }]
-      }
-    ]
-  }
+      }]
+    },
+    {
+      "gardenID": "garden2",
+      "location": "Palermo",
+      "plants": [{
+        "plantID": "plant1",
+        "name": "Eden Rose",
+        "sensors": [{
+          "devID": "dht11"
+        }, {
+          "devID": "UVsensor"
+        }, {
+          "devID": "irrigator",
+          "timestamp": 101
+        }]
+      }]
+    }
+  ]
+}
