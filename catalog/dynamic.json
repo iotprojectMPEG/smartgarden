@@ -1,59 +1,51 @@
-{
-  "users": [{
-    "userID": "mpeg123",
-    "gardens": [{
-        "ID": "garden1",
+{    "gardens": [{
+        "gardenID": "garden1",
         "location": "Torino",
-        "users": [{
-          "userID": "mpeg123",
-          "admin": 1
-        }],
         "plants": [{
-          "ID": "plant1",
+          "plantID": "plant1",
           "name": "Eden Rose",
           "hours": ["0800"],
           "devices": [{
-            "ID": "dht11",
+            "devID": "dht11",
             "timestamp": 100
           }, {
-            "ID": "dev5",
+            "devID": "dev5",
             "timestamp": 100
           }, {
-            "ID": "irrigator",
+            "devID": "irrigator",
             "timestamp": 101
           }]
         }, {
-          "ID": "plant2",
+          "plantID": "plant2",
           "name": "Sarracenia",
           "hours": ["0700", "1750"],
           "devices": [{
-            "ID": "dev3",
+            "devID": "dev3",
             "timestamp": 100
           }, {
-            "ID": "dev5",
+            "devID": "dev5",
             "timestamp": 100
           }, {
-            "ID": "irrigator",
+            "devID": "irrigator",
             "timestamp": 101
           }]
         }]
       },
       {
-        "ID": "garden2",
+        "gardenID": "garden2",
         "location": "Palermo",
         "plants": [{
-          "ID": "plant1",
+          "plantID": "plant1",
           "name": "Eden Rose",
           "sensors": [{
-            "ID": "dht11"
+            "devID": "dht11"
           }, {
-            "ID": "UVsensor"
+            "devID": "UVsensor"
           }, {
-            "ID": "irrigator",
+            "devID": "irrigator",
             "timestamp": 101
           }]
         }]
       }
     ]
-  }]
-}
+  }
