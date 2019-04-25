@@ -13,6 +13,7 @@ JSON_FILE2 = 'dynamic.json'
 CONF_FILE = 'conf'
 TOPIC = '/device/updater'
 BROKER_IP = '192.168.1.70'
+OLD_MAX = 300
 
 class Catalog(object):
     def __init__(self, filename, filename2):
@@ -76,13 +77,16 @@ class Catalog(object):
     def remove_old_device(self):
         self.load_file()
 
-
         for g in self.dynamic["gardens"]:
             for p in g['plants']:
-                for d in p['devices']:
-                    if d['timestamp'] > 5:
+                removable = []
+                for counter, d in enumerate(p['devices']):
+                    print(counter, d)
+                    if time.time() - d['timestamp'] > OLD_MAX:
                         print("Removing... %s" %(d['devID']))
-                        p['devices'].remove(d)
+                        removable.append(counter)
+                for index in sorted(removable, reverse=True):
+                    del p['devices'][index]
 
         print(self.dynamic)
         self.write_file()
@@ -195,8 +199,10 @@ class Third(threading.Thread):
         self.name = self.name
 
     def run(self):
-        cat = Catalog(JSON_FILE, JSON_FILE2)
-        cat.remove_old_device()
+        while True:
+            time.sleep(30)
+            cat = Catalog(JSON_FILE, JSON_FILE2)
+            cat.remove_old_device()
 
 def main():
     thread1 = First(1,"CherryPy")
