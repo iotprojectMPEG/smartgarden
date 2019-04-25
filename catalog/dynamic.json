@@ -38,10 +38,12 @@
       "plants": [{
         "plantID": "plant1",
         "name": "Eden Rose",
-        "sensors": [{
-          "devID": "dht11"
+        "devices": [{
+          "devID": "dht11",
+          "timestamp": 1023
         }, {
-          "devID": "UVsensor"
+          "devID": "UVsensor",
+          "timestamp": 1024
         }, {
           "devID": "irrigator",
           "timestamp": 101
