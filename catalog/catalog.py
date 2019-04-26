@@ -50,6 +50,9 @@ class Catalog(object):
         self.write_file()
 
     def update_device(self, gardenID, plantID, devID):
+        """Update timestamp of a device or insert it again in the dynamic
+        catalog if it has expired.
+        """
         data = {'devID': devID, 'timestamp': time.time()}
         self.load_file()
 
@@ -75,6 +78,9 @@ class Catalog(object):
         self.write_file()
 
     def remove_old_device(self):
+        """Check all the devices whose timestamp is old and remove them from
+        the dynamic catalog.
+        """
         self.load_file()
 
         for g in self.dynamic["gardens"]:
@@ -99,8 +105,36 @@ class Webserver(object):
     def GET(self, *uri, **params):
 
         catalog = Catalog(JSON_FILE, JSON_FILE2)
-        #catalog.add_device("garden1", "plant1", "dht11")
         catalog.load_file()
+        if uri[0] == 'devices':
+            """Get all devices from a specific plant in the garden.
+            If the plant is present it returns a json with the list of devices.
+            If the plant is not found it returns -1.
+            """
+            gardenID = uri[1]
+            plantID = uri[2]
+            g_found = 0
+            p_found = 0
+            
+            for g in catalog.dynamic["gardens"]:
+                if g["gardenID"] == gardenID:
+                    g_found = 1
+                    break
+
+            for p in g["plants"]:
+                if p["plantID"] == plantID:
+                    p_found = 1
+                    break
+
+            if g_found and p_found:
+                devices = p["devices"]
+                return devices
+
+            else:
+                return -1
+
+        #catalog.add_device("garden1", "plant1", "dht11")
+        #catalog.load_file()
 
         if uri[0] == 'catalog':
             # if uri[1] == 'p':
@@ -134,25 +168,19 @@ class MySubscriber:
         self.loop_flag = 0
 
     def my_on_message_received(self, client, userdata, msg):
-        # Receive a json like:
-        #  {"gardenID": 1, "plantID": 2, "devID": 3}
-        print("ci sono")
+        """Receives json messages in the topic '/device/updater' from other
+        devices and get info to update old timestamps or insert expired devices.
+
+        json format:
+        {"gardenID": "garden1", "plantID": "plant1", "devID": "dht11"}
+        """
         msg.payload = msg.payload.decode("utf-8")
         message = json.loads(msg.payload)
         catalog = Catalog(JSON_FILE, JSON_FILE2)
         gardenID = message["gardenID"]
         plantID = message["plantID"]
         devID = message["devID"]
-        print(gardenID)
-        print(plantID)
-        print(devID)
         catalog.update_device(gardenID, plantID, devID)
-        # Funzione che aggiorna il catalog con i device
-
-
-
-
-
 
 class First(threading.Thread):
     def __init__(self,ThreadID,name):
@@ -200,7 +228,7 @@ class Third(threading.Thread):
 
     def run(self):
         while True:
-            time.sleep(30)
+            time.sleep(6000)
             cat = Catalog(JSON_FILE, JSON_FILE2)
             cat.remove_old_device()
 
