@@ -8,27 +8,27 @@
         "hours": ["0800"],
         "devices": [{
           "devID": "dht11",
-          "timestamp": 100
+          "timestamp": 1556295286
         }, {
-          "devID": "dev5",
-          "timestamp": 100
+          "devID": "windsensor",
+          "timestamp": 1556295300
         }, {
           "devID": "irrigator",
-          "timestamp": 101
+          "timestamp": 1556295305
         }]
       }, {
         "plantID": "plant2",
         "name": "Sarracenia",
         "hours": ["0700", "1750"],
         "devices": [{
-          "devID": "dev3",
-          "timestamp": 100
+          "devID": "dht11",
+          "timestamp": 1556295309
         }, {
-          "devID": "dev5",
-          "timestamp": 100
+          "devID": "UVsensor",
+          "timestamp": 1556295296
         }, {
           "devID": "irrigator",
-          "timestamp": 101
+          "timestamp": 1556295301
         }]
       }]
     },
@@ -40,13 +40,13 @@
         "name": "Eden Rose",
         "devices": [{
           "devID": "dht11",
-          "timestamp": 1023
+          "timestamp": 1556295300
         }, {
           "devID": "UVsensor",
-          "timestamp": 1024
+          "timestamp": 1556295300
         }, {
           "devID": "irrigator",
-          "timestamp": 101
+          "timestamp": 1556295300
         }]
       }]
     }
