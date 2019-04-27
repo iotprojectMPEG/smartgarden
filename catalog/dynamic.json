@@ -1,10 +1,8 @@
 {
   "gardens": [{
       "gardenID": "garden1",
-      "location": "Torino",
       "plants": [{
         "plantID": "plant1",
-        "name": "Eden Rose",
         "hours": ["0800"],
         "devices": [{
           "devID": "dht11_1",
@@ -18,7 +16,6 @@
         }]
       }, {
         "plantID": "plant2",
-        "name": "Sarracenia",
         "hours": ["0700", "1750"],
         "devices": [{
           "devID": "dht11_2",
@@ -34,10 +31,8 @@
     },
     {
       "gardenID": "garden2",
-      "location": "Palermo",
       "plants": [{
         "plantID": "plant3",
-        "name": "Eden Rose",
         "devices": [{
           "devID": "dht11_3",
           "timestamp": 1556295300
