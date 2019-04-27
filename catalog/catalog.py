@@ -12,8 +12,9 @@ JSON_FILE = 'static.json'
 JSON_FILE2 = 'dynamic.json'
 CONF_FILE = 'conf'
 TOPIC = '/device/updater'
-BROKER_IP = '192.168.1.70'
+
 OLD_MAX = 300
+URL = "http://192.168.1.70:8080/broker"
 
 class Catalog(object):
     def __init__(self, filename, filename2):
@@ -27,6 +28,8 @@ class Catalog(object):
         with open(self.filename2, "r") as fd:
             self.dynamic = json.loads(fd.read())
             print("Dynamic loaded")
+
+        #self.BROKER_IP = self.static["broker"]["IP"]
 
     def write_file(self):
         with open(self.filename2, "w") as fd:
@@ -106,6 +109,11 @@ class Webserver(object):
 
         catalog = Catalog(JSON_FILE, JSON_FILE2)
         catalog.load_file()
+
+
+        if uri[0] == 'broker':
+            return catalog.static["broker"]
+
         if uri[0] == 'devices':
             """Get all devices from a specific plant in the garden.
             If the plant is present it returns a json with the list of devices.
@@ -115,7 +123,7 @@ class Webserver(object):
             plantID = uri[2]
             g_found = 0
             p_found = 0
-            
+
             for g in catalog.dynamic["gardens"]:
                 if g["gardenID"] == gardenID:
                     g_found = 1
@@ -142,6 +150,20 @@ class Webserver(object):
             # else:
             #     return catalog.static
             return catalog.dynamic
+
+        if uri[0] == 'static':
+            return catalog.static
+
+        if uri[0] == 'location':
+            plantID = uri[1]
+            devID = params['devID']
+
+            for g in catalog.static["gardens"]:
+                for p in g["plants"]:
+                    for d in p["devices"]:
+                        if d["devID"] == devID:
+                            break
+            print(d)
 
 
 class MySubscriber:
@@ -206,7 +228,9 @@ class Second(threading.Thread):
         self.name = self.name
 
     def run(self):
-        sub = MySubscriber("Sub1", TOPIC, BROKER_IP)
+        broker = requests.get(URL)
+        broker_ip = json.loads(broker.text)["IP"]
+        sub = MySubscriber("Sub1", TOPIC, broker_ip)
         sub.loop_flag = 1
         sub.start()
 
