@@ -1,62 +1,59 @@
 {
   "broker": {
-    "IP": "192.168.1.254",
+    "IP": "192.168.1.70",
     "port": "1883"
   },
-  "users": [{
-      "userID": "mpeg123",
-      "name": "MPEG",
-      "telegramID": "mpeg_123"
+
+  "gardens": [{
+      "gardenID": "garden1",
+      "location": "Torino",
+      "plants": [{
+        "plantID": "plant1",
+        "name": "Eden Rose",
+        "environment": {
+          "water": 100,
+          "humidity": 90,
+          "temperature": 30
+        },
+        "devices": [{
+          "devID": "dht11_1",
+          "endpoints": ["MQTT"],
+          "resources": ["Humidity", "Temperature"]
+        }, {
+          "devID": "windsensor_1",
+          "endpoints": ["MQTT"],
+          "resources": ["Wind"]
+        }, {
+          "devID": "irrigator_1",
+          "endpoints": ["MQTT", "REST"]
+        }]
+      }, {
+        "plantID": "plant2",
+        "name": "Sarracenia",
+        "environment": {
+          "water": 100,
+          "humidity": 90,
+          "temperature": 30
+        },
+        "devices": [{
+          "devID": "dht11_2",
+          "endpoints": ["MQTT"],
+          "resources": ["Humidity", "Temperature"]
+        }, {
+          "devID": "UVsensor_1",
+          "endpoints": ["MQTT", "REST"],
+          "resources": ["Wind speed"]
+        }, {
+          "devID": "irrigator_2",
+          "endpoints": ["MQTT"],
+          "resources": []
+        }]
+      }]
     },
     {
-      "userID": "guest007",
-      "name": "Guest",
-      "telegramID": "guest_007"
+      "gardenID": "garden2",
+      "location": "Palermo",
+      "plants": []
     }
-  ],
-  "devices": [{
-    "devID": "dht11",
-    "endpoints": ["MQTT"],
-    "resources": ["Humidity", "Temperature"]
-  }, {
-    "devID": "windsensor",
-    "endpoints": ["MQTT"],
-    "resources": ["Wind"]
-  }, {
-    "devID": "UVsensor",
-    "endpoints": ["MQTT"],
-    "resources": ["UV"]
-  }, {
-    "devID": "brightness",
-    "endpoints": ["MQTT"],
-    "resources": ["Brightness"]
-  }, {
-    "devID": "irrigator",
-    "endpoints": ["MQTT"],
-    "resources": []
-  }],
-  "plants": [{
-    "plantID": "p1",
-    "name": "Sarracenia",
-    "environment": {
-      "water": 100,
-      "humidity": 90,
-      "temperature": 30}
-    },{
-    "plantID": "p2",
-    "name": "Dionea",
-    "environment": {
-      "water": 100,
-      "humidity": 80,
-      "temperature": 25
-    }
-    },{
-      "plantID": "p3",
-      "name": "Aloe vera",
-      "environment":{
-        "water": 40,
-        "humidity": 30,
-        "temperature": 40
-      }
-      }]
+  ]
 }
