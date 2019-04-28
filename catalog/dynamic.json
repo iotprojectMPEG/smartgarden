@@ -1,8 +1,8 @@
 {
   "gardens": [{
-      "gardenID": "g_001",
+      "gardenID": "g_3041",
       "plants": [{
-        "plantID": "p_001",
+        "plantID": "p_1001",
         "hours": ["0800"],
         "devices": [{
           "devID": "dht_001",
@@ -15,7 +15,7 @@
           "timestamp": 1556295305
         }]
       }, {
-        "plantID": "p_002",
+        "plantID": "p_5843",
         "hours": ["0700", "1750"],
         "devices": [{
           "devID": "dht_002",
@@ -27,7 +27,7 @@
       }]
     },
     {
-      "gardenID": "g_002",
+      "gardenID": "g_4253",
       "plants": [{
         "plantID": "p_003",
         "devices": [{

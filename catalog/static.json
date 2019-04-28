@@ -6,11 +6,11 @@
   },
 
   "gardens": [{
-      "gardenID": "g_001",
+      "gardenID": "g_3041",
       "name": "Casa in montagna",
       "location": "Torino",
       "plants": [{
-        "plantID": "p_001",
+        "plantID": "p_1001",
         "name": "Eden Rose",
         "environment": {
           "water": 100,
@@ -59,7 +59,7 @@
       }]
     },
     {
-      "gardenID": "g_002",
+      "gardenID": "g_4253",
       "name": "Giardino al mare",
       "location": "Palermo",
       "plants": [{
