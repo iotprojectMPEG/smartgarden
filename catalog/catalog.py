@@ -10,11 +10,11 @@ import paho.mqtt.client as PahoMQTT
 
 JSON_FILE = 'static.json'
 JSON_FILE2 = 'dynamic.json'
-CONF_FILE = 'conf'
-TOPIC = '/device/updater'
+CONF_FILE = 'cherrypyconf'
+TOPIC = 'smartgarden/+/+/+'
 
 OLD_MAX = 300
-URL = "http://192.168.1.70:8080/broker"
+#URL = "http://192.168.1.70:8080/broker"
 
 class Catalog(object):
     def __init__(self, filename, filename2):
@@ -29,7 +29,9 @@ class Catalog(object):
             self.dynamic = json.loads(fd.read())
             print("Dynamic loaded")
 
-        #self.BROKER_IP = self.static["broker"]["IP"]
+        self.broker_ip = self.static["broker"]["IP"]
+        self.rest_port = self.static["broker"]["rest_port"]
+        self.mqtt_port = self.static["broker"]["mqtt_port"]
 
     def write_file(self):
         with open(self.filename2, "w") as fd:
@@ -78,6 +80,7 @@ class Catalog(object):
             # TO DO: Check if device is allowed from the static catalog.
             p['devices'].append(data)
 
+        print("Updating", devID)
         self.write_file()
 
     def remove_old_device(self):
@@ -114,32 +117,32 @@ class Webserver(object):
         if uri[0] == 'broker':
             return catalog.static["broker"]
 
-        if uri[0] == 'devices':
-            """Get all devices from a specific plant in the garden.
-            If the plant is present it returns a json with the list of devices.
-            If the plant is not found it returns -1.
-            """
-            gardenID = uri[1]
-            plantID = uri[2]
-            g_found = 0
-            p_found = 0
-
-            for g in catalog.dynamic["gardens"]:
-                if g["gardenID"] == gardenID:
-                    g_found = 1
-                    break
-
-            for p in g["plants"]:
-                if p["plantID"] == plantID:
-                    p_found = 1
-                    break
-
-            if g_found and p_found:
-                devices = p["devices"]
-                return devices
-
-            else:
-                return -1
+        # if uri[0] == 'devices':
+        #     """Get all devices from a specific plant in the garden.
+        #     If the plant is present it returns a json with the list of devices.
+        #     If the plant is not found it returns -1.
+        #     """
+        #     gardenID = uri[1]
+        #     plantID = uri[2]
+        #     g_found = 0
+        #     p_found = 0
+        #
+        #     for g in catalog.dynamic["gardens"]:
+        #         if g["gardenID"] == gardenID:
+        #             g_found = 1
+        #             break
+        #
+        #     for p in g["plants"]:
+        #         if p["plantID"] == plantID:
+        #             p_found = 1
+        #             break
+        #
+        #     if g_found and p_found:
+        #         devices = p["devices"]
+        #         return devices
+        #
+        #     else:
+        #         return -1
 
         #catalog.add_device("garden1", "plant1", "dht11")
         #catalog.load_file()
@@ -154,16 +157,67 @@ class Webserver(object):
         if uri[0] == 'static':
             return catalog.static
 
-        if uri[0] == 'location':
-            plantID = uri[1]
-            devID = params['devID']
 
+        if uri[0] == 'info':
+            ID = uri[1]
             for g in catalog.static["gardens"]:
+                if g["gardenID"] == ID:
+                    info = {"gardenID": ID, "plants": g["plants"]}
+                    return info
+
                 for p in g["plants"]:
+                    if p["plantID"] == ID:
+                        info = {"gardenID": g["gardenID"], "plantID": ID,
+                                "devices": p["devices"]}
+                        return info
+
                     for d in p["devices"]:
-                        if d["devID"] == devID:
-                            break
-            print(d)
+                        if d["devID"] == ID:
+                            info = {"gardenID": g["gardenID"],
+                                    "plantID": p["plantID"],
+                                    "devID": ID}
+                            return info
+            return -1
+
+
+        # if uri[0] == 'device':
+        #     devID = uri[1]
+        #     for g in catalog.static["gardens"]:
+        #         for p in g["plants"]:
+        #             for d in p["devices"]:
+        #                 if d["devID"] == devID:
+        #                     info = {"gardenID": g["gardenID"],
+        #                             "plantID": p["plantID"],
+        #                             "devID": d["devID"]}
+        #                     return info
+        #     return -1
+        #
+        # if uri[0] == 'plant':
+        #     plantID = uri[1]
+        #     for g in catalog.static["gardens"]:
+        #         for p in g["plants"]:
+        #             if p["plantID"] == plantID:
+        #                 info = {"gardenID": g["gardenID"],
+        #                         "plantID": p["plantID"],
+        #                         "devices": p["devices"]}
+        #                 return info
+        #     return -1
+        #
+        # if uri[0] == 'garden':
+        #     gardenID = uri[1]
+        #     for g in catalog.static["gardens"]:
+        #         for p in g["plants"]:
+        #             if p["plantID"] == plantID:
+        #                 info = {"gardenID": g["gardenID"],
+        #                         "plantID": p["plantID"],
+        #                         "devices": p["devices"]}
+        #                 return info
+        #     return -1
+
+            # print(g["gardenID"])
+            # print(p["plantID"])
+            # print(d["devID"])
+            # print("\n\n\n")
 
 
 class MySubscriber:
@@ -199,9 +253,20 @@ class MySubscriber:
         msg.payload = msg.payload.decode("utf-8")
         message = json.loads(msg.payload)
         catalog = Catalog(JSON_FILE, JSON_FILE2)
-        gardenID = message["gardenID"]
-        plantID = message["plantID"]
+        #gardenID = message["gardenID"]
+        #plantID = message["plantID"]
         devID = message["devID"]
+        string = 'http://192.168.1.70:8080/info/'+devID
+        print("\n\n\n")
+        print(string)
+        print("\n\n\n")
+        info = json.loads(requests.get(string).text)
+        gardenID = info["gardenID"]
+        plantID = info["plantID"]
+        print("\n\n\n")
+        print(gardenID)
+        print(plantID)
+        print("\n\n\n")
         catalog.update_device(gardenID, plantID, devID)
 
 class First(threading.Thread):
@@ -212,7 +277,7 @@ class First(threading.Thread):
     def run(self):
         try:
             cherrypy.tree.mount(Webserver(), '/', config=CONF_FILE)
-            cherrypy.config.update('conf')
+            cherrypy.config.update(CONF_FILE)
             cherrypy.engine.start()
             cherrypy.engine.block()
         except KeyboardInterrupt:
@@ -222,14 +287,17 @@ class First(threading.Thread):
 
 
 class Second(threading.Thread):
+    """Subscribe to MQTT in order to update timestamps of sensors
+    """
     def __init__(self,ThreadID,name):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = self.name
 
     def run(self):
-        broker = requests.get(URL)
-        broker_ip = json.loads(broker.text)["IP"]
+        cat = Catalog(JSON_FILE, JSON_FILE2)
+        cat.load_file()
+        broker_ip = cat.broker_ip #json.loads(broker.text)["IP"]
         sub = MySubscriber("Sub1", TOPIC, broker_ip)
         sub.loop_flag = 1
         sub.start()
