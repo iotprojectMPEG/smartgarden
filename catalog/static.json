@@ -7,6 +7,7 @@
 
   "gardens": [{
       "gardenID": "g_001",
+      "name": "Casa in montagna",
       "location": "Torino",
       "plants": [{
         "plantID": "p_001",
@@ -18,14 +19,17 @@
         },
         "devices": [{
           "devID": "dht_001",
+          "name": "DHT11",
           "endpoints": ["MQTT"],
           "resources": ["Humidity", "Temperature"]
         }, {
           "devID": "wind_001",
+          "name": "Wind sensor",
           "endpoints": ["MQTT"],
           "resources": ["Wind"]
         }, {
           "devID": "irr_001",
+          "name": "Irrigator",
           "endpoints": ["MQTT", "REST"]
         }]
       }, {
@@ -38,14 +42,17 @@
         },
         "devices": [{
           "devID": "dht_002",
+          "name": "DHT11",
           "endpoints": ["MQTT"],
           "resources": ["Humidity", "Temperature"]
         }, {
           "devID": "UV_001",
+          "name": "UV sensor",
           "endpoints": ["MQTT", "REST"],
-          "resources": ["Wind speed"]
+          "resources": ["UV"]
         }, {
           "devID": "irr_002",
+          "name": "Irrigator",
           "endpoints": ["MQTT"],
           "resources": []
         }]
@@ -53,8 +60,28 @@
     },
     {
       "gardenID": "g_002",
+      "name": "Giardino al mare",
       "location": "Palermo",
-      "plants": []
+      "plants": [{
+        "plantID": "p_003",
+        "name": "Aloe vera",
+        "devices": [{
+          "devID": "dht_003",
+          "name": "DHT11",
+          "endpoints": ["MQTT"],
+          "resources": ["Humidity", "Temperature"]
+        }, {
+          "devID": "wind_006",
+          "name": "Wind sensor",
+          "endpoints": ["MQTT", "REST"],
+          "resources": ["Wind"]
+        }, {
+          "devID": "irr_003",
+          "name": "Irrigator",
+          "endpoints": ["MQTT"],
+          "resources": []
+        }]
+      }]
     }
   ]
 }
