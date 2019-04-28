@@ -42,8 +42,10 @@ if __name__ == "__main__":
     # Get broker IP from the catalog
     broker = requests.get(config["catalogURL"]+"/broker")
     broker_ip = json.loads(broker.text)["IP"]
+    rest_port = json.loads(broker.text)["rest_port"]
 
-    pub = MyPublisher("dht11", broker_ip)
+    devID = 'dht_001'
+    pub = MyPublisher(devID, broker_ip)
     loop_flag = 1
     flag = 1
     pub.start()
@@ -55,8 +57,15 @@ if __name__ == "__main__":
     # Update registration on catalog
     while True:
         message = {"devID": "dht_001", "temperature": "25"}
-        print("Publishing", message)
-        pub.my_publish('g_001/p_001/temperature', json.dumps(message))
+        string = 'http://' + broker_ip + ':' + rest_port + '/info/' + devID
+        info = json.loads(requests.get(string).text)
+        gardenID = info["gardenID"]
+        plantID = info["plantID"]
+        resources = info["resources"]
+
+        # Use "resources" to get 'temperature' instead
+        pub.my_publish(gardenID + '/' + plantID + '/' + 'temperature',
+                       json.dumps(message))
         time.sleep(30)
 
     pub.stop()
