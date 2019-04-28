@@ -33,7 +33,7 @@
           "endpoints": ["MQTT", "REST"]
         }]
       }, {
-        "plantID": "p_002",
+        "plantID": "p_5843",
         "name": "Sarracenia",
         "environment": {
           "water": 100,
