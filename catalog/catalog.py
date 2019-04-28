@@ -37,9 +37,28 @@ class Catalog(object):
         with open(self.filename2, "w") as fd:
             json.dump(self.dynamic, fd, ensure_ascii=False)
 
-    def add_device(self, gardenID, plantID, devID):
-        data = {'devID': devID, 'timestamp': time.time()}
-        self.load_file()
+    # def add_device(self, gardenID, plantID, devID):
+    #     data = {'devID': devID, 'timestamp': time.time()}
+    #     self.load_file()
+    #     for g in self.dynamic["gardens"]:
+    #         if g['gardenID'] == gardenID:
+    #             break
+    #
+    #     for p in g['plants']:
+    #         if p['plantID'] == plantID:
+    #             break
+    #
+    #     for d in p['devices']:
+    #         if d['devID'] == devID:
+    #             d['timestamp'] = time.time()
+    #
+    #     self.write_file()
+
+    def add_new(self, gardenID, plantID, devID, endpoints, resources):
+        """Insert new device in the static catalog
+        """
+        data = {'gardenID': gardenID, 'plantID': plantID, 'devID': devID}
+        found = 0
         for g in self.dynamic["gardens"]:
             if g['gardenID'] == gardenID:
                 break
@@ -50,9 +69,10 @@ class Catalog(object):
 
         for d in p['devices']:
             if d['devID'] == devID:
-                d['timestamp'] = time.time()
+                return -1  # Device already registered
 
-        self.write_file()
+
+
 
     def update_device(self, gardenID, plantID, devID):
         """Update timestamp of a device or insert it again in the dynamic
@@ -103,6 +123,28 @@ class Catalog(object):
         print(self.dynamic)
         self.write_file()
 
+    def info(self, ID):
+        self.load_file()
+        for g in self.static["gardens"]:
+            if g["gardenID"] == ID:
+                info = {"gardenID": ID, "plants": g["plants"], "name": g["name"]}
+                return info
+
+            for p in g["plants"]:
+                if p["plantID"] == ID:
+                    info = {"gardenID": g["gardenID"], "plantID": ID,
+                            "devices": p["devices"], "name": p["name"]}
+                    return info
+
+                for d in p["devices"]:
+                    if d["devID"] == ID:
+                        info = {"gardenID": g["gardenID"],
+                                "plantID": p["plantID"],
+                                "devID": ID, "resources": d["resources"],
+                                "name": d["name"]}
+                        return info
+        return -1
+
 
 class Webserver(object):
     exposed = True
@@ -147,7 +189,7 @@ class Webserver(object):
         #catalog.add_device("garden1", "plant1", "dht11")
         #catalog.load_file()
 
-        if uri[0] == 'catalog':
+        if uri[0] == 'status':
             # if uri[1] == 'p':
             #     return catalog.get_sensors()
             # else:
@@ -160,24 +202,7 @@ class Webserver(object):
 
         if uri[0] == 'info':
             ID = uri[1]
-            for g in catalog.static["gardens"]:
-                if g["gardenID"] == ID:
-                    info = {"gardenID": ID, "plants": g["plants"]}
-                    return info
-
-                for p in g["plants"]:
-                    if p["plantID"] == ID:
-                        info = {"gardenID": g["gardenID"], "plantID": ID,
-                                "devices": p["devices"]}
-                        return info
-
-                    for d in p["devices"]:
-                        if d["devID"] == ID:
-                            info = {"gardenID": g["gardenID"],
-                                    "plantID": p["plantID"],
-                                    "devID": ID, "resources": d["resources"]}
-                            return info
-            return -1
+            return catalog.info(ID)
 
 
         # if uri[0] == 'device':
