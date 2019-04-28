@@ -18,14 +18,11 @@
         "plantID": "p_002",
         "hours": ["0700", "1750"],
         "devices": [{
-          "devID": "dht11_002",
+          "devID": "dht_002",
           "timestamp": 1556295309
         }, {
           "devID": "UV_001",
           "timestamp": 1556295296
-        }, {
-          "devID": "irr_002",
-          "timestamp": 1556295301
         }]
       }]
     },
@@ -35,9 +32,6 @@
         "plantID": "p_003",
         "devices": [{
           "devID": "dht_003",
-          "timestamp": 1556295300
-        }, {
-          "devID": "UV_002",
           "timestamp": 1556295300
         }, {
           "devID": "irr_003",
