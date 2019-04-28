@@ -47,8 +47,38 @@ def irrigation(bot, update):
     # funzione...
 
 def status(bot, update):
-    update.message.reply_text("Magari metti qualche sensore")
-    # funzione...
+    """Gets information about all the sensors in the gardens and their status
+    Connected/Disconnected, and sends a summary to the user.
+    """
+    with open('conf.json', "r") as f:
+        config = json.loads(f.read())
+    url = config["catalogURL"]
+    dynamic = json.loads(requests.get(url + '/status').text)
+    static = json.loads(requests.get(url + '/static').text)
+
+    for g in static["gardens"]:
+        devices = []
+        status = '🏡 ' + g["name"]
+        for p in g["plants"]:
+            status = status + '\n\n    🌱 ' + p["name"]
+
+            for g2 in dynamic["gardens"]:
+                if g2["gardenID"] == g["gardenID"]:
+                    break
+            for p2 in g2["plants"]:
+                if p2["plantID"] == p["plantID"]:
+                    break
+            for d2 in p2["devices"]:
+                devices.append(d2["devID"])
+
+            for d in p["devices"]:
+                if d["devID"] in devices:
+                    status = status + '\n        ✅️ ' + d["name"]
+                else:
+                    status = status + '\n        ❌ ' + d["name"]
+
+                devices.append(d["devID"])
+        update.message.reply_text(status)
 
 def main():
     """Start the bot."""
