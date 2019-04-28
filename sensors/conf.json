@@ -1,0 +1,10 @@
+{
+  "catalogURL": "http://192.168.1.70:8080",
+  "devices": [{
+    "name": "dht11",
+    "devID": "dht11_1"
+  }, {
+    "name": "rain_sensor",
+    "devID": "rain_1"
+  }]
+}
