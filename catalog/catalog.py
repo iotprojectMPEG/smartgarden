@@ -175,7 +175,7 @@ class Webserver(object):
                         if d["devID"] == ID:
                             info = {"gardenID": g["gardenID"],
                                     "plantID": p["plantID"],
-                                    "devID": ID}
+                                    "devID": ID, "resources": d["resources"]}
                             return info
             return -1
 
@@ -263,10 +263,6 @@ class MySubscriber:
         info = json.loads(requests.get(string).text)
         gardenID = info["gardenID"]
         plantID = info["plantID"]
-        print("\n\n\n")
-        print(gardenID)
-        print(plantID)
-        print("\n\n\n")
         catalog.update_device(gardenID, plantID, devID)
 
 class First(threading.Thread):
