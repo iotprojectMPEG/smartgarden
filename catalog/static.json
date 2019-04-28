@@ -5,10 +5,10 @@
   },
 
   "gardens": [{
-      "gardenID": "garden1",
+      "gardenID": "g_001",
       "location": "Torino",
       "plants": [{
-        "plantID": "plant1",
+        "plantID": "p_001",
         "name": "Eden Rose",
         "environment": {
           "water": 100,
@@ -16,19 +16,19 @@
           "temperature": 30
         },
         "devices": [{
-          "devID": "dht11_1",
+          "devID": "dht_001",
           "endpoints": ["MQTT"],
           "resources": ["Humidity", "Temperature"]
         }, {
-          "devID": "windsensor_1",
+          "devID": "wind_001",
           "endpoints": ["MQTT"],
           "resources": ["Wind"]
         }, {
-          "devID": "irrigator_1",
+          "devID": "irr_001",
           "endpoints": ["MQTT", "REST"]
         }]
       }, {
-        "plantID": "plant2",
+        "plantID": "p_002",
         "name": "Sarracenia",
         "environment": {
           "water": 100,
@@ -36,22 +36,22 @@
           "temperature": 30
         },
         "devices": [{
-          "devID": "dht11_2",
+          "devID": "dht_002",
           "endpoints": ["MQTT"],
           "resources": ["Humidity", "Temperature"]
         }, {
-          "devID": "UVsensor_1",
+          "devID": "UV_001",
           "endpoints": ["MQTT", "REST"],
           "resources": ["Wind speed"]
         }, {
-          "devID": "irrigator_2",
+          "devID": "irr_002",
           "endpoints": ["MQTT"],
           "resources": []
         }]
       }]
     },
     {
-      "gardenID": "garden2",
+      "gardenID": "g_002",
       "location": "Palermo",
       "plants": []
     }

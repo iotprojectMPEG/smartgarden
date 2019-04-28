@@ -1,46 +1,46 @@
 {
   "gardens": [{
-      "gardenID": "garden1",
+      "gardenID": "g_001",
       "plants": [{
-        "plantID": "plant1",
+        "plantID": "p_001",
         "hours": ["0800"],
         "devices": [{
-          "devID": "dht11_1",
+          "devID": "dht_001",
           "timestamp": 1556295286
         }, {
-          "devID": "windsensor_1",
+          "devID": "wind_001",
           "timestamp": 1556295300
         }, {
-          "devID": "irrigator_1",
+          "devID": "irr_001",
           "timestamp": 1556295305
         }]
       }, {
-        "plantID": "plant2",
+        "plantID": "p_002",
         "hours": ["0700", "1750"],
         "devices": [{
-          "devID": "dht11_2",
+          "devID": "dht11_002",
           "timestamp": 1556295309
         }, {
-          "devID": "UVsensor_1",
+          "devID": "UV_001",
           "timestamp": 1556295296
         }, {
-          "devID": "irrigator_2",
+          "devID": "irr_002",
           "timestamp": 1556295301
         }]
       }]
     },
     {
-      "gardenID": "garden2",
+      "gardenID": "g_002",
       "plants": [{
-        "plantID": "plant3",
+        "plantID": "p_003",
         "devices": [{
-          "devID": "dht11_3",
+          "devID": "dht_003",
           "timestamp": 1556295300
         }, {
-          "devID": "UVsensor_2",
+          "devID": "UV_002",
           "timestamp": 1556295300
         }, {
-          "devID": "irrigator_3",
+          "devID": "irr_003",
           "timestamp": 1556295300
         }]
       }]
