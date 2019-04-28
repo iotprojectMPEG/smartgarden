@@ -1,7 +1,8 @@
 {
   "broker": {
     "IP": "192.168.1.70",
-    "port": "1883"
+    "rest_port": "8080",
+    "mqtt_port": "1883"
   },
 
   "gardens": [{
