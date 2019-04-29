@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import numpy as np
 import json
 import cherrypy
 import time
@@ -34,6 +35,8 @@ class Catalog(object):
         self.mqtt_port = self.static["broker"]["mqtt_port"]
 
     def write_file(self):
+        with open(self.filename, "w") as fs:
+            json.dump(self.static, fs, ensure_ascii=False)
         with open(self.filename2, "w") as fd:
             json.dump(self.dynamic, fd, ensure_ascii=False)
 
@@ -53,6 +56,91 @@ class Catalog(object):
     #             d['timestamp'] = time.time()
     #
     #     self.write_file()
+
+    def add_garden(self, garden_json):
+        """Adds a new garden in the static catalog.
+           Needs a garden_json formatted as:
+
+           {
+           "name": "MyGarden"
+           "location": "Turin"
+           }
+
+        """
+        self.load_file()
+        list_id = []
+        for g in self.static["gardens"]:
+            list_id.append(g["gardenID"])
+
+        new_id = 'g_' + str(np.random.randint(1000, 9999))
+
+        while new_id in list_id:
+            new_id = 'g_' + str(np.random.randint(1000, 9999))
+
+        garden_json["plants"] = []
+        garden_json["gardenID"] = new_id
+        print(garden_json)
+
+        self.static["gardens"].append(garden_json)
+        self.write_file()
+
+
+
+    def add_plant(self, plant_json):
+        """Adds a new plant in the static catalog.
+           Needs a plant_json formatted as:
+
+           {
+           "gardenID": "g_9999"
+           "name": "Dionea"
+           }
+
+        """
+        self.load_file()
+        list_id = []
+        for g in self.static["gardens"]:
+            if g["gardenID"] == plant_json["gardenID"]:
+                break
+            for p in g["plants"]:
+                list_id.append(p["plantID"])
+
+        new_id = 'p_' + str(np.random.randint(1000, 9999))
+
+        while new_id in list_id:
+            new_id = 'p_' + str(np.random.randint(1000, 9999))
+
+        del plant_json["gardenID"]
+        plant_json["plantID"] = new_id
+        plant_json["devices"] = []
+
+        g["plants"].append(plant_json)
+        self.write_file()
+
+    def add_device(self, dev_json):
+        """Add a new device in the static catalog.
+        """
+        self.load_file()
+        list_id = []
+        for g in self.static["gardens"]:
+            if g["gardenID"] == dev_json["gardenID"]:
+                break
+        for p in g["plants"]:
+            if p["plantID"] == dev_json["plantID"]:
+                break
+            for d in p["devices"]:
+                list_id.append(d["devID"])
+
+        new_id = 'd_' + str(np.random.randint(1000, 9999))
+
+        while new_id in list_id:
+            new_id = 'd_' + str(np.random.randint(1000, 9999))
+
+        del dev_json["gardenID"]
+        del dev_json["plantID"]
+        dev_json["devID"] = new_id
+
+        p["devices"].append(dev_json)
+        self.write_file()
 
     def add_new(self, gardenID, plantID, devID, endpoints, resources):
         """Insert new device in the static catalog
@@ -244,6 +332,28 @@ class Webserver(object):
             # print(d["devID"])
             # print("\n\n\n")
 
+    @cherrypy.tools.json_out()
+    def POST(self, *uri, **params):
+        if uri[0] == 'addg':
+            body = json.loads(cherrypy.request.body.read())  # Read body data
+            cat = Catalog(JSON_FILE, JSON_FILE2)
+            print(json.dumps(body))
+            cat.add_garden(body)
+            return 200
+
+        if uri[0] == 'addp':
+            body = json.loads(cherrypy.request.body.read())  # Read body data
+            cat = Catalog(JSON_FILE, JSON_FILE2)
+            print(json.dumps(body))
+            cat.add_plant(body)
+            return 200
+
+        if uri[0] == 'addd':
+            body = json.loads(cherrypy.request.body.read())  # Read body data
+            cat = Catalog(JSON_FILE, JSON_FILE2)
+            print(json.dumps(body))
+            cat.add_device(body)
+            return 200
 
 class MySubscriber:
     def __init__(self, clientID, topic, serverIP):
@@ -340,10 +450,11 @@ class Third(threading.Thread):
         self.name = self.name
 
     def run(self):
+        time.sleep(50000)
         while True:
-            time.sleep(6000)
             cat = Catalog(JSON_FILE, JSON_FILE2)
             cat.remove_old_device()
+            time.sleep(300)
 
 def main():
     thread1 = First(1,"CherryPy")
