@@ -15,7 +15,7 @@ class Adder(object):
           <head></head>
           <body>
             <h2>ADD GARDEN</h2>
-            <form method="get" action="posting" target="_blank">
+            <form method="get" action="posting_gard" target="_blank">
               Name:<br>
               <input type="text" name="name" value="">
               <br>
@@ -28,7 +28,7 @@ class Adder(object):
         </html>"""
 
     @cherrypy.expose
-    def posting(self, name=None, location=None):
+    def posting_gard(self, name=None, location=None):
         new_garden = {"name": name, "location": location}
         file = open(CONF_FILE, 'r')
         config = json.load(file)
@@ -38,13 +38,13 @@ class Adder(object):
 
 
     @cherrypy.expose
-    #look here to understand: https://www.w3schools.com/html/tryit.asp?filename=tryhtml_elem_select 
+    #look here to understand: https://www.w3schools.com/html/tryit.asp?filename=tryhtml_elem_select
     def addplant(self):
         return """<html>
           <head></head>
           <body>
             <h2>ADD PLANT</h2>
-            <form method="get" action="posting" target="_blank">
+            <form method="get" action="posting_plant" target="_blank">
             Select Garden:<br>
               <select name="garden">
                 <option value=""></option>
@@ -59,12 +59,12 @@ class Adder(object):
         </html>"""
 
     @cherrypy.expose
-    def posting(self, name=None, location=None):
+    def posting_plant(self, name=None, location=None):
         new_garden = {"name": name, "location": location}
         file = open(CONF_FILE, 'r')
         config = json.load(file)
         file.close()
-        cat_url = config["URL"] + ":" + config["port"] + "/addg"
+        cat_url = config["URL"] + ":" + config["port"] + "/addp"
         return requests.post(cat_url, json.dumps(new_garden))
 
 
@@ -74,7 +74,7 @@ class Adder(object):
           <head></head>
           <body>
             <h2>ADD DEVICE</h2>
-            <form method="get" action="posting" target="_blank">
+            <form method="get" action="posting_dev" target="_blank">
               Name:<br>
               <input type="text" name="name" value="">
               <br>
@@ -87,31 +87,14 @@ class Adder(object):
         </html>"""
 
     @cherrypy.expose
-    def posting(self, name=None, location=None):
+    def posting_dev(self, name=None, location=None):
         new_garden = {"name": name, "location": location}
         file = open(CONF_FILE, 'r')
         config = json.load(file)
         file.close()
-        cat_url = config["URL"] + ":" + config["port"] + "/addg"
+        cat_url = config["URL"] + ":" + config["port"] + "/addd"
         return requests.post(cat_url, json.dumps(new_garden))
 
-
-    # @cherrypy.expose
-    # def index2(self):
-    #     return """<html>
-    #       <head></head>
-    #       <body>
-    #         <form method="get" action="generate">
-    #           <input type="text" value="8" name="length" />
-    #           <button type="submit">Give it now!</button>
-    #         </form>
-    #       </body>
-    #     </html>"""
-    #
-    #
-    # @cherrypy.expose
-    # def generate(self, length=8):
-    #     return ''.join(random.sample(string.hexdigits, int(length)))
 
 
 if __name__ == '__main__':
