@@ -2,9 +2,12 @@
 import random
 import string
 import cherrypy
+import requests
+import json
+from /catalog/catalog.py import add_garden
 
 
-class ItemAdder(object):
+class Adder(object):
 
     @cherrypy.expose
     def index(self):
@@ -27,7 +30,11 @@ class ItemAdder(object):
     @cherrypy.expose
     def posting(self, name=None, location=None):
         #prendere input e metterli nel catalog
-        return "ciao, %s" %name
+        new_garden = {"name": name, "location": location}
+        post_body = json.dumps(new_garden)
+        return add_garden(post_body)
+        #return requests.post("http://192.168.1.70:8080", post_body)
+
 
 
 
@@ -50,4 +57,4 @@ class ItemAdder(object):
 
 
 if __name__ == '__main__':
-    cherrypy.quickstart(ItemAdder())
+    cherrypy.quickstart(Adder())
