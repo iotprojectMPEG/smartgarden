@@ -1,12 +1,37 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.7
 import random
 import string
 import cherrypy
 
 
 class StringGenerator(object):
+
     @cherrypy.expose
-    def index(self):
+    def index1(self):
+        return """<html>
+          <head></head>
+          <body>
+
+            <h2>ADD GARDEN</h2>
+
+            <form action="generate">
+              Name:<br>
+              <input type="text" name="Name" value="">
+              <br>
+              Location:<br>
+              <input type="text" name="Location" value="">
+              <br><br>
+              <input type="submit" value="Submit">
+            </form>
+
+
+           </body>
+        </html>"""
+
+
+
+    @cherrypy.expose
+    def index2(self):
         return """<html>
           <head></head>
           <body>
@@ -16,6 +41,7 @@ class StringGenerator(object):
             </form>
           </body>
         </html>"""
+
 
     @cherrypy.expose
     def generate(self, length=8):
