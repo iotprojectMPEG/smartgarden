@@ -4,8 +4,8 @@ import string
 import cherrypy
 import requests
 import json
-from /catalog/catalog.py import add_garden
 
+CONF_FILE = 'conf.json'
 
 class Adder(object):
 
@@ -29,11 +29,12 @@ class Adder(object):
 
     @cherrypy.expose
     def posting(self, name=None, location=None):
-        #prendere input e metterli nel catalog
         new_garden = {"name": name, "location": location}
-        post_body = json.dumps(new_garden)
-        return add_garden(post_body)
-        #return requests.post("http://192.168.1.70:8080", post_body)
+        file = open(CONF_FILE, 'r')
+        config = json.load(file)
+        file.close()
+        cat_url = config["URL"] + ":" + config["port"] + "/addg"
+        return requests.post(cat_url, json.dumps(new_garden))
 
 
 
