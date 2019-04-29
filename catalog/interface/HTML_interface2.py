@@ -10,7 +10,7 @@ CONF_FILE = 'conf.json'
 class Adder(object):
 
     @cherrypy.expose
-    def index(self):
+    def addgard(self):
         return """<html>
           <head></head>
           <body>
@@ -37,6 +37,63 @@ class Adder(object):
         return requests.post(cat_url, json.dumps(new_garden))
 
 
+    @cherrypy.expose
+    #look here to understand: https://www.w3schools.com/html/tryit.asp?filename=tryhtml_elem_select 
+    def addplant(self):
+        return """<html>
+          <head></head>
+          <body>
+            <h2>ADD PLANT</h2>
+            <form method="get" action="posting" target="_blank">
+            Select Garden:<br>
+              <select name="garden">
+                <option value=""></option>
+                <option value=""></option>
+                <option value=""></option>
+                <option value=""></option>
+              </select>
+              <br><br>
+              <input type="submit">
+            </form>
+          </body>
+        </html>"""
+
+    @cherrypy.expose
+    def posting(self, name=None, location=None):
+        new_garden = {"name": name, "location": location}
+        file = open(CONF_FILE, 'r')
+        config = json.load(file)
+        file.close()
+        cat_url = config["URL"] + ":" + config["port"] + "/addg"
+        return requests.post(cat_url, json.dumps(new_garden))
+
+
+    @cherrypy.expose
+    def adddev(self):
+        return """<html>
+          <head></head>
+          <body>
+            <h2>ADD DEVICE</h2>
+            <form method="get" action="posting" target="_blank">
+              Name:<br>
+              <input type="text" name="name" value="">
+              <br>
+              Location:<br>
+              <input type="text" name="location" value="">
+              <br><br>
+              <input type="submit" value="Submit">
+            </form>
+          </body>
+        </html>"""
+
+    @cherrypy.expose
+    def posting(self, name=None, location=None):
+        new_garden = {"name": name, "location": location}
+        file = open(CONF_FILE, 'r')
+        config = json.load(file)
+        file.close()
+        cat_url = config["URL"] + ":" + config["port"] + "/addg"
+        return requests.post(cat_url, json.dumps(new_garden))
 
 
     # @cherrypy.expose
