@@ -8,6 +8,7 @@ readAPI
 
 # Other
 .DS_Store
+_DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
