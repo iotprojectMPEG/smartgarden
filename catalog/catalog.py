@@ -40,23 +40,6 @@ class Catalog(object):
         with open(self.filename2, "w") as fd:
             json.dump(self.dynamic, fd, ensure_ascii=False)
 
-    # def add_device(self, gardenID, plantID, devID):
-    #     data = {'devID': devID, 'timestamp': time.time()}
-    #     self.load_file()
-    #     for g in self.dynamic["gardens"]:
-    #         if g['gardenID'] == gardenID:
-    #             break
-    #
-    #     for p in g['plants']:
-    #         if p['plantID'] == plantID:
-    #             break
-    #
-    #     for d in p['devices']:
-    #         if d['devID'] == devID:
-    #             d['timestamp'] = time.time()
-    #
-    #     self.write_file()
-
     def add_garden(self, garden_json):
         """Adds a new garden in the static catalog.
            Needs a garden_json formatted as:
@@ -83,8 +66,6 @@ class Catalog(object):
 
         self.static["gardens"].append(garden_json)
         self.write_file()
-
-
 
     def add_plant(self, plant_json):
         """Adds a new plant in the static catalog.
@@ -158,9 +139,6 @@ class Catalog(object):
         for d in p['devices']:
             if d['devID'] == devID:
                 return -1  # Device already registered
-
-
-
 
     def update_device(self, gardenID, plantID, devID):
         """Update timestamp of a device or insert it again in the dynamic
@@ -278,10 +256,6 @@ class Webserver(object):
         #catalog.load_file()
 
         if uri[0] == 'status':
-            # if uri[1] == 'p':
-            #     return catalog.get_sensors()
-            # else:
-            #     return catalog.static
             return catalog.dynamic
 
         if uri[0] == 'static':
@@ -291,46 +265,6 @@ class Webserver(object):
         if uri[0] == 'info':
             ID = uri[1]
             return catalog.info(ID)
-
-
-        # if uri[0] == 'device':
-        #     devID = uri[1]
-        #     for g in catalog.static["gardens"]:
-        #         for p in g["plants"]:
-        #             for d in p["devices"]:
-        #                 if d["devID"] == devID:
-        #                     info = {"gardenID": g["gardenID"],
-        #                             "plantID": p["plantID"],
-        #                             "devID": d["devID"]}
-        #                     return info
-        #     return -1
-        #
-        # if uri[0] == 'plant':
-        #     plantID = uri[1]
-        #     for g in catalog.static["gardens"]:
-        #         for p in g["plants"]:
-        #             if p["plantID"] == plantID:
-        #                 info = {"gardenID": g["gardenID"],
-        #                         "plantID": p["plantID"],
-        #                         "devices": p["devices"]}
-        #                 return info
-        #     return -1
-        #
-        # if uri[0] == 'garden':
-        #     gardenID = uri[1]
-        #     for g in catalog.static["gardens"]:
-        #         for p in g["plants"]:
-        #             if p["plantID"] == plantID:
-        #                 info = {"gardenID": g["gardenID"],
-        #                         "plantID": p["plantID"],
-        #                         "devices": p["devices"]}
-        #                 return info
-        #     return -1
-
-            # print(g["gardenID"])
-            # print(p["plantID"])
-            # print(d["devID"])
-            # print("\n\n\n")
 
     @cherrypy.tools.json_out()
     def POST(self, *uri, **params):
@@ -400,6 +334,7 @@ class MySubscriber:
         plantID = info["plantID"]
         catalog.update_device(gardenID, plantID, devID)
 
+
 class First(threading.Thread):
     def __init__(self,ThreadID,name):
         threading.Thread.__init__(self)
@@ -414,7 +349,6 @@ class First(threading.Thread):
         except KeyboardInterrupt:
             print ("Stopping the engine")
             return
-
 
 
 class Second(threading.Thread):
@@ -442,6 +376,7 @@ class Second(threading.Thread):
             time.sleep(1)
 
         sub.stop()
+
 
 class Third(threading.Thread):
     def __init__(self,ThreadID,name):
@@ -471,10 +406,6 @@ def main():
     time.sleep(1)
     print("\nStarting remover...")
     thread3.start()
-
-
-
-
 
 
 if __name__ == '__main__':
