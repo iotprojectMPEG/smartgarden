@@ -10,6 +10,20 @@ CONF_FILE = 'conf.json'
 class Adder(object):
 
     @cherrypy.expose
+    def index(self):
+        return """<html>
+          <head></head>
+          <body>
+            <h2>WELCOME TO THE SMART GARDEN</h2>
+            <p>Choose one of the following options:</p>
+            <form method="get" action="posting" target="_blank">
+              <button type="button" onclick="alert('Hello World!')">Click Me!</button>
+            </form>
+          </body>
+        </html>"""
+
+
+    @cherrypy.expose
     def addgard(self):
         return """<html>
           <head></head>
