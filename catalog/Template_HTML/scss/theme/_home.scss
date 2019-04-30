@@ -1,0 +1,550 @@
+body{
+	background:#f6f6fc;
+}
+
+.oz-body-wrap {
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.2);
+    margin: 50px;
+    position: relative;
+    @include media-breakpoint-down (sm) {
+		margin: 30px;
+	}
+	@include media-breakpoint-down (xs) {
+		margin: 10px;
+	}
+}
+
+.section-gap {
+	padding: 100px 0;
+}
+.section-title {
+	padding-bottom: 30px;
+	h2 {
+		margin-bottom: 20px;
+	}
+	p {
+		font-size: 16px;
+		margin-bottom: 0;
+		@include media-breakpoint-down (md) {
+			br {
+				display: none;
+			}
+		}
+	}
+}
+.primary-btn {
+	line-height: 40px;
+	padding: 0 30px;
+	border-radius: 20px;
+	background: transparent;
+	border: 1px solid $white;
+	color: $title-color;
+	display: inline-block;
+	font-weight: 500;
+	position: relative;
+	@include transition();
+	cursor: pointer;
+	text-transform: uppercase;
+	&:focus {
+		outline: none;
+	}
+	span {
+		color: $white;
+		position: relative;
+		z-index: 2;
+	}
+	.mr-10 {
+		@include transition();
+	}
+	&:hover {
+		.mr-10 {
+			margin-right: 20px;
+		}
+	}
+	&.white-bg {
+		span {
+			color: $primary-color;
+			@include transition();
+		}
+		background: $white;
+		border: 1px solid #eee;
+		color: $primary-color;
+		&:hover {
+			background: $primary-color;
+			color: $white;
+			border: 1px solid transparent;
+			span {
+				color: $white;
+			}
+		}
+	}
+	
+}
+
+
+//--------- Start Banner Area -------------//
+
+.banner-area {
+	background: $white;
+
+	.fullscreen {
+		@include media-breakpoint-down (sm) {
+			height: 1000px !important;
+		}
+	}
+}
+
+.banner-left{
+	@include media-breakpoint-down(lg) {
+		margin-top:60px;
+	}
+}
+
+.story-content {
+	h1 {
+		font-size: 48px;
+		font-weight: 100;
+		line-height: 1.2em;
+		margin-bottom: 20px;
+		margin-top: 20px;
+		@include media-breakpoint-down(sm) {
+			font-size: 40px;
+		}
+		br {
+			@include media-breakpoint-down (md) {
+				display: none;
+			}
+		}
+	}
+	h6{
+		font-weight:400;
+	}
+	p {
+		margin-bottom: 60px;
+		font-size: 16px;
+		br {
+			@include media-breakpoint-down (md) {
+				display: none;
+			}
+		}
+	}
+	.sp-1{
+		font-weight:600
+	}
+	.sp-2{
+		color:$primary;
+		font-weight:600;
+	}
+
+	@media( max-width:768px ){
+		text-align:center;
+	}
+}
+
+.generic-banner {
+	background: $primary-color;
+	.height {
+		height: 600px;
+		@include media-breakpoint-down (sm) {
+			height: 400px;
+		}
+	}
+	.banner-content {
+		h2 {
+			line-height: 1.2em;
+			margin-bottom: 20px;
+			br {
+				@include media-breakpoint-down (md) {
+					display: none;
+				}
+			}
+		}
+		p {
+			font-size: 16px;
+			br {
+				@include media-breakpoint-down (md) {
+					display: none;
+				}
+			}
+		}
+	}
+}
+//--------- End Banner Area -------------//
+
+//--------- Start video Area -------------//
+
+.video-area {
+	padding: 200px 0 60px 0;
+	position: relative;
+	background: url(../img/video-bg.jpg) no-repeat center center/cover;
+	.overlay-bg {
+		background: rgba($primary-color, .85);
+	}
+	.video-content {
+		text-align: center;
+		position: relative;
+		z-index: 2;
+		a {
+			display: inline-block;
+			margin-bottom: 20px;
+		}
+		h3{
+			font-weight:600;
+			font-size:18px;
+			margin-bottom:10px;
+			letter-spacing: 2px;
+		}
+		h4{
+			font-weight:300;
+			font-size: 14px;
+		}
+		.video-desc{
+			margin-top:120px;
+			text-align:right;
+			align-self: flex-end;
+		}
+	}
+}
+//--------- End video Area -------------//
+
+
+//--------- Start about Area -------------//
+	
+.about-area{
+	position: relative;
+	background:white;
+	.story-content {
+		h2 {
+			font-size: 36px;
+			line-height: 1.25em;
+			font-weight:100;
+			span{
+				font-weight:600;
+			}
+		}
+		p{
+			line-height:1.65em;
+			font-size:14px;
+			font-weight:300;
+		}
+	}
+}
+
+@media(max-width: 768px){
+	.story-content{
+		margin-top:40px;
+		margin-bottom:40px;
+	}
+}
+
+
+//--------- End about Area -------------//
+
+//--------- Start feature Area -------------//
+	
+	.feature-area{
+		background: url(../img/video-bg.jpg) no-repeat center center/cover;
+		.overlay-bg {
+			background: rgba($primary-color, .85);
+		}
+		.icon{
+			font-size: 100px;
+			color:$white;
+			background: #f0f8e9;
+			text-align: center;
+			padding: 50px;
+			@include transition();
+			&:hover{
+				color:$white;
+				background-color:$primary-color;
+				.lnr{
+					color:#fff;
+				}
+			}
+		}
+		.lnr{
+			color:$primary-color;
+		}
+		.desc{
+			margin-top:30px;
+			h2{
+				font-size:18px;
+				font-weight:600;
+				margin-bottom:10px;
+				letter-spacing: 2.5px;
+			}
+			p{
+				color:#555;
+			}
+		}
+	}
+
+	.single-feature{
+		background-color:$white;
+		padding:30px;
+		margin-bottom:30px;
+	}
+
+
+//--------- End feature Area -------------//
+
+//--------- Start faq Area -------------//
+
+
+.faq-area{
+	background:$white;
+}
+
+.counter-left{
+	text-align:right;
+	h2{	
+		font-size: 48px;
+		font-weight:100;
+		color:$primary-color;
+	}
+	p{
+		font-size:14px;
+		font-weight:300;
+	}
+
+	.single-facts{
+		margin-bottom:26px;
+	}
+
+	@media( max-width:768px ){
+		text-align:center;
+	}
+
+}
+
+
+.faq-content{
+	padding-left:10%;
+	padding-right:10%;
+	
+	@include media-breakpoint-down(lg) {
+		padding-left:2%;
+		padding-right:2%;
+	}
+
+	@include media-breakpoint-down(sm) {
+		text-align:center;
+	}
+}
+
+.single-faq{
+	margin-bottom:30px;
+	h2{
+		font-size:18px;
+		font-weight:600;
+		letter-spacing:3px;
+		margin-top: 15px;
+		margin-bottom: 25px;
+	}
+	p{
+		font-size:16px;
+		font-weight:300;
+		line-height:24px;
+	}
+}
+
+
+//--------- End faq Area -------------//
+
+
+//--------- Contact Area -------------//
+		
+	.contact-area{
+		background: url(../img/contact-bg.jpg) no-repeat center center/cover;
+		color:$white;
+		.overlay-bg {
+			background: rgba($primary-color, .85);
+		}
+		h2{
+			font-size:36px;
+			font-weight:100;
+			span{
+				font-weight:600;
+			}
+		}
+		p{
+			font-size:14px;
+			font-weight:300;
+		}
+	}
+	.contact-form {
+		::-webkit-input-placeholder {
+			color:    $white;
+			font-weight: 300;
+		}
+		:-moz-placeholder {
+			color:    $white;
+			opacity:  1;
+			font-weight: 300;
+		}
+		::-moz-placeholder {
+			color:    $white;
+			opacity:  1;
+			font-weight: 300;
+		}
+		:-ms-input-placeholder { 
+			color:    $white;
+			font-weight: 300;
+		}
+		::-ms-input-placeholder { 
+			color:    $white;
+			font-weight: 300;
+		}	
+		.alert-msg {
+			color: $white!important;
+			margin-top: 50px;
+			z-index:1;
+		}
+
+	}
+	.common-input {
+		border: 1px solid #a6d477;
+		line-height: 48px;
+		width: 100%;
+		display: block;
+		background: transparent;
+		padding: 0 25px;
+		color: $white;
+	}
+	.common-textarea {
+		border: 1px solid #a6d477;
+		width: 100%;
+		display: block;
+		background: transparent;
+		padding: 15px 25px;
+		color: $white;
+		height: 150px;
+		resize: none;
+	}
+
+//--------- End Contact Area -------------//
+
+//--------- Start footera Area -------------//
+
+footer {
+	background:$white;
+	.footer-nav {
+		li {
+			margin-top: 8px;
+			a {
+				color: #777;
+				&:hover {
+					color: $primary-color;
+				}
+			}
+		}
+	}
+}
+
+
+.single-footer-widget {
+	margin-bottom: 30px;
+	h6{
+		color:$black;
+	}
+
+}
+.footer-bottom {
+	border-top:1px solid #eeeeee;
+	padding-top: 40px;
+	.footer-text {
+		color: #777;
+		i {
+			color: $primary-color;
+		}
+		a {
+			color: $primary-color;
+			&:hover {
+			color: $primary-color;
+			}
+		}
+	}
+}
+.footer-social {
+	@include media-breakpoint-down(sm) {
+		margin-top: 10px;
+	}
+	a {
+		width: 30px;
+		background:#f9f9ff;
+		line-height: 30px;
+		display: inline-block;
+		text-align: center;
+		margin-right: 5px;
+		i {
+			color: #777;
+			@include transition();
+		}
+		&:last-child {
+			margin-right: 0;
+		}
+		&:hover {
+			background: $primary-color;
+			i {
+				color: $white;
+			}
+		}
+	}
+}
+
+//----------- Start Generic Page -------------//
+
+.generic-header{
+	.menu-bar{
+		span{
+			color:$text-color;
+		}
+	}
+
+	nav{
+		a{
+			color: $black;
+		}
+	}
+}
+
+.generic-banner{
+	background:$white;
+	color:$title-color
+}
+
+.about-generic-area {
+	background: $white;
+	.border-top-generic {
+		padding: 100px 15px;
+	}
+	p {
+		margin-bottom: 20px;
+	}
+}
+.white-bg {
+	background: $white;
+}
+.section-top-border {
+	padding: 70px 0;
+	border-top: 1px dotted #eee;
+}
+.switch-wrap {
+	margin-bottom: 10px;
+	p {
+		margin: 0;
+	}
+}
+//----------- End Generic Page -------------//
+
+//----------- Start Elements Page -------------//
+
+
+.elements-banner{
+	color:$black!important;
+}
+
+
+
+//----------- End Elements Page -------------//
+
