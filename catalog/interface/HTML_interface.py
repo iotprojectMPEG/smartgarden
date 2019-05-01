@@ -7,7 +7,20 @@ import json
 
 CONF_FILE = 'conf.json'
 
-class Adder(object):
+
+class Data(object):
+
+    #this gets the list
+    def get_list_gardens(self):
+        file = open(CONF_FILE, 'r')
+        config = json.load(file)
+        file.close()
+        string = config["URL"] + ":" + config["port"] + "/static" # Genera URL per GET
+        data = json.loads(requests.get(string).text)  # GET per ottenere il catalog
+        list = [g["name"] for g in data["gardens"]]  # Genera lista di giardini
+
+
+class HTML(object):
 
     #this is the index page
     @cherrypy.expose
@@ -31,8 +44,8 @@ class Adder(object):
 
         """"""
 
-
-    @cherrypy.expose #function to add the garden
+    #function to add the garden
+    @cherrypy.expose
     def addgard(self):
         return """<html>
           <head></head>
@@ -58,8 +71,8 @@ class Adder(object):
         cat_url = config["URL"] + ":" + config["port"] + "/addg"
         return requests.post(cat_url, json.dumps(new_garden))
 
-
-    @cherrypy.expose #function to add the plant
+    #function to add the plant
+    @cherrypy.expose
     def addplant(self):
         return """<html>
           <head></head>
@@ -73,6 +86,10 @@ class Adder(object):
                 <option value=""></option>
                 <option value=""></option>
               </select>
+              <br>
+              Name:<br>
+              <input type="text" name="name" value="">
+              <br>
               <br><br>
               <input type="submit">
             </form>
@@ -87,20 +104,39 @@ class Adder(object):
         cat_url = config["URL"] + ":" + config["port"] + "/addp"
         return requests.post(cat_url, json.dumps(new_garden))
 
-
-    @cherrypy.expose #function to add a device
+    #function to add a device
+    @cherrypy.expose
     def adddev(self):
         return """<html>
           <head></head>
           <body>
             <h2>ADD DEVICE</h2>
             <form method="get" action="posting_dev" target="_self">
+              Select Garden:<br>
+                <select name="garden">
+                    <option value=""></option>
+                    <option value=""></option>
+                    <option value=""></option>
+                    <option value=""></option>
+                </select>
+                <br>
+              Select Plant:<br>
+                <select name="garden">
+                    <option value=""></option>
+                    <option value=""></option>
+                    <option value=""></option>
+                    <option value=""></option>
+              </select>
+              <br>
               Name:<br>
               <input type="text" name="name" value="">
               <br>
-              Location:<br>
+              Resources:<br>
               <input type="text" name="location" value="">
-              <br><br>
+              <br>
+              Endpoints:<br>
+              <input type="text" name="name" value="">
+              <br>
               <input type="submit" value="Submit">
             </form>
           </body>
@@ -116,4 +152,6 @@ class Adder(object):
 
 
 if __name__ == '__main__':
-    cherrypy.quickstart(Adder())
+
+    #Data().get_list_gardens()
+    cherrypy.quickstart(HTML())
