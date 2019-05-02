@@ -9,7 +9,6 @@ CONF_FILE = 'conf.json'
 
 
 class Data(object):
-
     #this gets the list
     def get_list_gardens(self):
         file = open(CONF_FILE, 'r')
@@ -21,7 +20,6 @@ class Data(object):
 
 
 class HTML(object):
-
     #this is the index page
     @cherrypy.expose
     def index(self):
@@ -42,7 +40,7 @@ class HTML(object):
           </body>
         </html>"""
 
-        """"""
+
 
     #function to add the garden
     @cherrypy.expose
