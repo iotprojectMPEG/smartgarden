@@ -9,17 +9,20 @@ CONF_FILE = 'conf.json'
 
 
 class Data(object):
+
     #this gets the list
-    def get_list_gardens(self):
+    def get_lists(self):
         file = open(CONF_FILE, 'r')
         config = json.load(file)
         file.close()
         string = config["URL"] + ":" + config["port"] + "/static" # Genera URL per GET
         data = json.loads(requests.get(string).text)  # GET per ottenere il catalog
-        list = [g["name"] for g in data["gardens"]]  # Genera lista di giardini
-
+        list_gar = [g["name"] for g in data["gardens"]] # Generates list of gardens
+        list_pla = [p["name"] for p in data["plants"]]  # Generates list of plants
+        list_dev = [d["name"] for d in data["devices"]] # Generates list of devices
 
 class HTML(object):
+    
     #this is the index page
     @cherrypy.expose
     def index(self):
@@ -39,8 +42,6 @@ class HTML(object):
               </form>
           </body>
         </html>"""
-
-
 
     #function to add the garden
     @cherrypy.expose
