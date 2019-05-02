@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Use this to test all sensors.
-"""
 
 import dht11
 import wind
 import time
 
+import json
+import requests
+import threading
 
-def main():
+def read_all():
     while True:
         # DHT11 (real)
         humidity, temperature = dht11.get_data()
@@ -18,7 +18,23 @@ def main():
         # Wind (simulated)
         intensity = wind.get_data()
         print('Wind: %d N' %(intensity))
+
+        # Light (real)
+
+
+        # Rain (real)
+
+
+
         time.sleep(10)
+
+
+def main():
+    # Read conf file
+    with open("conf.json") as f:
+        conf = json.loads(f.read())
+
+    read_all()
 
 
 if __name__ == '__main__':
