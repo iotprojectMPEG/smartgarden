@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Sono necessari i seguenti componenti (edo_fax li ha):
 # 1. Photoresistor module
 # 2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
@@ -24,4 +25,4 @@ def get_data():
 if __name__ == '__main__':
     setup()
     value=get_data()
-    print 'Value: ', value
+    print('Value: ', value)
