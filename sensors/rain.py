@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Sono necessari i seguenti componenti (edo_fax li ha):
 # 1. Rain detection module
 # 2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
@@ -22,9 +23,9 @@ def setup():
 
 def Print(x):
     if x == 1:
-        print 'Not raining'
+        print('Not raining')
     if x == 0:
-        print 'Raining'
+        print('Raining')
 
 def get_data():
     status = GPIO.input(DO)
