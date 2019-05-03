@@ -5,8 +5,9 @@
     Use a file named "token" for the token.
 """
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler
+from telegram.ext import Filters, CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 import logging
 import json
 import requests
@@ -23,12 +24,20 @@ logger = logging.getLogger(__name__)
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     """Send a message when the command /start is issued."""
-    update.message.reply_text('Ciao!')
+    msg = "Ciao!"
+    bot.sendMessage(chat_id=update.message.chat_id, text=msg,
+                    parse_mode=ParseMode.MARKDOWN)
 
 
 def help(bot, update):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('HELP!')
+    help_message = ("*Welcome to your Smart Garden bot!*\n\n"
+    "You can perform the following actions:\n"
+    "- '/status': Get info about your gardens\n"
+    "- '/status id': Get ID info about your gardens\n")
+
+    bot.sendMessage(chat_id=update.message.chat_id, text=help_message,
+                    parse_mode=ParseMode.MARKDOWN)
 
 
 def echo(bot, update):
@@ -112,6 +121,8 @@ def status(bot, update, args):
                     devices.append(d["devID"])
             update.message.reply_text(status)
 
+
+############################ Main ##############################################
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
