@@ -5,8 +5,9 @@
     Use a file named "token" for the token.
 """
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler
+from telegram.ext import Filters, CallbackQueryHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 import logging
 import json
 import requests
@@ -23,12 +24,20 @@ logger = logging.getLogger(__name__)
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     """Send a message when the command /start is issued."""
-    update.message.reply_text('Ciao!')
+    msg = "Ciao!"
+    bot.sendMessage(chat_id=update.message.chat_id, text=msg,
+                    parse_mode=ParseMode.MARKDOWN)
 
 
 def help(bot, update):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('HELP!')
+    help_message = ("*Welcome to your Smart Garden bot!*\n\n"
+    "You can perform the following actions:\n"
+    "- '/status': Get info about your gardens\n"
+    "- '/status id': Get ID info about your gardens\n")
+
+    bot.sendMessage(chat_id=update.message.chat_id, text=help_message,
+                    parse_mode=ParseMode.MARKDOWN)
 
 
 def echo(bot, update):
@@ -46,40 +55,74 @@ def irrigation(bot, update):
     update.message.reply_text("Irrigazione fallita!")
     # funzione...
 
-def status(bot, update):
+def status(bot, update, args):
     """Gets information about all the sensors in the gardens and their status
     Connected/Disconnected, and sends a summary to the user.
     """
+
+    param = " ".join(args)
+
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
     url = config["catalogURL"]
     dynamic = json.loads(requests.get(url + '/status').text)
     static = json.loads(requests.get(url + '/static').text)
 
-    for g in static["gardens"]:
-        devices = []
-        status = '🏡 ' + g["name"]
-        for p in g["plants"]:
-            status = status + '\n\n    🌱 ' + p["name"]
+    if param == 'id':
+        for g in static["gardens"]:
+            devices = []
+            status = '🏡 ' + g["gardenID"] + '   (' + g["name"] + ')'
+            for p in g["plants"]:
+                status = status + ('\n\n    🌱 ' + p["plantID"] +
+                                  '   (' + p["name"] + ')')
 
-            for g2 in dynamic["gardens"]:
-                if g2["gardenID"] == g["gardenID"]:
-                    break
-            for p2 in g2["plants"]:
-                if p2["plantID"] == p["plantID"]:
-                    break
-            for d2 in p2["devices"]:
-                devices.append(d2["devID"])
+                for g2 in dynamic["gardens"]:
+                    if g2["gardenID"] == g["gardenID"]:
+                        break
+                for p2 in g2["plants"]:
+                    if p2["plantID"] == p["plantID"]:
+                        break
+                for d2 in p2["devices"]:
+                    devices.append(d2["devID"])
 
-            for d in p["devices"]:
-                if d["devID"] in devices:
-                    status = status + '\n        ✅️ ' + d["name"]
-                else:
-                    status = status + '\n        ❌ ' + d["name"]
+                for d in p["devices"]:
+                    if d["devID"] in devices:
+                        status = status + ('\n        ✅️ ' + d["devID"] +
+                                          '   (' + d["name"] + ')')
+                    else:
+                        status = status + ('\n        ❌ ' + d["devID"] +
+                                          '   (' + d["name"] + ')')
 
-                devices.append(d["devID"])
-        update.message.reply_text(status)
+                    devices.append(d["devID"])
+            update.message.reply_text(status)
 
+    else:
+        for g in static["gardens"]:
+            devices = []
+            status = '🏡 ' + g["name"]
+            for p in g["plants"]:
+                status = status + '\n\n    🌱 ' + p["name"]
+
+                for g2 in dynamic["gardens"]:
+                    if g2["gardenID"] == g["gardenID"]:
+                        break
+                for p2 in g2["plants"]:
+                    if p2["plantID"] == p["plantID"]:
+                        break
+                for d2 in p2["devices"]:
+                    devices.append(d2["devID"])
+
+                for d in p["devices"]:
+                    if d["devID"] in devices:
+                        status = status + '\n        ✅️ ' + d["name"]
+                    else:
+                        status = status + '\n        ❌ ' + d["name"]
+
+                    devices.append(d["devID"])
+            update.message.reply_text(status)
+
+
+############################ Main ##############################################
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
@@ -94,7 +137,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
-    dp.add_handler(CommandHandler("status", status))
+    dp.add_handler(CommandHandler("status", status, pass_args=True))
     dp.add_handler(CommandHandler("irrigate", irrigation))
 
     # on noncommand i.e message - echo the message on Telegram
