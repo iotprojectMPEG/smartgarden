@@ -83,7 +83,7 @@ class HTML(object):
             <form method="get" action="posting_plant" target="_self">
             Select Garden:<br>
               <select name="garden">
-                <option value=""></option>
+                <option value="fiat">fiat</option>
                 <option value=""></option>
                 <option value=""></option>
                 <option value=""></option>
@@ -98,13 +98,14 @@ class HTML(object):
           </body>
         </html>"""
     @cherrypy.expose
-    def posting_plant(self, name=None, location=None):
-        new_garden = {"name": name, "location": location}
+    def posting_plant(self, garden=None, name=None):
+        new_plant = {"garden": garden, "plant": name}
+        print(new_plant)
         file = open(CONF_FILE, 'r')
         config = json.load(file)
         file.close()
         cat_url = config["URL"] + ":" + config["port"] + "/addp"
-        return requests.post(cat_url, json.dumps(new_garden))
+        return requests.post(cat_url, json.dumps(new_plant))
 
     #function to add a device
     @cherrypy.expose
@@ -155,5 +156,5 @@ class HTML(object):
 
 if __name__ == '__main__':
 
-    Data().get_lists()
+    #Data().get_lists()
     cherrypy.quickstart(HTML())
