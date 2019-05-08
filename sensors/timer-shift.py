@@ -32,7 +32,7 @@ def main():
 
     # Schedule times.
     for h in hours:
-        schedule.every().day.at(h).do(call_sensors)
+        schedule.every().day.at(h).do(call_sensors())
 
 while True:
     schedule.run_pending()
