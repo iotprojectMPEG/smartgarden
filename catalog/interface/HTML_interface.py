@@ -100,7 +100,6 @@ class HTML(object):
     @cherrypy.expose
     def posting_plant(self, garden=None, name=None):
         new_plant = {"garden": garden, "plant": name}
-        print(new_plant)
         file = open(CONF_FILE, 'r')
         config = json.load(file)
         file.close()
@@ -158,5 +157,3 @@ if __name__ == '__main__':
 
     #Data().get_lists()
     cherrypy.quickstart(HTML())
-    #COMMENT 
-    
