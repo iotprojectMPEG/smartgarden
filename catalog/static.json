@@ -9,6 +9,7 @@
       "gardenID": "g_3041",
       "name": "Casa in montagna",
       "location": "Torino",
+      "hours": ["07:00", "19:00"],
       "plants": [{
         "plantID": "p_1001",
         "name": "Eden Rose",
@@ -62,6 +63,7 @@
       "gardenID": "g_4253",
       "name": "Giardino al mare",
       "location": "Palermo",
+      "hours": ["07:00", "19:00"],
       "plants": [{
         "plantID": "p_003",
         "name": "Aloe vera",
