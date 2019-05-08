@@ -7,8 +7,14 @@ Activates sensors in specific moments of the day.
 import json
 import requests
 import schedule
+import time
 
 FILENAME = "conf.json"
+
+def call_sensors():
+    #Call sensors
+    print("Calling...")
+    pass
 
 def main():
 
@@ -24,8 +30,13 @@ def main():
     for g in static["gardens"]:
         hours = g["hours"]
 
+    # Schedule times.
+    for h in hours:
+        schedule.every().day.at(h).do(call_sensors)
 
-
+while True:
+    schedule.run_pending()
+    time.sleep(60)
 
 if __name__ == '__main__':
     main()
