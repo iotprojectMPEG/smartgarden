@@ -83,7 +83,7 @@ if __name__ == '__main__':
             'tools.staticdir.dir' : os.path.abspath(os.path.join(os.path.dirname(__file__), './assets'))
         }
     }
-
+    cherrypy.tree.mount(Data(), '/', config=conf)
     cherrypy.tree.mount(HTML(), '/', config=conf)
     cherrypy.engine.start()
     cherrypy.engine.block()
