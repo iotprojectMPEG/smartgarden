@@ -140,8 +140,17 @@ class HTML(object):
 
 
 if __name__ == '__main__':
-    
-    cherrypy.tree.mount(HTML(), '/', config='conf')
-    cherrypy.config.update('conf')
+    conf  = {'/':
+         {
+            'request.dispatch' : cherrypy.dispatch.MethodDispatcher()
+         },
+            '/assets':
+        {
+            'tools.staticdir.on' : True,
+            'tools.staticdir.dir' : os.path.abspath(os.path.join(os.path.dirname(__file__), './assets'))
+        }
+    }
+
+    cherrypy.tree.mount(HTML(), '/', config=conf)
     cherrypy.engine.start()
     cherrypy.engine.block()
