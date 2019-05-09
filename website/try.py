@@ -4,6 +4,7 @@ import string
 import cherrypy
 import requests
 import json
+import os
 
 CONF_FILE = 'conf.json'
 
@@ -27,8 +28,8 @@ class Data(object):
 class HTML(object):
 
     #this is the index page
-    @cherrypy.expose
-    def index(self):
+    exposed = True
+    def GET(self):
         return open('index.html')
 
     #function to add the garden
@@ -139,6 +140,8 @@ class HTML(object):
 
 
 if __name__ == '__main__':
-
-    #Data().get_lists()
-    cherrypy.quickstart(HTML())
+    
+    cherrypy.tree.mount(HTML(), '/', config='conf')
+    cherrypy.config.update('conf')
+    cherrypy.engine.start()
+    cherrypy.engine.block()

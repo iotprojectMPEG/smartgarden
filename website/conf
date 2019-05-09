@@ -4,7 +4,7 @@ server.socket_port: 8080
 
 [/]
 request.dispatch: cherrypy.dispatch.MethodDispatcher()
-tools.staticdir.root: ''
+tools.staticdir.root: '/home/paolo26/mainproject/website/'
 
 [/assets]
 tools.staticdir.on: True
