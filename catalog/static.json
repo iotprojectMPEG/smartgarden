@@ -9,10 +9,10 @@
       "gardenID": "g_3041",
       "name": "Casa in montagna",
       "location": "Torino",
-      "hours": ["07:00", "19:00"],
       "plants": [{
         "plantID": "p_1001",
         "name": "Eden Rose",
+        "hours": ["07:00", "19:00"],
         "environment": {
           "water": 100,
           "humidity": 90,
@@ -31,11 +31,13 @@
         }, {
           "devID": "irr_001",
           "name": "Irrigator",
-          "endpoints": ["MQTT", "REST"]
+          "endpoints": ["MQTT", "REST"],
+          "resources": ["Irrigation"]
         }]
       }, {
         "plantID": "p_5843",
         "name": "Sarracenia",
+        "hours": ["07:00", "19:00"],
         "environment": {
           "water": 100,
           "humidity": 90,
@@ -55,7 +57,7 @@
           "devID": "irr_002",
           "name": "Irrigator",
           "endpoints": ["MQTT"],
-          "resources": []
+          "resources": ["Irrigation"]
         }]
       }]
     },
@@ -63,10 +65,10 @@
       "gardenID": "g_4253",
       "name": "Giardino al mare",
       "location": "Palermo",
-      "hours": ["07:00", "19:00"],
       "plants": [{
         "plantID": "p_003",
         "name": "Aloe vera",
+        "hours": ["07:00", "19:00"],
         "devices": [{
           "devID": "dht_003",
           "name": "DHT11",
@@ -81,7 +83,7 @@
           "devID": "irr_003",
           "name": "Irrigator",
           "endpoints": ["MQTT"],
-          "resources": []
+          "resources": ["Irrigation"]
         }]
       }]
     }
