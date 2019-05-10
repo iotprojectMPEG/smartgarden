@@ -29,14 +29,17 @@ class HTML(object):
 
     #this is the index page
     exposed = True
-    def GET(self):
-        return open('index.html')
+    def GET(self, *uri):
+        if uri[0] == 'index':
+            return open('index.html')
 
     #function to add the garden
-    @cherrypy.expose
-    def addgard(self):
-        return open('Add Garden.html')
-    @cherrypy.expose
+    #exposed=True
+    #def addgard(self):
+        if uri[0] == 'AddGarden':
+            return open('Add Garden.html')
+
+    exposed=True
     def posting_gard(self, name=None, location=None):
         new_garden = {"name": name, "location": location}
         file = open(CONF_FILE, 'r')
@@ -46,10 +49,10 @@ class HTML(object):
         return requests.post(cat_url, json.dumps(new_garden))
 
     #function to add the plant
-    @cherrypy.expose
+    exposed=True
     def addplant(self):
         return open('Add Plant.html')
-    @cherrypy.expose
+    exposed=True
     def posting_plant(self, garden=None, name=None):
         new_plant = {"garden": garden, "plant": name}
         file = open(CONF_FILE, 'r')
@@ -59,10 +62,10 @@ class HTML(object):
         return requests.post(cat_url, json.dumps(new_plant))
 
     #function to add a device
-    @cherrypy.expose
+    exposed=True
     def adddev(self):
         return open('Add Device.html')
-    @cherrypy.expose
+    exposed = True
     def posting_dev(self, name=None, location=None):
         new_garden = {"name": name, "location": location}
         file = open(CONF_FILE, 'r')
@@ -83,7 +86,7 @@ if __name__ == '__main__':
             'tools.staticdir.dir' : os.path.abspath(os.path.join(os.path.dirname(__file__), './assets'))
         }
     }
-    cherrypy.tree.mount(Data(), '/', config=conf)
+    #cherrypy.tree.mount(Data(), '/', config=conf)
     cherrypy.tree.mount(HTML(), '/', config=conf)
     cherrypy.engine.start()
     cherrypy.engine.block()
