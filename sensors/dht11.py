@@ -5,22 +5,28 @@ Real humidity and temperature sensor.
 """
 
 import sys
-import Adafruit_DHT
+try:
+    import Adafruit_DHT
+except:
+    pass
 
 SENSOR = 11
 PIN = 17
 
 
 def get_data():
-    humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN,
-                                                    retries=3,
-                                                    delay_seconds=2)
 
-    if humidity == None:
-        humidity = -1
+    # Initialization.
+    humidity = -1
+    temperature = -1
 
-    if temperature == None:
-        temperature = -1
+    # Read data from sensor
+    try:
+        humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN,
+                                                        retries=3,
+                                                        delay_seconds=2)
+    except:
+        pass
 
     return (humidity, temperature)
 
