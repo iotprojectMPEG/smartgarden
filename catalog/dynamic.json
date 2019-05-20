@@ -29,7 +29,7 @@
     {
       "gardenID": "g_4253",
       "plants": [{
-        "plantID": "p_003",
+        "plantID": "p_5003",
         "devices": [{
           "devID": "dht_003",
           "timestamp": 1556295300
