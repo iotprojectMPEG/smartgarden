@@ -4,6 +4,7 @@
 Real humidity and temperature sensor.
 """
 
+import json
 import sys
 try:
     import Adafruit_DHT
@@ -28,12 +29,22 @@ def get_data():
     except:
         pass
 
-    return (humidity, temperature)
+    data = {
+      "data": [{
+        "res": "humidity",
+        "value": humidity
+      }, {
+        "res": "temperature",
+        "value": temperature
+      }]
+    }
+
+    return data
 
 
 def main():
-    hum, temp = get_data()
-    print('Temp: %.1f  Humidity: %.1f' %(temp, hum))
+    data = get_data()
+    print(json.dumps(data, indent=2))
 
 
 if __name__ == '__main__':
