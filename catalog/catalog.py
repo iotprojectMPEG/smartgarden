@@ -322,13 +322,8 @@ class MySubscriber:
         msg.payload = msg.payload.decode("utf-8")
         message = json.loads(msg.payload)
         catalog = Catalog(JSON_FILE, JSON_FILE2)
-        #gardenID = message["gardenID"]
-        #plantID = message["plantID"]
         devID = message["devID"]
         string = 'http://192.168.1.70:8080/info/'+devID
-        print("\n\n\n")
-        print(string)
-        print("\n\n\n")
         info = json.loads(requests.get(string).text)
         gardenID = info["gardenID"]
         plantID = info["plantID"]
