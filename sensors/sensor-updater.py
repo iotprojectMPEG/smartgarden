@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-@author = Paolo Grasso
+1. Read from the static catalog the list of available sensors.
+2. Check for every plant if the sensors are active.
+3. Publish via MQTT the devID telling that the sensor is active.
 """
 
 import paho.mqtt.client as PahoMQTT
@@ -41,7 +43,7 @@ class MyPublisher(object):
         loop_flag = 0
 
 
-def publisher(devID, resource, value):
+def publisher():
     with open("conf.json") as f:
         config = json.loads(f.read())
 
@@ -66,7 +68,7 @@ def publisher(devID, resource, value):
             print("Retrying in %d seconds..." % SEC)
             time.sleep(SEC)
 
-    pub = MyPublisher(devID, broker_ip)
+    pub = MyPublisher("Raspi", broker_ip)
     flag = 1
     pub.start()
 
@@ -75,31 +77,40 @@ def publisher(devID, resource, value):
         print("Waiting for connection...")
         time.sleep(.1)
 
-    # Update registration on catalog
-    while True:
+    # Update registration on catalog.
+    while True:  # Keep on updating devices
         for g in static["gardens"]:
             for p in g["plants"]:
                 for d in p["devices"]:
                     devID = d["devID"]
 
-                    (gardenID, plantID, resources, status) = check_device(devID, broker_ip, rest_port)
+                    (gardenID, plantID, resources, status) = check_dev(devID,
+                                                        broker_ip, rest_port)
 
                     message = {"devID": devID}
-                    if status == 1:
+                    if status == 1:  # If the sensor is active
                         for r in resources:
-                            print("Updating %s" % devID)
+                            print("Updating %s (%s)" % (devID, r))
                             pub.my_publish(gardenID + '/' + plantID + '/' +
                                            r, json.dumps(message))
+                            time.sleep(2)
                     else:
                         print("%s is not working now!" % devID)
 
                     time.sleep(2)  # Let the catalog write json files.
-        time.sleep(60)  # Wait 60 seconds and then repeat.
+        print("Waiting 60 seconds...")
+        time.sleep(60)  # Wait 60 seconds and then repeat the whole cycle.
 
     pub.stop()
 
-def check_device(devID, broker_ip, rest_port):
+def check_dev(devID, broker_ip, rest_port):
+    """Get gardenID, plantID and resources from the catalog given devID.
+       Check if the sensor is active or not.
+       Return (gardenID, plantID, resources, status)
+    """
     string = 'http://' + broker_ip + ':' + rest_port + '/info/' + devID
+
+    # Check info to build topic as "smartgarden/gardenID/plantID/resource"
     info = json.loads(requests.get(string).text)
     gardenID = info["gardenID"]
     plantID = info["plantID"]
@@ -114,11 +125,11 @@ def check_device(devID, broker_ip, rest_port):
 
             # Add data control...
 
-            status = 1
+            status = 1  # Sensor is active
         except:
-            status = 0
+            status = 0  # Sensor is unactive
 
     return (gardenID, plantID, resources, status)
 
 if __name__ == "__main__":
-    publisher("dht_5003", "temperature", 5)
+    publisher()
