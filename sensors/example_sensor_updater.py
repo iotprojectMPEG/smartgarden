@@ -10,7 +10,9 @@ import datetime
 import json
 import requests
 
+SEC = 10
 
+loop_flag = 1
 class MyPublisher(object):
     def __init__(self, clientID, serverIP):
         self.clientID = clientID
@@ -35,34 +37,45 @@ class MyPublisher(object):
         loop_flag = 0
 
 
-if __name__ == "__main__":
-
+def publisher(devID, resource, value):
     with open("conf.json") as f:
         config = json.loads(f.read())
 
     # Get broker IP from the catalog
-    broker = requests.get(config["catalogURL"]+"/broker")
-    broker_ip = json.loads(broker.text)["IP"]
-    rest_port = json.loads(broker.text)["rest_port"]
+    connected = 0
+    while connected == 0:
+        try:
+            string = ("http://"+config["catalogURL"]+ ":" +
+                       config["port"] + "/broker")
+            print(string)
+            broker = requests.get(string)
+            broker_ip = json.loads(broker.text)["IP"]
+            rest_port = json.loads(broker.text)["rest_port"]
+            connected = 1
+            print("Service started")
+        except:
+            print("The catalog is not reachable!")
+            print("Retrying in %d seconds..." % SEC)
+            time.sleep(SEC)
 
     devID = 'dht_001'
     pub = MyPublisher(devID, broker_ip)
-    loop_flag = 1
     flag = 1
     pub.start()
 
     while loop_flag:
         print("Waiting for connection...")
-        time.sleep(.01)
+        time.sleep(.1)
 
     # Update registration on catalog
     while True:
-        message = {"devID": "dht_001", "temperature": "25"}
+        message = {"devID": devID, resource: value}
         string = 'http://' + broker_ip + ':' + rest_port + '/info/' + devID
         info = json.loads(requests.get(string).text)
         gardenID = info["gardenID"]
         plantID = info["plantID"]
         resources = info["resources"]
+        print(gardenID, plantID, resources)
 
         # Use "resources" to get 'temperature' instead
         pub.my_publish(gardenID + '/' + plantID + '/' + 'temperature',
@@ -70,3 +83,6 @@ if __name__ == "__main__":
         time.sleep(30)
 
     pub.stop()
+
+if __name__ == "__main__":
+    publisher("dht_5003", "temperature", 5)
