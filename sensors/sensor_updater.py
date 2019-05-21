@@ -9,6 +9,10 @@ import time
 import datetime
 import json
 import requests
+import sys
+
+import dht11 as dht
+import wind
 
 SEC = 10
 
@@ -51,6 +55,10 @@ def publisher(devID, resource, value):
             broker = requests.get(string)
             broker_ip = json.loads(broker.text)["IP"]
             rest_port = json.loads(broker.text)["rest_port"]
+
+            string = ("http://"+config["catalogURL"]+ ":" +
+                       config["port"] + "/static")
+            static = json.loads(requests.get(string).text)
             connected = 1
             print("Service started")
         except:
@@ -58,10 +66,10 @@ def publisher(devID, resource, value):
             print("Retrying in %d seconds..." % SEC)
             time.sleep(SEC)
 
-    devID = 'dht_001'
     pub = MyPublisher(devID, broker_ip)
     flag = 1
     pub.start()
+
 
     while loop_flag:
         print("Waiting for connection...")
@@ -69,20 +77,48 @@ def publisher(devID, resource, value):
 
     # Update registration on catalog
     while True:
-        message = {"devID": devID, resource: value}
-        string = 'http://' + broker_ip + ':' + rest_port + '/info/' + devID
-        info = json.loads(requests.get(string).text)
-        gardenID = info["gardenID"]
-        plantID = info["plantID"]
-        resources = info["resources"]
-        print(gardenID, plantID, resources)
+        for g in static["gardens"]:
+            for p in g["plants"]:
+                for d in p["devices"]:
+                    devID = d["devID"]
 
-        # Use "resources" to get 'temperature' instead
-        pub.my_publish(gardenID + '/' + plantID + '/' + 'temperature',
-                       json.dumps(message))
-        time.sleep(30)
+                    (gardenID, plantID, resources, status) = check_device(devID, broker_ip, rest_port)
+
+                    message = {"devID": devID}
+                    if status == 1:
+                        for r in resources:
+                            print("Updating %s" % devID)
+                            pub.my_publish(gardenID + '/' + plantID + '/' +
+                                           r, json.dumps(message))
+                    else:
+                        print("%s is not working now!" % devID)
+
+                    time.sleep(2)  # Let the catalog write json files.
+        time.sleep(60)  # Wait 60 seconds and then repeat.
 
     pub.stop()
+
+def check_device(devID, broker_ip, rest_port):
+    string = 'http://' + broker_ip + ':' + rest_port + '/info/' + devID
+    info = json.loads(requests.get(string).text)
+    gardenID = info["gardenID"]
+    plantID = info["plantID"]
+    resources = info["resources"]
+
+    if (1 == 1): # Check if the sensor is active...
+        d = devID[0:devID.find('_')]
+
+        try:
+            func = d + '.get_data()'
+            data = eval(func)
+
+            # Add data control...
+
+            status = 1
+        except:
+            status = 0
+
+    return (gardenID, plantID, resources, status)
 
 if __name__ == "__main__":
     publisher("dht_5003", "temperature", 5)
