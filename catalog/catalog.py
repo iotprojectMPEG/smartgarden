@@ -25,10 +25,10 @@ class Catalog(object):
     def load_file(self):
         with open(self.filename, "r") as fs:
             self.static = json.loads(fs.read())
-            print("Static loaded")
+            # print("Static loaded")
         with open(self.filename2, "r") as fd:
             self.dynamic = json.loads(fd.read())
-            print("Dynamic loaded")
+            # print("Dynamic loaded")
 
         self.broker_ip = self.static["broker"]["IP"]
         self.rest_port = self.static["broker"]["rest_port"]
