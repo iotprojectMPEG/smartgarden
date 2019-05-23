@@ -5,7 +5,11 @@ Real humidity and temperature sensor.
 """
 
 import json
+import time
 import sys
+import threading
+from .. import updater
+
 try:
     import Adafruit_DHT
 except:
@@ -13,7 +17,6 @@ except:
 
 SENSOR = 11
 PIN = 17
-
 
 def get_data():
 
@@ -43,9 +46,12 @@ def get_data():
 
 
 def main():
-    data = get_data()
-    print(json.dumps(data, indent=2))
+    thread1 = updater.Alive(1, "Alive")
+    thread2 = updater.When(2, "When")
 
+    thread1.start()
+    time.sleep(1)
+    thread2.start()
 
 if __name__ == '__main__':
     main()
