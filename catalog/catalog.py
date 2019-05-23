@@ -388,7 +388,7 @@ class Third(threading.Thread):
 
 def main():
     thread1 = First(1,"CherryPy")
-    thread2 = Second(2,"Updater")
+    thread2 = Second(2, "Updater")
     thread3 = Third(3, "Remover")
 
     print("Starting CherryPy...")
