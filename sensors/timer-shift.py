@@ -19,43 +19,34 @@ SEC = 10
 
 
 class MyPublisher(object):
-    def __init__(self,clientID):
+    def __init__(self,clientID, ip, port):
+        print(ip)
+        print(port)
         self.clientID=clientID
         self.publisher=Pub.Client(self.clientID,False)
         self.publisher.on_publish=self.onpublish
+        self.ip = ip
+        self.port = int(port)
+
     def onpublish(self,client, userdata, mid):
         print("Message published on the message broker")
+
     def start(self):
-        self.publisher.connect("iot.eclipse.org")
+        self.publisher.connect(self.ip, self.port)
         self.publisher.loop_start()
+
     def stop(self):
         self.publisher.loop_stop()
         self.publisher.disconnect()
+
     def myPublish(self,topic,message):
         self.publisher.publish(topic,message,qos=1)
-    pass
 
 
-def call_sensors(devices):
+def call_sensors(devices, ip, port):
     print(devices)
 
-    """
-    1. Create a json:
-    {
-        "sensors": [{
-            "devID": "dht_001"
-        }, {
-            "devID": "dht_002"
-        }]
-    }
-    where "dht_001", "dht_002", are inside "devices"
-
-    
-
-    2. Publish a MQTT message in 'smartgarden/commands' with that json
-    """
-
-    sensor_list={
+    sensor_list = {
         "sensors": []
     }
     for i in range(len(devices)):
@@ -64,8 +55,8 @@ def call_sensors(devices):
         }
         sensor_list["sensors"].insert(i,id)
 
-    publisher=MyPublisher("Sens_list")
-    publisher.myPublish("smartgarden/commands",json.dumps(sensor_list))
+    publisher = MyPublisher("Sens_list", ip, port)
+    publisher.myPublish("smartgarden/commands", json.dumps(sensor_list))
 def main():
 
     with open(FILENAME, "r") as f:
@@ -75,11 +66,15 @@ def main():
     port = conf["port"]
 
     string = "http://" + url + ":" + port + "/static"
+    broker_string = "http://" + url + ":" + port + "/broker"
 
     connected = 0
     while connected == 0:
         try:
             static = json.loads(requests.get(string).text)
+            broker_info = json.loads(requests.get(broker_string).text)
+            broker_ip = broker_info["IP"]
+            mqtt_port = broker_info["mqtt_port"]
             connected = 1
             print("Service started")
         except:
@@ -94,9 +89,10 @@ def main():
             for d in p["devices"]:
                 devices.append(d["devID"])
 
-            hours = ['15:23']
+            hours = ['16:33']
             for h in hours:
-                schedule.every().day.at(h).do(call_sensors, devices)
+                schedule.every().day.at(h).do(call_sensors, devices,
+                                              broker_ip, mqtt_port)
                 print("Schedule: %s > %s > %s" %(p["plantID"], h, devices))
 
     while True:
