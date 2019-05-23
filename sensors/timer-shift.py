@@ -12,17 +12,33 @@ import requests
 import schedule
 import time
 import sys
+import paho.mqtt.client as Pub
 
 FILENAME = "conf.json"
 SEC = 10
 
 
 class MyPublisher(object):
+    def __init__(self,clientID):
+        self.clientID=clientID
+        self.publisher=Pub.Client(self.clientID,False)
+        self.publisher.on_publish=self.onpublish
+    def onpublish(self,client, userdata, mid):
+        print("Message published on the message broker")
+    def start(self):
+        self.publisher.connect("iot.eclipse.org")
+        self.publisher.loop_start()
+    def stop(self):
+        self.publisher.loop_stop()
+        self.publisher.disconnect()
+    def myPublish(self,topic,message):
+        self.publisher.publish(topic,message,qos=1)
     pass
 
 
 def call_sensors(devices):
     print(devices)
+
     """
     1. Create a json:
     {
@@ -34,9 +50,22 @@ def call_sensors(devices):
     }
     where "dht_001", "dht_002", are inside "devices"
 
+    
+
     2. Publish a MQTT message in 'smartgarden/commands' with that json
     """
 
+    sensor_list={
+        "sensors": []
+    }
+    for i in range(len(devices)):
+        id={
+            "devID":devices[i]
+        }
+        sensor_list["sensors"].insert(i,id)
+
+    publisher=MyPublisher("Sens_list")
+    publisher.myPublish("smartgarden/commands",json.dumps(sensor_list))
 def main():
 
     with open(FILENAME, "r") as f:
@@ -65,7 +94,7 @@ def main():
             for d in p["devices"]:
                 devices.append(d["devID"])
 
-            hours = ['13:26']
+            hours = ['15:23']
             for h in hours:
                 schedule.every().day.at(h).do(call_sensors, devices)
                 print("Schedule: %s > %s > %s" %(p["plantID"], h, devices))
