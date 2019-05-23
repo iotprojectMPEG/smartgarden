@@ -16,16 +16,26 @@ import sys
 FILENAME = "conf.json"
 SEC = 10
 
-def call_sensors(devices):
-    # Call sensors.
 
-    for dev in devices:
-        d = dev[0:dev.find('_')]
-        try:
-            func = d + '.get_data()'
-            print(eval(func))
-        except:
-            print("%s is not available!" % d)
+class MyPublisher(object):
+    pass
+
+
+def call_sensors(devices):
+    print(devices)
+    """
+    1. Create a json:
+    {
+        "sensors": [{
+            "devID": "dht_001"
+        }, {
+            "devID": "dht_002"
+        }]
+    }
+    where "dht_001", "dht_002", are inside "devices"
+
+    2. Publish a MQTT message in 'smartgarden/commands' with that json
+    """
 
 def main():
 
@@ -55,7 +65,7 @@ def main():
             for d in p["devices"]:
                 devices.append(d["devID"])
 
-            #hours = ['17:46']
+            hours = ['13:26']
             for h in hours:
                 schedule.every().day.at(h).do(call_sensors, devices)
                 print("Schedule: %s > %s > %s" %(p["plantID"], h, devices))
