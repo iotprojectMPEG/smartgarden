@@ -380,10 +380,10 @@ class Third(threading.Thread):
         self.name = self.name
 
     def run(self):
-        time.sleep(50000000)
+        time.sleep(30)
         while True:
-            cat = Catalog(JSON_FILE, JSON_FILE2)
-            cat.remove_old_device()
+            #cat = Catalog(JSON_FILE, JSON_FILE2)
+            #cat.remove_old_device()
             time.sleep(300)
 
 def main():
