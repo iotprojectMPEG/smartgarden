@@ -6,9 +6,6 @@ import paho.mqtt.client as PahoMQTT
 import time
 import datetime
 
-TOPIC = 'smartgarden/+/+/+'
-BROKER_IP = '192.168.1.70'
-
 
 class MySubscriber:
     def __init__(self, clientID, topic, serverIP):
@@ -37,7 +34,6 @@ class MySubscriber:
     def my_on_message_received(self, client, userdata, msg):
         msg.payload = msg.payload.decode("utf-8")
         message = json.loads(msg.payload)
-        print(message)
 
 
 if __name__ == "__main__":
