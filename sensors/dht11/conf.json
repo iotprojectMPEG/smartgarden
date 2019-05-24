@@ -1,5 +1,5 @@
 {
   "devID": "dht_001",
-  "catalogURL": "192.168.1.70",
+  "catalogURL": "127.0.0.1",
   "port": "8080"
 }
