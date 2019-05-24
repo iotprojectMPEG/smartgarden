@@ -22,13 +22,13 @@ class MyPublisher(object):
     def __init__(self,clientID, ip, port):
         print(ip)
         print(port)
-        self.clientID=clientID
-        self.publisher=Pub.Client(self.clientID,False)
-        self.publisher.on_publish=self.onpublish
+        self.clientID = clientID
+        self.publisher = Pub.Client(self.clientID, False)
+        self.publisher.on_publish = self.onpublish
         self.ip = ip
         self.port = int(port)
 
-    def onpublish(self,client, userdata, mid):
+    def onpublish(self, client, userdata, mid):
         print("Message published on the message broker")
 
     def start(self):
@@ -40,7 +40,7 @@ class MyPublisher(object):
         self.publisher.disconnect()
 
     def myPublish(self,topic,message):
-        self.publisher.publish(topic,message,qos=1)
+        self.publisher.publish(topic, message, qos=2)
 
 
 def call_sensors(devices, ip, port):
@@ -57,6 +57,8 @@ def call_sensors(devices, ip, port):
 
     publisher = MyPublisher("Sens_list", ip, port)
     publisher.myPublish("smartgarden/commands", json.dumps(sensor_list))
+
+
 def main():
 
     with open(FILENAME, "r") as f:
