@@ -28,7 +28,6 @@ def find_me(devID, url, port):
        plantID, resources.
     """
     string = "http://" + url + ":" + port + "/info/" + devID
-    print(string)
     info = json.loads(requests.get(string).text)
     gardenID = info["gardenID"]
     plantID = info["plantID"]
@@ -58,7 +57,6 @@ class Alive(threading.Thread):
                                                         self.url, self.port)
         (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
-        print("OK")
 
     def run(self):
         pub = PubImAlive(self.devID, self.broker_ip, self.mqtt_port)
@@ -95,7 +93,6 @@ class When(threading.Thread):
                                                         self.url, self.port)
         (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
-        # print(self.topic)
 
     def run(self):
         sub = SubAndPub(self.devID, self.topic, self.broker_ip)
@@ -105,16 +102,7 @@ class When(threading.Thread):
             print("Waiting for connection...")
             time.sleep(1)
 
-
-        while True:
-            if sub.my_on_message_received == 1:
-                print("Ricevuto")
-                time.sleep(5)
-
         sub.stop()
-
-
-
 
 
 class PubImAlive(object):
