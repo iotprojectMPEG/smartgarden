@@ -54,6 +54,11 @@
           "endpoints": ["MQTT", "REST"],
           "resources": ["UV"]
         }, {
+          "devID": "rain_002",
+          "name": "Rain sensor",
+          "endpoints": ["MQTT", "REST"],
+          "resources": ["Rain"]
+        }, {
           "devID": "irr_002",
           "name": "Irrigator",
           "endpoints": ["MQTT"],
