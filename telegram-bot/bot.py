@@ -65,8 +65,10 @@ def status(bot, update, args):
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
     url = config["catalogURL"]
-    dynamic = json.loads(requests.get(url + '/status').text)
-    static = json.loads(requests.get(url + '/static').text)
+    port = config["port"]
+    string = "http://" + url + ":" + port
+    dynamic = json.loads(requests.get(string + '/status').text)
+    static = json.loads(requests.get(string + '/static').text)
 
     if param == 'id':
         for g in static["gardens"]:
