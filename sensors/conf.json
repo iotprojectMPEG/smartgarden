@@ -1,11 +1,4 @@
 {
   "catalogURL": "127.0.0.1",
-  "port": "8080",
-  "devices": [{
-    "name": "dht11",
-    "devID": "dht11_1"
-  }, {
-    "name": "rain_sensor",
-    "devID": "rain_1"
-  }]
+  "port": "8080"
 }
