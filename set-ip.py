@@ -21,6 +21,7 @@ def update_json(filename, key, value):
 def main():
     ip = input("Type catalog IP followed by [Enter]:\n")
     update_json("./thingspeak/conf.json", "catalogURL", ip)
+    update_json("./telegram-bot/conf.json", "catalogURL", ip)
     update_json("./sensors/conf.json", "catalogURL", ip)
     update_json("./sensors/dht11/conf.json", "catalogURL", ip)
     update_json("./sensors/irrigator/conf.json", "catalogURL", ip)
