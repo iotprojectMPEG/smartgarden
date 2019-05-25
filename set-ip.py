@@ -9,6 +9,7 @@ import sys, os
 
 def update_json(filename, key, value):
 
+    print(filename)
     with open(filename, 'r') as fr:
         data = json.loads(fr.read())
 
@@ -20,6 +21,7 @@ def update_json(filename, key, value):
 
 def main():
     ip = input("Type catalog IP followed by [Enter]:\n")
+    print("Changing files:")
     update_json("./thingspeak/conf.json", "catalogURL", ip)
     update_json("./telegram-bot/conf.json", "catalogURL", ip)
     update_json("./sensors/conf.json", "catalogURL", ip)
