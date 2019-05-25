@@ -10,20 +10,33 @@ import threading
 import paho.mqtt.client as PahoMQTT
 import time
 
-TOPIC = 'smartgarden/+/+/irrigate'
+import os, sys, inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+import updater
+
+TOPIC = 'smartgarden/+/+/irrigation'
 FILENAME = "conf.json"
 
-class MySubscriber:
-    def __init__(self, clientID, topic, serverIP):
+
+def irrigate(id, time=300):
+    print("Starting irrigation on %s" % id)
+
+
+class PublisherSubscriber:
+    def __init__(self, clientID, topic, serverIP, port):
         self.clientID = clientID
         self.topic = topic
         self.messageBroker = serverIP
+        self.port = port
         self._paho_mqtt = PahoMQTT.Client(clientID, False)
         self._paho_mqtt.on_connect = self.my_on_connect
         self._paho_mqtt.on_message = self.my_on_message_received
+        self.loop_flag = 1
 
     def start(self):
-        self._paho_mqtt.connect(self.messageBroker, 1883)
+        self._paho_mqtt.connect(self.messageBroker, self.port)
         self._paho_mqtt.loop_start()
         self._paho_mqtt.subscribe(self.topic, 2)
 
@@ -33,41 +46,62 @@ class MySubscriber:
         self._paho_mqtt.disconnect()
 
     def my_on_connect(self, client, userdata, flags, rc):
-        global loop_flag
         print ("Connected to %s - Result code: %d" % (self.messageBroker, rc))
-        loop_flag = 0
+        self.loop_flag = 0
 
     def my_on_message_received(self, client, userdata, msg):
         msg.payload = msg.payload.decode("utf-8")
         message = json.loads(msg.payload)
-        print(message)
         dev = message["devID"]
-        print(message)
-        print("Starting irrigation on %!" %(dev))
+        try:
+            duration = message["duration"]
+            irrigate(dev, duration)
+        except:
+            irrigate(dev)
 
 
+class PubData(threading.Thread):
+    def __init__(self, ThreadID, name):
+        threading.Thread.__init__(self)
+        self.ThreadID = ThreadID
+        self.name = name
+        (self.devID, self.url, self.port) = updater.read_file("conf.json")
+        print(">>> Irrigator %s <<<\n" %(self.devID))
+        (self.gardenID, self.plantID,
+                        self.resources) = updater.find_me(self.devID,
+                        self.url, self.port)
+        (self.broker_ip, mqtt_port) = updater.broker_info(self.url, self.port)
+        self.mqtt_port = int(mqtt_port)
+
+        self.topic = []
+        for r in self.resources:
+            self.topic.append('smartgarden/' + self.gardenID + '/'
+                              + self.plantID + '/' + r)
+
+    def run(self):
+        print("Topics:", self.topic)
+        pubsub = PublisherSubscriber(self.devID + '_1', self.topic[0], self.broker_ip,
+                          int(self.mqtt_port))
+        pubsub.start()
+
+        while pubsub.loop_flag:
+            print("Waiting for connection...")
+            time.sleep(1)
+
+        while True:
+            time.sleep(60)
+
+        pubsub.stop()
+
+
+def main():
+    thread1 = updater.Alive(1, "Alive")
+    thread2 = PubData(2, "PubData")
+
+    thread1.start()
+    time.sleep(1)
+    thread2.start()
 
 
 if __name__ == '__main__':
-    with open("conf.json") as f:
-        config = json.loads(f.read())
-
-    # Get broker IP from the catalog
-    string = "http://" + config["catalogURL"] + ":" + config["port"] + "/broker"
-    broker = requests.get(string)
-    broker_ip = json.loads(broker.text)["IP"]
-    rest_port = json.loads(broker.text)["rest_port"]
-
-    sub = MySubscriber("Irrigator_sub", TOPIC, broker_ip)
-
-    loop_flag = 1
-    sub.start()
-
-    while loop_flag:
-        print("Waiting for connection...")
-        time.sleep(.1)
-
-    while True:
-        time.sleep(1)
-
-    sub.stop()
+    main()
