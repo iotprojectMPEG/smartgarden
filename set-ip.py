@@ -18,11 +18,9 @@ def update_cherrypy(filename, key, value):
 
     for cnt, line in enumerate(data):
         if line.find(key) != -1:
-            print(cnt, line)
             break
 
     data[cnt] = string
-    print(data)
 
     with open(filename, 'w') as fw:
          fw.writelines(data)
