@@ -31,7 +31,6 @@ class Catalog(object):
             # print("Dynamic loaded")
 
         self.broker_ip = self.static["broker"]["IP"]
-        self.rest_port = self.static["broker"]["rest_port"]
         self.mqtt_port = self.static["broker"]["mqtt_port"]
 
     def write_file(self):
