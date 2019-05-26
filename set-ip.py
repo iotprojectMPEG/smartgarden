@@ -40,9 +40,21 @@ def update_json(filename, key, value):
     with open(filename, 'w') as fw:
         json.dump(data, fw, indent=2)
 
+def update_broker(filename, key, value):
+    print(filename)
+
+    with open(filename, 'r') as fr:
+        data = json.loads(fr.read())
+
+    data["broker"][key] = value
+
+    with open(filename, 'w') as fw:
+        json.dump(data, fw, indent=2)
 
 def main():
     ip = input("Type catalog IP followed by [Enter]:\n")
+    ip2 = input("Type MQTT broker IP followed by [Enter]:\n")
+
     print("Changing files:")
     update_json("./thingspeak/conf.json", "catalogURL", ip)
     update_json("./telegram-bot/conf.json", "catalogURL", ip)
@@ -53,6 +65,10 @@ def main():
     update_json("./sensors/rain/conf.json", "catalogURL", ip)
     update_json("./sensors/wind/conf.json", "catalogURL", ip)
     update_cherrypy("./catalog/cherrypyconf", "server.socket_host", ip)
+
+
+    update_broker("./catalog/static.json", "IP", ip2)
+
     print("Success!")
 
 
