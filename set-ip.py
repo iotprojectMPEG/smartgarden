@@ -6,6 +6,7 @@ This script lets you change all IPs in json files.
 import json
 import sys, os
 
+
 def update_cherrypy(filename, key, value):
     """Update cherrypy config file with new value
     """
@@ -25,6 +26,7 @@ def update_cherrypy(filename, key, value):
     with open(filename, 'w') as fw:
          fw.writelines(data)
 
+
 def update_json(filename, key, value):
     """Update json files with new value
     """
@@ -34,6 +36,9 @@ def update_json(filename, key, value):
         data = json.loads(fr.read())
 
     data[key] = value
+
+    with open(filename, 'w') as fw:
+        json.dump(data, fw, indent=2)
 
 
 def main():
