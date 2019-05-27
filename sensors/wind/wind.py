@@ -19,8 +19,6 @@ sys.path.insert(0, parent_dir)
 import updater
 
 INTENSITY = [(0, 3), (4, 7), (8, 12)]
-
-TOPIC = 'smartgarden/+/+/wind'
 FILENAME = "conf.json"
 
 class MyPublisher(object):
@@ -59,7 +57,7 @@ class PubData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.devID, self.url, self.port) = updater.read_file("conf.json")
+        (self.devID, self.url, self.port) = updater.read_file(FILENAME)
         print(">>> Wind %s <<<\n" %(self.devID))
         (self.gardenID, self.plantID,
          self.resources) = updater.find_me(self.devID,
@@ -70,7 +68,7 @@ class PubData(threading.Thread):
         self.topic = []
         for r in self.resources:
             self.topic.append('smartgarden/' + self.gardenID + '/'
-                              + self.plantID + '/' + r)
+                              + self.plantID + '/' + self.devID)
 
     def run(self):
         print("Topics:", self.topic)

@@ -16,13 +16,10 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 import updater
 
-TOPIC = 'smartgarden/+/+/irrigation'
 FILENAME = "conf.json"
-
 
 def irrigate(id, time=300):
     print("Starting irrigation on %s" % id)
-
 
 class PublisherSubscriber:
     def __init__(self, clientID, topic, serverIP, port):
@@ -65,7 +62,7 @@ class PubData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.devID, self.url, self.port) = updater.read_file("conf.json")
+        (self.devID, self.url, self.port) = updater.read_file(FILENAME)
         print(">>> Irrigator %s <<<\n" %(self.devID))
         (self.gardenID, self.plantID,
                         self.resources) = updater.find_me(self.devID,
@@ -76,7 +73,7 @@ class PubData(threading.Thread):
         self.topic = []
         for r in self.resources:
             self.topic.append('smartgarden/' + self.gardenID + '/'
-                              + self.plantID + '/' + r)
+                              + self.plantID + '/' + self.devID)
 
     def run(self):
         print("Topics:", self.topic)

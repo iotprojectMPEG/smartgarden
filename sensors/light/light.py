@@ -7,8 +7,11 @@
 ###################
 # Light Intensity #
 ###################
-import PCF8591 as ADC
-import RPi.GPIO as GPIO
+try:
+    import PCF8591 as ADC
+    import RPi.GPIO as GPIO
+except:
+    pass
 import json
 import requests
 import threading
@@ -21,9 +24,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 import updater
 
-TOPIC = 'smartgarden/+/+/light'
 FILENAME = "conf.json"
-
 DO = 17
 GPIO.setmode(GPIO.BCM)
 
@@ -67,7 +68,7 @@ class PubData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.devID, self.url, self.port) = updater.read_file("conf.json")
+        (self.devID, self.url, self.port) = updater.read_file(FILENAME)
         print(">>> Light %s <<<\n" %(self.devID))
         (self.gardenID, self.plantID,
          self.resources) = updater.find_me(self.devID,
@@ -78,7 +79,7 @@ class PubData(threading.Thread):
         self.topic = []
         for r in self.resources:
             self.topic.append('smartgarden/' + self.gardenID + '/'
-                              + self.plantID + '/' + r)
+                              + self.plantID + '/' + self.devID)
 
     def run(self):
         print("Topics:", self.topic)

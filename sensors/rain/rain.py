@@ -8,9 +8,11 @@
 ##################
 # Rain Detection #
 ##################
-
-import PCF8591 as ADC
-import RPi.GPIO as GPIO
+try:
+    import PCF8591 as ADC
+    import RPi.GPIO as GPIO
+except:
+    pass
 import json
 import time
 import math
@@ -81,7 +83,7 @@ class PubData(threading.Thread):
         self.topic = []
         for r in self.resources:
             self.topic.append('smartgarden/' + self.gardenID + '/'
-                              + self.plantID + '/' + r)
+                              + self.plantID + '/' + self.devID)
 
     def run(self):
         print("Topics:", self.topic)
