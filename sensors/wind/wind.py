@@ -11,11 +11,12 @@ import paho.mqtt.client as PahoMQTT
 import os, sys, inspect
 import time
 import numpy as np
-import updater
+
 
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
+import updater
 
 INTENSITY = [(0, 3), (4, 7), (8, 12)]
 
