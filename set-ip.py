@@ -64,6 +64,7 @@ def main():
     update_json("./sensors/light/conf.json", "catalogURL", ip)
     update_json("./sensors/rain/conf.json", "catalogURL", ip)
     update_json("./sensors/wind/conf.json", "catalogURL", ip)
+    update_json("./catalog/conf.json", "catalogURL", ip)
     update_cherrypy("./catalog/cherrypyconf", "server.socket_host", ip)
 
 
