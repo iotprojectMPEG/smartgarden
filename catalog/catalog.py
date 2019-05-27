@@ -392,11 +392,11 @@ class Third(threading.Thread):
         self.name = self.name
 
     def run(self):
-        time.sleep(30)
+        time.sleep(600)
         while True:
-            #cat = Catalog(JSON_FILE, JSON_FILE2)
-            #cat.remove_old_device()
-            time.sleep(300)
+            cat = Catalog(JSON_FILE, JSON_FILE2)
+            cat.remove_old_device()
+            time.sleep(600)
 
 def main():
     thread1 = First(1,"CherryPy")
