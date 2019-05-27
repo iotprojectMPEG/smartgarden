@@ -20,6 +20,7 @@ import updater
 
 INTENSITY = [(0, 3), (4, 7), (8, 12)]
 FILENAME = "conf.json"
+BT = None
 
 class MyPublisher(object):
     def __init__(self, clientID, topic, serverIP, port):
@@ -96,9 +97,10 @@ def get_data(devID,res):
     except:
         pass
 
-    timestamp=time.time()
+    timestamp = round(time.time()) - BT
     data={
         "bn": devID,
+        "bt": BT,
         "e":[{
             "n":res[0]["n"],
             "u": res[0]["u"],
@@ -114,6 +116,8 @@ def main():
     # for i in range(30):
     #     wind = get_data()
     #     print('Wind: %d kn' %(wind))
+    global BT
+    BT = round(time.time())
     thread1=updater.Alive(1,"Alive")
     thread2 = PubData(2, "PubData")
 

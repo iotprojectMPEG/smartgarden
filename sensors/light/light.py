@@ -25,7 +25,9 @@ sys.path.insert(0, parent_dir)
 import updater
 
 FILENAME = "conf.json"
+BT = None
 DO = 17
+
 try:
     GPIO.setmode(GPIO.BCM)
 except:
@@ -108,9 +110,10 @@ def get_data(devID, res):
     except:
         pass
 
-    timestamp=time.time()
+    timestamp = round(time.time()) - BT
     data={
         "bn": devID,
+        "bt": BT,
         "e":[{
             "n":res[0]["n"],
             "u": res[0]["u"],
@@ -121,7 +124,9 @@ def get_data(devID, res):
 
     return data
 
-if __name__ == '__main__':
+def main():
+    global BT
+    BT = round(time.time())
     try:
         setup()
     except:
@@ -133,3 +138,6 @@ if __name__ == '__main__':
     thread1.start()
     time.sleep(1)
     thread2.start()
+
+if __name__ == '__main__':
+    main()

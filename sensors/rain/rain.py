@@ -29,7 +29,7 @@ import updater
 
 TOPIC = 'smartgarden/+/+/rain'
 FILENAME = "conf.json"
-
+BT = None
 DO = 17
 try:
     GPIO.setmode(GPIO.BCM)
@@ -112,13 +112,14 @@ def get_data(devID, res):
     except:
         pass
 
-    timestamp=time.time()
+    timestamp = round(time.time()) - BT
     if status == 1:
         value=0
     if status == 0:
         value=1
     data={
         "bn": devID,
+        "bt": BT,
         "e":[{
             "n":res[0]["n"],
             "u": res[0]["u"],
@@ -136,7 +137,9 @@ def get_data(devID, res):
 #         print('Raining')
 
 
-if __name__ == '__main__':
+def main():
+    global BT
+    BT = round(time.time())
     try:
         setup()
     except:
@@ -147,3 +150,6 @@ if __name__ == '__main__':
     thread1.start()
     time.sleep(1)
     thread2.start()
+
+if __name__ == '__main__':
+    main()
