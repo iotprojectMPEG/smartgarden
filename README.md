@@ -16,6 +16,18 @@ Internet of Things project for smart gardening.
 ### Sensors:
 * Run all scripts of your [sensors](https://github.com/iotprojectMPEG/mainproject/tree/master/sensors)
 
+
 ### Telegram bot:
 * Create a file named "token" in the [telegram-bot](https://github.com/iotprojectMPEG/mainproject/tree/master/telegram-bot) folder and insert your API inside.
 * Run [bot.py](https://github.com/iotprojectMPEG/mainproject/tree/master/telegram-bot)
+
+
+## Sensors installation:
+### Temperature and humidity sensor (DHT11)
+<img src="https://github.com/iotprojectMPEG/mainproject/blob/master/sensors/images/dht11.png" width="500" />
+
+### Rain sensor
+<img src="https://github.com/iotprojectMPEG/mainproject/blob/master/sensors/images/rain.jpg" width="500" />
+
+### Light sensor
+<img src="https://github.com/iotprojectMPEG/mainproject/blob/master/sensors/images/light.jpg" width="400" /> 
