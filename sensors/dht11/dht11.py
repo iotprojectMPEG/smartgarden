@@ -27,8 +27,8 @@ def get_data(devID, res):
     """Get humidity and temperature from sensor. Return two jsons.
     """
     # Initialization.
-    humidity = -1
-    temperature = -1
+    humidity = None
+    temperature = None
 
     # Read data from sensor
     try:
