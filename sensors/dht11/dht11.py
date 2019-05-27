@@ -38,17 +38,18 @@ def get_data(devID, res):
     except:
         pass
 
+    timestamp = time.time()
     data = {
     "bn": devID,
     "e":
        [{"n": res[0]["n"],
         "u": res[0]["u"],
-        "t": time.time(),
+        "t": timestamp,
         "v": humidity
         },{
         "n": res[1]["n"],
         "u": res[1]["u"],
-        "t": time.time(),
+        "t": timestamp,
         "v": temperature
         }]
     }
