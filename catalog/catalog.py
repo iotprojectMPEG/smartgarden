@@ -12,6 +12,7 @@ import paho.mqtt.client as PahoMQTT
 JSON_FILE = 'static.json'
 JSON_FILE2 = 'dynamic.json'
 CONF_FILE = 'cherrypyconf'
+CONFIG = 'conf.json'
 TOPIC = 'smartgarden/+/+/+'
 
 OLD_MAX = 300
@@ -210,6 +211,12 @@ class Catalog(object):
                         return info
         return -1
 
+def read_config(filename):
+    with open(filename, "r") as file:
+        f = json.loads(file.read())
+        url = f["catalogURL"]
+        port = f["port"]
+    return (url, port)
 
 class Webserver(object):
     exposed = True
@@ -322,18 +329,15 @@ class MySubscriber:
         message = json.loads(msg.payload)
         catalog = Catalog(JSON_FILE, JSON_FILE2)
         devID = message['bn']
-        print(devID, "\n\n\n")
         try:
-            print(message['e'])
             for e in message['e']:
                 if e['n'] == 'alive' and e['v'] == 1:
-                    print("OK")
-                    string = 'http://127.0.0.1:8080/info/'+devID
+                    (url, port) = read_config(CONFIG)
+                    string = 'http://' + url + ':' + port + '/info/' + devID
                     info = json.loads(requests.get(string).text)
                     gardenID = info["gardenID"]
                     plantID = info["plantID"]
                     catalog.update_device(gardenID, plantID, devID)
-                    print("Updating...")
         except:
             pass
 
