@@ -22,6 +22,7 @@ import updater
 
 SENSOR = 11
 PIN = 17
+BT = None
 
 def get_data(devID, res):
     """Get humidity and temperature from sensor. Return two jsons.
@@ -38,9 +39,10 @@ def get_data(devID, res):
     except:
         pass
 
-    timestamp = time.time()
+    timestamp = round(time.time()) - BT
     data = {
     "bn": devID,
+    "bt": BT,
     "e":
        [{"n": res[0]["n"],
         "u": res[0]["u"],
@@ -128,6 +130,9 @@ class MyPublisher(object):
 
 
 def main():
+    global BT
+    BT = round(time.time())
+
     thread1 = updater.Alive(1, "Alive")
     thread2 = PubData(2, "PubData")
 
