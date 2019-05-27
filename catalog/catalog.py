@@ -321,12 +321,21 @@ class MySubscriber:
         msg.payload = msg.payload.decode("utf-8")
         message = json.loads(msg.payload)
         catalog = Catalog(JSON_FILE, JSON_FILE2)
-        devID = message["devID"]
-        string = 'http://192.168.1.70:8080/info/'+devID
-        info = json.loads(requests.get(string).text)
-        gardenID = info["gardenID"]
-        plantID = info["plantID"]
-        catalog.update_device(gardenID, plantID, devID)
+        devID = message['bn']
+        print(devID, "\n\n\n")
+        try:
+            print(message['e'])
+            for e in message['e']:
+                if e['n'] == 'alive' and e['v'] == 1:
+                    print("OK")
+                    string = 'http://127.0.0.1:8080/info/'+devID
+                    info = json.loads(requests.get(string).text)
+                    gardenID = info["gardenID"]
+                    plantID = info["plantID"]
+                    catalog.update_device(gardenID, plantID, devID)
+                    print("Updating...")
+        except:
+            pass
 
 
 class First(threading.Thread):
