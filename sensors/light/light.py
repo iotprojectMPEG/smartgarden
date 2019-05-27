@@ -26,7 +26,10 @@ import updater
 
 FILENAME = "conf.json"
 DO = 17
-GPIO.setmode(GPIO.BCM)
+try:
+    GPIO.setmode(GPIO.BCM)
+except:
+    pass
 
 def setup():
     ADC.setup(0x48)
@@ -119,7 +122,10 @@ def get_data(devID, res):
     return data
 
 if __name__ == '__main__':
-    setup()
+    try:
+        setup()
+    except:
+        pass
 
     thread1=updater.Alive(1,"Alive")
     thread2 = PubData(2, "PubData")
@@ -127,6 +133,3 @@ if __name__ == '__main__':
     thread1.start()
     time.sleep(1)
     thread2.start()
-
-
-
