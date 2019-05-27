@@ -99,6 +99,12 @@ class PubData(threading.Thread):
 
 
 def get_data(devID, res):
+    value=None
+    try:
+        value = ADC.read(0)
+    except:
+        pass
+
     timestamp=time.time()
     data={
         "bn": devID,
@@ -106,7 +112,7 @@ def get_data(devID, res):
             "n":res[0]["n"],
             "u": res[0]["u"],
             "t": timestamp,
-            "v": ADC.read(0)
+            "v": value
         }]
     }
 
