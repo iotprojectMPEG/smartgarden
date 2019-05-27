@@ -66,13 +66,21 @@ class Alive(threading.Thread):
             print("Waiting for connection...")
             time.sleep(1)
 
-        message = {"devID": self.devID}
+        message = {
+          "bn": self.devID,
+          "e": [{
+            "n": "alive",
+            "t": time.time(),
+            "v": 1
+          }]
+        }
 
         while True:
             for r in self.resources:
                 #topic = ("smartgarden/" + self.gardenID + "/" +
                 #         self.plantID + "/" + r)
-                topic = "smartgarden/alive"
+                topic = ('smartgarden/' + self.gardenID + '/'
+                         + self.plantID + '/' + self.devID)
                 print("Publishing %s on %s" %(message, topic))
                 pub.my_publish(topic, json.dumps(message))
                 time.sleep(300)
