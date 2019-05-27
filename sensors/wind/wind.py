@@ -66,8 +66,7 @@ class PubData(threading.Thread):
         self.mqtt_port = int(mqtt_port)
 
         self.topic = []
-        for r in self.resources:
-            self.topic.append('smartgarden/' + self.gardenID + '/'
+        self.topic.append('smartgarden/' + self.gardenID + '/'
                               + self.plantID + '/' + self.devID)
 
     def run(self):
