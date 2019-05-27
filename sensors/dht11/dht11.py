@@ -38,17 +38,22 @@ def get_data():
     except:
         pass
 
-    data_h = {
-        "res": "humidity",
-        "value": humidity
-        }
-
-    data_t = {
-        "res": "temperature",
-        "value": temperature
+    data = {
+    "e":
+       [{"n": "humidity",
+        "u": "%",
+        "t": time.time(),
+        "v": humidity
+        },{
+        "n": "temperature",
+        "u": "Celsius",
+        "t": time.time(),
+        "v": temperature
+        }]
     }
 
-    return (data_h, data_t)
+
+    return data
 
 
 class PubData(threading.Thread):
@@ -66,27 +71,26 @@ class PubData(threading.Thread):
         self.mqtt_port = int(mqtt_port)
 
         self.topic = []
-        for r in self.resources:
-            self.topic.append('smartgarden/' + self.gardenID + '/'
-                              + self.plantID + '/' + r)
+        self.topic.append('smartgarden/' + self.gardenID + '/'
+                              + self.plantID + '/' + self.devID)
 
     def run(self):
 
-        pub1 = MyPublisher(self.devID + '_1', self.topic[0], self.broker_ip,
+        pub = MyPublisher(self.devID + '_1', self.topic[0], self.broker_ip,
                           int(self.mqtt_port))
-        pub1.start()
-        pub2 = MyPublisher(self.devID + '_2', self.topic[1], self.broker_ip,
-                          int(self.mqtt_port))
-        pub2.start()
+        pub.start()
+        # pub2 = MyPublisher(self.devID + '_2', self.topic[1], self.broker_ip,
+                          # int(self.mqtt_port))
+        # pub2.start()
 
-        while (pub1.loop_flag or pub2.loop_flag):
+        while pub.loop_flag:
             print("Waiting for connection...")
             time.sleep(1)
 
         while True:
-            (hum, temp) = get_data()
-            pub1.my_publish(json.dumps(hum))
-            pub2.my_publish(json.dumps(temp))
+            data = get_data()
+            pub.my_publish(json.dumps(data))
+            # pub2.my_publish(json.dumps(temp))
             time.sleep(60)
 
         sub.stop()
