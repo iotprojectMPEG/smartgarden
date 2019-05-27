@@ -21,17 +21,31 @@
           "devID": "dht_001",
           "name": "DHT11",
           "endpoints": ["MQTT"],
-          "resources": ["humidity", "temperature"]
+          "resources": [{
+              "n": "humidity",
+              "u": "%"
+            },
+            {
+              "n": "temperature",
+              "u": "Celsius"
+            }
+          ]
         }, {
           "devID": "wind_001",
           "name": "Wind sensor",
           "endpoints": ["MQTT"],
-          "resources": ["wind"]
+          "resources": [{
+            "n": "wind",
+            "u": "kn"
+          }]
         }, {
           "devID": "irr_001",
           "name": "Irrigator",
           "endpoints": ["MQTT", "REST"],
-          "resources": ["irrigation"]
+          "resources": [{
+            "n": "irrigation",
+            "u": "n.a."
+          }]
         }]
       }, {
         "plantID": "p_5843",
@@ -46,22 +60,39 @@
           "devID": "dht_002",
           "name": "DHT11",
           "endpoints": ["MQTT"],
-          "resources": ["humidity", "temperature"]
+          "resources": [{
+              "n": "humidity",
+              "u": "%"
+            },
+            {
+              "n": "temperature",
+              "u": "Celsius"
+            }
+          ]
         }, {
-          "devID": "UV_001",
-          "name": "UV sensor",
+          "devID": "light_001",
+          "name": "Light sensor",
           "endpoints": ["MQTT", "REST"],
-          "resources": ["UV"]
+          "resources": [{
+            "n": "light",
+            "u": "lm"
+          }]
         }, {
           "devID": "rain_002",
           "name": "rain sensor",
           "endpoints": ["MQTT", "REST"],
-          "resources": ["rain"]
+          "resources": [{
+            "n": "rain",
+            "u": "n.a."
+          }]
         }, {
           "devID": "irr_002",
           "name": "Irrigator",
           "endpoints": ["MQTT"],
-          "resources": ["irrigation"]
+          "resources": [{
+            "n": "irrigation",
+            "u": "n.a."
+          }]
         }]
       }]
     },
@@ -77,17 +108,31 @@
           "devID": "dht_003",
           "name": "DHT11",
           "endpoints": ["MQTT"],
-          "resources": ["humidity", "temperature"]
+          "resources": [{
+              "n": "humidity",
+              "u": "%"
+            },
+            {
+              "n": "temperature",
+              "u": "Celsius"
+            }
+          ]
         }, {
           "devID": "wind_006",
           "name": "Wind sensor",
           "endpoints": ["MQTT", "REST"],
-          "resources": ["wind"]
+          "resources": [{
+            "n": "wind",
+            "u": "kn"
+          }]
         }, {
           "devID": "irr_003",
           "name": "Irrigator",
           "endpoints": ["MQTT"],
-          "resources": ["irrigation"]
+          "resources": [{
+            "n": "irrigation",
+            "u": "n.a."
+          }]
         }]
       }]
     }
