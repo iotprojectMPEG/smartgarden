@@ -23,7 +23,7 @@ import updater
 SENSOR = 11
 PIN = 17
 
-def get_data():
+def get_data(devID, res):
     """Get humidity and temperature from sensor. Return two jsons.
     """
     # Initialization.
@@ -39,14 +39,15 @@ def get_data():
         pass
 
     data = {
+    "bn": devID,
     "e":
-       [{"n": "humidity",
-        "u": "%",
+       [{"n": res[0]["n"],
+        "u": res[0]["u"],
         "t": time.time(),
         "v": humidity
         },{
-        "n": "temperature",
-        "u": "Celsius",
+        "n": res[1]["n"],
+        "u": res[1]["u"],
         "t": time.time(),
         "v": temperature
         }]
@@ -88,7 +89,7 @@ class PubData(threading.Thread):
             time.sleep(1)
 
         while True:
-            data = get_data()
+            data = get_data(self.devID, self.resources)
             pub.my_publish(json.dumps(data))
             # pub2.my_publish(json.dumps(temp))
             time.sleep(60)
@@ -120,7 +121,8 @@ class MyPublisher(object):
         self.loop_flag = 0
 
     def my_publish(self, message):
-        print("Publishing %s on %s" %(message, self.topic))
+        print("Publishing on %s:" % self.topic)
+        print(json.dumps(json.loads(message), indent=2))
         self._paho_mqtt.publish(self.topic, message, 2)
 
 
