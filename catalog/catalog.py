@@ -199,7 +199,9 @@ class Catalog(object):
             for p in g["plants"]:
                 if p["plantID"] == ID:
                     info = {"gardenID": g["gardenID"], "plantID": ID,
-                            "devices": p["devices"], "name": p["name"]}
+                            "name": p["name"],
+                            "thingspeakID": p["thingspeakID"],
+                            "devices": p["devices"]}
                     return info
 
                 for d in p["devices"]:
