@@ -128,8 +128,14 @@ def status(bot, update, args):
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
-    with open('token') as t:
-        token = t.read().splitlines()[0]
+
+    with open('conf.json', "r") as f:
+        config = json.loads(f.read())
+    url = config["catalogURL"]
+    port = config["port"]
+    string = "http://" + url + ":" + port + "/" + "api/telegramtoken"
+    token = json.loads(requests.get(string).text)
+    token = token["token"]
 
     updater = Updater(token)
 
