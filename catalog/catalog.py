@@ -11,6 +11,7 @@ import paho.mqtt.client as PahoMQTT
 
 JSON_FILE = 'static.json'
 JSON_FILE2 = 'dynamic.json'
+APIFILE = 'api.json'
 CONF_FILE = 'cherrypyconf'
 CONFIG = 'conf.json'
 TOPIC = 'smartgarden/+/+/+'
@@ -213,6 +214,21 @@ class Catalog(object):
                         return info
         return -1
 
+
+    def get_token(self, filename):
+        with open(filename, "r") as f:
+            api = json.loads(f.read())
+
+        return api["telegramtoken"]
+
+    def get_ts_api(self, filename, id):
+        with open(filename, "r") as f:
+            api = json.loads(f.read())
+
+        for c in api["TSchannels"]:
+            if c["ID"] == id:
+                return c
+
 def read_config(filename):
     with open(filename, "r") as file:
         f = json.loads(file.read())
@@ -273,6 +289,13 @@ class Webserver(object):
         if uri[0] == 'info':
             ID = uri[1]
             return catalog.info(ID)
+
+        if uri[0] == 'api':
+            if uri[1] == 'telegramtoken':
+                return catalog.get_token(APIFILE)
+
+            if uri[1] == 'tschannel':
+                return catalog.get_ts_api(APIFILE, uri[2])
 
     @cherrypy.tools.json_out()
     def POST(self, *uri, **params):
