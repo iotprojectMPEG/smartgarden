@@ -1,0 +1,14 @@
+{
+  "telegramtoken": "000000000:XxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxXxX",
+  "TSchannels": [{
+      "ID": "000000",
+      "writeAPI": "XXXXXXXXXXXXXXXX",
+      "readAPI": "YYYYYYYYYYYYYYYY"
+    },
+    {
+      "ID": "123456",
+      "writeAPI": "XXXXXXXXXXXXXXXX",
+      "readAPI": "YYYYYYYYYYYYYYYY"
+    }
+  ]
+}
