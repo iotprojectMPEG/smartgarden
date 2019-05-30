@@ -219,7 +219,8 @@ class Catalog(object):
         with open(filename, "r") as f:
             api = json.loads(f.read())
 
-        return api["telegramtoken"]
+        t = {"token": api["telegramtoken"]}
+        return t
 
     def get_ts_api(self, filename, id):
         with open(filename, "r") as f:
