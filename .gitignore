@@ -5,6 +5,7 @@ nohup.out
 token
 writeAPI
 readAPI
+api.json
 
 # Other
 .DS_Store
