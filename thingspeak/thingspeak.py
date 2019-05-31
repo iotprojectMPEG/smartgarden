@@ -7,6 +7,8 @@ import time
 import datetime
 import sys,os,inspect
 import threading
+import requests
+
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
@@ -22,6 +24,7 @@ def get_API_key(thingspeakID):
 
 def publish_thingspeak(num_api,field):
     RequestToThingspeak = 'https://api.thingspeak.com/update?api_key='+num_api
+    #da continuare
 
 class MySubscriber:
     def __init__(self, clientID, topic, serverIP):
@@ -50,14 +53,19 @@ class MySubscriber:
     def my_on_message_received(self, client, userdata, msg):
         msg.payload = msg.payload.decode("utf-8")
         msg.topic= msg.topic.decode("utf-8")
-        url=msg.topic.split('/')
-        sensor_ID=url[3]
         message = json.loads(msg.payload)
-        # Funzione che ritorna thingspeakID
-        thingspeakID= updater.get_thingspeak_channel("static.json",url)
-        #Funzione che associa thingspeakID con writeAPI
-        writeapi=get_API_key(thingspeakID)
-        #Funzione che pubblica su Thingspeak (Gennaro)
+        devID=message['bn']
+        (self.url, self.port,self.topic) = updater.read_file("conf.json")
+        string = "http://" + self.url + ":" + self.port + "/info/" + devID
+        info = json.loads(requests.get(string).text)
+
+        # url=msg.topic.split('/')
+        # sensor_ID=url[3]
+        # # Funzione che ritorna thingspeakID
+        # thingspeakID= updater.get_thingspeak_channel("static.json",url)
+        # #Funzione che associa thingspeakID con writeAPI
+        # writeapi=get_API_key(thingspeakID)
+        # #Funzione che pubblica su Thingspeak (Gennaro)
 
         
 
