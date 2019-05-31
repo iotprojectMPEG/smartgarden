@@ -12,7 +12,7 @@
         "plantID": "p_1001",
         "name": "Dionaea muscipula",
         "hours": ["07:00", "19:00"],
-        "thingspeakID": null,
+        "thingspeakID": 789145,
         "environment": {
           "water": 100,
           "humidity": 90,
@@ -52,7 +52,7 @@
         "plantID": "p_5843",
         "name": "Sarracenia leucophylla",
         "hours": ["07:00", "19:00"],
-        "thingspeakID": 741610,
+        "thingspeakID": 791968,
         "environment": {
           "water": 100,
           "humidity": 90,
@@ -106,7 +106,7 @@
         "plantID": "p_5003",
         "name": "Aloe vera",
         "hours": ["07:00", "19:00"],
-        "thingspeakID": null,
+        "thingspeakID": 791970,
         "devices": [{
           "devID": "dht_003",
           "name": "DHT11",
