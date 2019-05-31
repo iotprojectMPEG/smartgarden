@@ -1,7 +1,7 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 
 import requests
-import time
+
 request = None
 item = None
 
