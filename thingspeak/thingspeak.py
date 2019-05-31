@@ -9,22 +9,26 @@ import sys,os,inspect
 import threading
 import requests
 
-current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
-import updater
 #TOPIC = 'smartgarden/+/+/+'
 
-def get_API_key(thingspeakID):
-    with open("api.json", "r") as f:
+def read_file(filename):
+    """Read json file to get devID, catalogURL and port.
+    """
+    with open(filename, "r") as f:
         data = json.loads(f.read())
-        for item in data["channels"]:
-            if item["ID"]==thingspeakID:
-                return item["writeAPI"]
+        url = data["catalogURL"]
+        topic = data["topic"]
+        port = data["port"]
+        return (url, port, topic)
 
-def publish_thingspeak(num_api,field):
-    RequestToThingspeak = 'https://api.thingspeak.com/update?api_key='+num_api
-    #da continuare
+def broker_info(url, port):
+    """Send GET request to catalog in order to obrain MQTT broker info.
+    """
+    string = "http://"+ url + ":" + port + "/broker"
+    broker = requests.get(string)
+    broker_ip = json.loads(broker.text)["IP"]
+    mqtt_port = json.loads(broker.text)["mqtt_port"]
+    return (broker_ip, mqtt_port)
 
 class MySubscriber:
     def __init__(self, clientID, topic, serverIP):
@@ -55,19 +59,23 @@ class MySubscriber:
         msg.topic= msg.topic.decode("utf-8")
         message = json.loads(msg.payload)
         devID=message['bn']
-        (self.url, self.port,self.topic) = updater.read_file("conf.json")
+        (self.url, self.port,self.topic) = read_file("conf.json")
         string = "http://" + self.url + ":" + self.port + "/info/" + devID
         info = json.loads(requests.get(string).text)
+        thingspeakID=info['thingspeakID']
+        string2 = "http://" + self.url + ":" + self.port + "/api/tschannel" + thingspeakID
+        info2 = json.loads(requests.get(string2).text)
+        write_API=info2["writeAPI"]
 
-        # url=msg.topic.split('/')
-        # sensor_ID=url[3]
-        # # Funzione che ritorna thingspeakID
-        # thingspeakID= updater.get_thingspeak_channel("static.json",url)
-        # #Funzione che associa thingspeakID con writeAPI
-        # writeapi=get_API_key(thingspeakID)
-        # #Funzione che pubblica su Thingspeak (Gennaro)
+        for item in message["e"]:
+            topic=item["n"]
+            for item2 in info["resources"]:
+                if item2["n"]==topic:
+                    feed=item2["f"]
+            RequestToThingspeak = 'https://api.thingspeak.com/update?api_key='+write_API+'&field'+feed+'='
+            RequestToThingspeak +=str(item['v'])
+            request = requests.get(RequestToThingspeak)
 
-        
 
 class SubData(threading.Thread):
     """Publish sensor data with MQTT every minute.
@@ -76,15 +84,14 @@ class SubData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.url, self.port, self.topic) = updater.read_file("conf.json")
-        (self.broker_ip, mqtt_port) = updater.broker_info(self.url, self.port)
+        (self.url, self.port, self.topic) = read_file("conf.json")
+        (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
 
 
     def run(self):
 
-        sub = MySubscriber("Thingspeak", self.topic, self.broker_ip,
-                          int(self.mqtt_port))
+        sub = MySubscriber("Thingspeak", self.topic, self.broker_ip)#
         loop_flag = 1
         sub.start()
 
@@ -96,22 +103,8 @@ class SubData(threading.Thread):
             time.sleep(5)
 
         sub.stop()
-        # sub.start()
-        # # pub2 = MyPublisher(self.devID + '_2', self.topic[1], self.broker_ip,
-        #                   # int(self.mqtt_port))
-        # # pub2.start()
-        #
-        # while pub.loop_flag:
-        #     print("Waiting for connection...")
-        #     time.sleep(1)
-        #
-        # while True:
-        #     data = get_data(self.devID, self.resources)
-        #     pub.my_publish(json.dumps(data))
-        #     # pub2.my_publish(json.dumps(temp))
-        #     time.sleep(60)
-        #
-        # sub.stop()
 
 
 if __name__ == "__main__":
+    thread1 = SubData(1, "SubData")
+    thread1.start()

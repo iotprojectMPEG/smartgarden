@@ -1,43 +1,33 @@
 {
-  "gardens": [{
+  "gardens": [
+    {
       "gardenID": "g_3041",
-      "plants": [{
-        "plantID": "p_1001",
-        "hours": ["0800"],
-        "devices": [{
-          "devID": "dht_001",
-          "timestamp": 1556295286
-        }, {
-          "devID": "wind_001",
-          "timestamp": 1556295300
-        }, {
-          "devID": "irr_001",
-          "timestamp": 1556295305
-        }]
-      }, {
-        "plantID": "p_5843",
-        "hours": ["0700", "1750"],
-        "devices": [{
-          "devID": "dht_002",
-          "timestamp": 1556295309
-        }, {
-          "devID": "light_001",
-          "timestamp": 1556295296
-        }]
-      }]
+      "plants": [
+        {
+          "devices": [],
+          "plantID": "p_1001",
+          "hours": [
+            "0800"
+          ]
+        },
+        {
+          "devices": [],
+          "plantID": "p_5843",
+          "hours": [
+            "0700",
+            "1750"
+          ]
+        }
+      ]
     },
     {
       "gardenID": "g_4253",
-      "plants": [{
-        "plantID": "p_5003",
-        "devices": [{
-          "devID": "dht_003",
-          "timestamp": 1556295300
-        }, {
-          "devID": "irr_003",
-          "timestamp": 1556295300
-        }]
-      }]
+      "plants": [
+        {
+          "devices": [],
+          "plantID": "p_5003"
+        }
+      ]
     }
   ]
 }
