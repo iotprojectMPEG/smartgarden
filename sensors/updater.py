@@ -35,20 +35,20 @@ def find_me(devID, url, port):
     return (gardenID, plantID, resources)
 
 def get_thingspeak_channel(filename,url):
-    (a,garden_ID,plant_ID,sensor_ID)=url.split('/')
-
+    garden_ID=url[1]
+    plant_ID=url[2]
     with open(filename, "r") as f:
         data = json.loads(f.read())
 
         for key, value in data.items():
             if (key=="gardens"):
-                for item in value.items():
+                for item in value:
                     if item["gardenID"]==garden_ID:
                         for item2 in item["plants"]:
                             if item2["plantID"]==plant_ID:
                                 thingspeakID=item2["thingspeakID"]
-                    
-        return thingspeakID
+                                return thingspeakID
+
 
 def broker_info(url, port):
     """Send GET request to catalog in order to obrain MQTT broker info.
