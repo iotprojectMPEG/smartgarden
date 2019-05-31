@@ -209,6 +209,7 @@ class Catalog(object):
                     if d["devID"] == ID:
                         info = {"gardenID": g["gardenID"],
                                 "plantID": p["plantID"],
+                                "thingspeakID": p["thingspeakID"],
                                 "devID": ID, "resources": d["resources"],
                                 "name": d["name"]}
                         return info
