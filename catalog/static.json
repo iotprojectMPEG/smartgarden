@@ -24,11 +24,13 @@
           "endpoints": ["MQTT"],
           "resources": [{
               "n": "humidity",
-              "u": "%"
+              "u": "%",
+              "f": 2
             },
             {
               "n": "temperature",
-              "u": "Celsius"
+              "u": "Celsius",
+              "f": 1
             }
           ]
         }, {
@@ -37,7 +39,8 @@
           "endpoints": ["MQTT"],
           "resources": [{
             "n": "wind",
-            "u": "kn"
+            "u": "kn",
+            "f": 3
           }]
         }, {
           "devID": "irr_001",
@@ -45,7 +48,8 @@
           "endpoints": ["MQTT", "REST"],
           "resources": [{
             "n": "irrigation",
-            "u": "n.a."
+            "u": "n.a.",
+            "f": 4
           }]
         }]
       }, {
@@ -64,11 +68,13 @@
           "endpoints": ["MQTT"],
           "resources": [{
               "n": "humidity",
-              "u": "%"
+              "u": "%",
+              "f": 2
             },
             {
               "n": "temperature",
-              "u": "Celsius"
+              "u": "Celsius",
+              "f": 1
             }
           ]
         }, {
@@ -77,7 +83,8 @@
           "endpoints": ["MQTT", "REST"],
           "resources": [{
             "n": "light",
-            "u": "lm"
+            "u": "lm",
+            "f": 6
           }]
         }, {
           "devID": "rain_002",
@@ -85,7 +92,8 @@
           "endpoints": ["MQTT", "REST"],
           "resources": [{
             "n": "rain",
-            "u": "n.a."
+            "u": "n.a.",
+            "f": 5
           }]
         }, {
           "devID": "irr_002",
@@ -93,7 +101,8 @@
           "endpoints": ["MQTT"],
           "resources": [{
             "n": "irrigation",
-            "u": "n.a."
+            "u": "n.a.",
+            "f": 4
           }]
         }]
       }]
@@ -113,11 +122,13 @@
           "endpoints": ["MQTT"],
           "resources": [{
               "n": "humidity",
-              "u": "%"
+              "u": "%",
+              "f": 2
             },
             {
               "n": "temperature",
-              "u": "Celsius"
+              "u": "Celsius",
+              "f": 1
             }
           ]
         }, {
@@ -126,7 +137,8 @@
           "endpoints": ["MQTT", "REST"],
           "resources": [{
             "n": "wind",
-            "u": "kn"
+            "u": "kn",
+            "f": 3
           }]
         }, {
           "devID": "irr_003",
@@ -134,7 +146,8 @@
           "endpoints": ["MQTT"],
           "resources": [{
             "n": "irrigation",
-            "u": "n.a."
+            "u": "n.a.",
+            "f": 4
           }]
         }]
       }]
