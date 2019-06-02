@@ -35,7 +35,7 @@ Internet of Things project for smart gardening.
 
 
 ### Authors
-Fassio Edoardo
-Grasso Paolo
-Maffei Marzia
-Rende Gennaro
+Fassio Edoardo//
+Grasso Paolo//
+Maffei Marzia//
+Rende Gennaro//
