@@ -32,3 +32,10 @@ Internet of Things project for smart gardening.
 
 ### Light sensor
 <img src="https://github.com/iotprojectMPEG/mainproject/blob/master/sensors/images/light.jpg" width="400" /> 
+
+
+### Authors
+Fassio Edoardo
+Grasso Paolo
+Maffei Marzia
+Rende Gennaro
