@@ -67,7 +67,7 @@ def status(bot, update, args):
     url = config["catalogURL"]
     port = config["port"]
     string = "http://" + url + ":" + port
-    dynamic = json.loads(requests.get(string + '/status').text)
+    dynamic = json.loads(requests.get(string + '/dynamic').text)
     static = json.loads(requests.get(string + '/static').text)
 
     if param == 'id':
