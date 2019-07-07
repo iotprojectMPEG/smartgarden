@@ -9,19 +9,20 @@ import requests
 import threading
 import paho.mqtt.client as PahoMQTT
 
-JSON_FILE = 'static.json'
-JSON_FILE2 = 'dynamic.json'
+JSON_STATIC = 'static.json'
+JSON_DYNAMIC = 'dynamic.json'
 APIFILE = 'api.json'
-CONF_FILE = 'cherrypyconf'
+CHERRY_CONF = 'cherrypyconf'
 CONFIG = 'conf.json'
 TOPIC = 'smartgarden/+/+/+'
 
 OLD_MAX = 300
+REMOVE_AFTER = 600
 
 class Catalog(object):
-    def __init__(self, static_file, dynamic_file):
-        self.filename_s = static_file
-        self.filename_d = dynamic_file
+    def __init__(self, filename_static, filename_dynamic):
+        self.filename_s = filename_static
+        self.filename_d = filename_dynamic
 
     def load_file(self):
         with open(self.filename_s, "r") as fs:
@@ -244,7 +245,7 @@ class Webserver(object):
     @cherrypy.tools.json_out()
     def GET(self, *uri, **params):
 
-        catalog = Catalog(JSON_FILE, JSON_FILE2)
+        catalog = Catalog(JSON_STATIC, JSON_DYNAMIC)
         catalog.load_file()
 
 
@@ -303,21 +304,21 @@ class Webserver(object):
     def POST(self, *uri, **params):
         if uri[0] == 'addg':
             body = json.loads(cherrypy.request.body.read())  # Read body data
-            cat = Catalog(JSON_FILE, JSON_FILE2)
+            cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
             print(json.dumps(body))
             cat.add_garden(body)
             return 200
 
         if uri[0] == 'addp':
             body = json.loads(cherrypy.request.body.read())  # Read body data
-            cat = Catalog(JSON_FILE, JSON_FILE2)
+            cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
             print(json.dumps(body))
             cat.add_plant(body)
             return 200
 
         if uri[0] == 'addd':
             body = json.loads(cherrypy.request.body.read())  # Read body data
-            cat = Catalog(JSON_FILE, JSON_FILE2)
+            cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
             print(json.dumps(body))
             cat.add_device(body)
             return 200
@@ -354,7 +355,7 @@ class MySubscriber:
         """
         msg.payload = msg.payload.decode("utf-8")
         message = json.loads(msg.payload)
-        catalog = Catalog(JSON_FILE, JSON_FILE2)
+        catalog = Catalog(JSON_STATIC, JSON_DYNAMIC)
         devID = message['bn']
         try:
             for e in message['e']:
@@ -376,8 +377,8 @@ class First(threading.Thread):
         self.name = self.name
     def run(self):
         try:
-            cherrypy.tree.mount(Webserver(), '/', config=CONF_FILE)
-            cherrypy.config.update(CONF_FILE)
+            cherrypy.tree.mount(Webserver(), '/', config=CHERRY_CONF)
+            cherrypy.config.update(CHERRY_CONF)
             cherrypy.engine.start()
             cherrypy.engine.block()
         except KeyboardInterrupt:
@@ -394,7 +395,7 @@ class Second(threading.Thread):
         self.name = self.name
 
     def run(self):
-        cat = Catalog(JSON_FILE, JSON_FILE2)
+        cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
         cat.load_file()
         broker_ip = cat.broker_ip #json.loads(broker.text)["IP"]
         sub = MySubscriber("Sub1", TOPIC, broker_ip)
@@ -419,26 +420,27 @@ class Third(threading.Thread):
         self.name = self.name
 
     def run(self):
-        time.sleep(600)
+        time.sleep(REMOVE_AFTER)
         while True:
-            cat = Catalog(JSON_FILE, JSON_FILE2)
+            cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
             cat.remove_old_device()
-            time.sleep(600)
+            time.sleep(REMOVE_AFTER)
 
 def main():
     thread1 = First(1,"CherryPy")
     thread2 = Second(2, "Updater")
     thread3 = Third(3, "Remover")
 
-    print("Starting CherryPy...")
+    print("> Starting CherryPy...")
     thread1.start()
 
     time.sleep(1)
-    print("\nStarting MQTT device updater...")
+    print("\n> Starting MQTT device updater...")
     thread2.start()
 
     time.sleep(1)
-    print("\nStarting remover...")
+    print("\n> Starting remover...\nDelete old devices every %d seconds."
+          % REMOVE_AFTER)
     thread3.start()
 
 
