@@ -17,49 +17,46 @@ CONFIG = 'conf.json'
 TOPIC = 'smartgarden/+/+/+'
 
 OLD_MAX = 300
-#URL = "http://192.168.1.70:8080/broker"
 
 class Catalog(object):
-    def __init__(self, filename, filename2):
-        self.filename = filename
-        self.filename2 = filename2
+    def __init__(self, static_file, dynamic_file):
+        self.filename_s = static_file
+        self.filename_d = dynamic_file
 
     def load_file(self):
-        with open(self.filename, "r") as fs:
+        with open(self.filename_s, "r") as fs:
             self.static = json.loads(fs.read())
-            # print("Static loaded")
-        with open(self.filename2, "r") as fd:
+
+        with open(self.filename_d, "r") as fd:
             self.dynamic = json.loads(fd.read())
-            # print("Dynamic loaded")
 
         self.broker_ip = self.static["broker"]["IP"]
         self.mqtt_port = self.static["broker"]["mqtt_port"]
 
     def write_file(self):
-        with open(self.filename, "w") as fs:
+        with open(self.filename_s, "w") as fs:
             json.dump(self.static, fs, ensure_ascii=False, indent=2)
-        with open(self.filename2, "w") as fd:
+
+        with open(self.filename_d, "w") as fd:
             json.dump(self.dynamic, fd, ensure_ascii=False, indent=2)
 
     def add_garden(self, garden_json):
         """Adds a new garden in the static catalog.
-           Needs a garden_json formatted as:
-
-           {
-           "name": "MyGarden"
-           "location": "Turin"
-           }
-
+           Auto-generate a new gardenID.
         """
         self.load_file()
         list_id = []
+
         for g in self.static["gardens"]:
             list_id.append(g["gardenID"])
 
-        new_id = 'g_' + str(np.random.randint(1000, 9999))
+        # Generate a new gardenID.
+        numID = 1000
+        new_id = 'g_' + str(numID)
 
         while new_id in list_id:
-            new_id = 'g_' + str(np.random.randint(1000, 9999))
+            numID += 1
+            new_id = 'g_' + str(numID)
 
         garden_json["plants"] = []
         garden_json["gardenID"] = new_id
@@ -70,26 +67,24 @@ class Catalog(object):
 
     def add_plant(self, plant_json):
         """Adds a new plant in the static catalog.
-           Needs a plant_json formatted as:
-
-           {
-           "gardenID": "g_9999"
-           "name": "Dionea"
-           }
-
+           Auto-generate a new plantID.
         """
         self.load_file()
         list_id = []
+
         for g in self.static["gardens"]:
             if g["gardenID"] == plant_json["gardenID"]:
                 break
             for p in g["plants"]:
                 list_id.append(p["plantID"])
 
-        new_id = 'p_' + str(np.random.randint(1000, 9999))
+        # Generate a new plantID.
+        numID = 1000
+        new_id = 'p_' + str(numID)
 
         while new_id in list_id:
-            new_id = 'p_' + str(np.random.randint(1000, 9999))
+            numID += 1
+            new_id = 'p_' + str(numID)
 
         del plant_json["gardenID"]
         plant_json["plantID"] = new_id
@@ -112,10 +107,13 @@ class Catalog(object):
             for d in p["devices"]:
                 list_id.append(d["devID"])
 
-        new_id = 'd_' + str(np.random.randint(1000, 9999))
+        # Generate a new devID.
+        numID = 1000
+        new_id = 'd_' + str(numID)
 
         while new_id in list_id:
-            new_id = 'd_' + str(np.random.randint(1000, 9999))
+            numID += 1
+            new_id = 'd_' + str(numID)
 
         del dev_json["gardenID"]
         del dev_json["plantID"]
@@ -281,7 +279,7 @@ class Webserver(object):
         #catalog.add_device("garden1", "plant1", "dht11")
         #catalog.load_file()
 
-        if uri[0] == 'status':
+        if uri[0] == 'dynamic':
             return catalog.dynamic
 
         if uri[0] == 'static':
