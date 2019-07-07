@@ -3,154 +3,222 @@
     "IP": "127.0.0.1",
     "mqtt_port": "1883"
   },
-
-  "gardens": [{
-      "gardenID": "g_3041",
+  "gardens": [
+    {
+      "gardenID": "g_1001",
       "name": "Casa in montagna",
       "location": "Torino",
-      "plants": [{
-        "plantID": "p_1001",
-        "name": "Dionaea muscipula",
-        "hours": ["07:00", "19:00"],
-        "thingspeakID": 789145,
-        "environment": {
-          "water": 100,
-          "humidity": 90,
-          "temperature": 30
-        },
-        "devices": [{
-          "devID": "dht_001",
-          "name": "DHT11",
-          "endpoints": ["MQTT"],
-          "resources": [{
-              "n": "humidity",
-              "u": "%",
-              "f": 2
+      "plants": [
+        {
+          "plantID": "p_1001",
+          "name": "Dionaea muscipula",
+          "hours": [
+            "07:00",
+            "19:00"
+          ],
+          "thingspeakID": 789145,
+          "environment": {
+            "water": 100,
+            "humidity": 90,
+            "temperature": 30
+          },
+          "devices": [
+            {
+              "devID": "d_1001",
+              "name": "DHT11",
+              "endpoints": [
+                "MQTT"
+              ],
+              "resources": [
+                {
+                  "n": "humidity",
+                  "u": "%",
+                  "f": 2
+                },
+                {
+                  "n": "temperature",
+                  "u": "Celsius",
+                  "f": 1
+                }
+              ]
             },
             {
-              "n": "temperature",
-              "u": "Celsius",
-              "f": 1
-            }
-          ]
-        }, {
-          "devID": "wind_001",
-          "name": "Wind sensor",
-          "endpoints": ["MQTT"],
-          "resources": [{
-            "n": "wind",
-            "u": "kn",
-            "f": 3
-          }]
-        }, {
-          "devID": "irr_001",
-          "name": "Irrigator",
-          "endpoints": ["MQTT", "REST"],
-          "resources": [{
-            "n": "irrigation",
-            "u": "n.a.",
-            "f": 4
-          }]
-        }]
-      }, {
-        "plantID": "p_5843",
-        "name": "Sarracenia leucophylla",
-        "hours": ["07:00", "19:00"],
-        "thingspeakID": 791968,
-        "environment": {
-          "water": 100,
-          "humidity": 90,
-          "temperature": 30
-        },
-        "devices": [{
-          "devID": "dht_002",
-          "name": "DHT11",
-          "endpoints": ["MQTT"],
-          "resources": [{
-              "n": "humidity",
-              "u": "%",
-              "f": 2
+              "devID": "d_1002",
+              "name": "Wind sensor",
+              "endpoints": [
+                "MQTT"
+              ],
+              "resources": [
+                {
+                  "n": "wind",
+                  "u": "kn",
+                  "f": 3
+                }
+              ]
             },
             {
-              "n": "temperature",
-              "u": "Celsius",
-              "f": 1
+              "devID": "d_1003",
+              "name": "Irrigator",
+              "endpoints": [
+                "MQTT",
+                "REST"
+              ],
+              "resources": [
+                {
+                  "n": "irrigation",
+                  "u": "n.a.",
+                  "f": 4
+                }
+              ]
             }
           ]
-        }, {
-          "devID": "light_001",
-          "name": "Light sensor",
-          "endpoints": ["MQTT", "REST"],
-          "resources": [{
-            "n": "light",
-            "u": "lm",
-            "f": 6
-          }]
-        }, {
-          "devID": "rain_002",
-          "name": "rain sensor",
-          "endpoints": ["MQTT", "REST"],
-          "resources": [{
-            "n": "rain",
-            "u": "n.a.",
-            "f": 5
-          }]
-        }, {
-          "devID": "irr_002",
-          "name": "Irrigator",
-          "endpoints": ["MQTT"],
-          "resources": [{
-            "n": "irrigation",
-            "u": "n.a.",
-            "f": 4
-          }]
-        }]
-      }]
+        },
+        {
+          "plantID": "p_1002",
+          "name": "Sarracenia leucophylla",
+          "hours": [
+            "07:00",
+            "19:00"
+          ],
+          "thingspeakID": 791968,
+          "environment": {
+            "water": 100,
+            "humidity": 90,
+            "temperature": 30
+          },
+          "devices": [
+            {
+              "devID": "d_1004",
+              "name": "DHT11",
+              "endpoints": [
+                "MQTT"
+              ],
+              "resources": [
+                {
+                  "n": "humidity",
+                  "u": "%",
+                  "f": 2
+                },
+                {
+                  "n": "temperature",
+                  "u": "Celsius",
+                  "f": 1
+                }
+              ]
+            },
+            {
+              "devID": "d_1005",
+              "name": "Light sensor",
+              "endpoints": [
+                "MQTT",
+                "REST"
+              ],
+              "resources": [
+                {
+                  "n": "light",
+                  "u": "lm",
+                  "f": 6
+                }
+              ]
+            },
+            {
+              "devID": "d_1006",
+              "name": "rain sensor",
+              "endpoints": [
+                "MQTT",
+                "REST"
+              ],
+              "resources": [
+                {
+                  "n": "rain",
+                  "u": "n.a.",
+                  "f": 5
+                }
+              ]
+            },
+            {
+              "devID": "d_1007",
+              "name": "Irrigator",
+              "endpoints": [
+                "MQTT"
+              ],
+              "resources": [
+                {
+                  "n": "irrigation",
+                  "u": "n.a.",
+                  "f": 4
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
-      "gardenID": "g_4253",
+      "gardenID": "g_1002",
       "name": "Giardino al mare",
       "location": "Palermo",
-      "plants": [{
-        "plantID": "p_5003",
-        "name": "Aloe vera",
-        "hours": ["07:00", "19:00"],
-        "thingspeakID": 791970,
-        "devices": [{
-          "devID": "dht_003",
-          "name": "DHT11",
-          "endpoints": ["MQTT"],
-          "resources": [{
-              "n": "humidity",
-              "u": "%",
-              "f": 2
+      "plants": [
+        {
+          "plantID": "p_1003",
+          "name": "Aloe vera",
+          "hours": [
+            "07:00",
+            "19:00"
+          ],
+          "thingspeakID": 791970,
+          "devices": [
+            {
+              "devID": "d_1008",
+              "name": "DHT11",
+              "endpoints": [
+                "MQTT"
+              ],
+              "resources": [
+                {
+                  "n": "humidity",
+                  "u": "%",
+                  "f": 2
+                },
+                {
+                  "n": "temperature",
+                  "u": "Celsius",
+                  "f": 1
+                }
+              ]
             },
             {
-              "n": "temperature",
-              "u": "Celsius",
-              "f": 1
+              "devID": "d_1009",
+              "name": "Wind sensor",
+              "endpoints": [
+                "MQTT",
+                "REST"
+              ],
+              "resources": [
+                {
+                  "n": "wind",
+                  "u": "kn",
+                  "f": 3
+                }
+              ]
+            },
+            {
+              "devID": "d_1010",
+              "name": "Irrigator",
+              "endpoints": [
+                "MQTT"
+              ],
+              "resources": [
+                {
+                  "n": "irrigation",
+                  "u": "n.a.",
+                  "f": 4
+                }
+              ]
             }
           ]
-        }, {
-          "devID": "wind_006",
-          "name": "Wind sensor",
-          "endpoints": ["MQTT", "REST"],
-          "resources": [{
-            "n": "wind",
-            "u": "kn",
-            "f": 3
-          }]
-        }, {
-          "devID": "irr_003",
-          "name": "Irrigator",
-          "endpoints": ["MQTT"],
-          "resources": [{
-            "n": "irrigation",
-            "u": "n.a.",
-            "f": 4
-          }]
-        }]
-      }]
+        }
+      ]
     }
   ]
 }
