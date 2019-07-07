@@ -33,10 +33,12 @@ class Catalog(object):
         self.broker_ip = self.static["broker"]["IP"]
         self.mqtt_port = self.static["broker"]["mqtt_port"]
 
-    def write_file(self):
+
+    def write_static(self):
         with open(self.filename_s, "w") as fs:
             json.dump(self.static, fs, ensure_ascii=False, indent=2)
 
+    def write_dynamic(self):
         with open(self.filename_d, "w") as fd:
             json.dump(self.dynamic, fd, ensure_ascii=False, indent=2)
 
@@ -63,7 +65,7 @@ class Catalog(object):
         print(garden_json)
 
         self.static["gardens"].append(garden_json)
-        self.write_file()
+        self.write_static()
 
     def add_plant(self, plant_json):
         """Adds a new plant in the static catalog.
@@ -91,7 +93,7 @@ class Catalog(object):
         plant_json["devices"] = []
 
         g["plants"].append(plant_json)
-        self.write_file()
+        self.write_static()
 
     def add_device(self, dev_json):
         """Add a new device in the static catalog.
@@ -120,7 +122,7 @@ class Catalog(object):
         dev_json["devID"] = new_id
 
         p["devices"].append(dev_json)
-        self.write_file()
+        self.write_static()
 
     def add_new(self, gardenID, plantID, devID, endpoints, resources):
         """Insert new device in the static catalog
@@ -166,7 +168,7 @@ class Catalog(object):
             p['devices'].append(data)
 
         print("Updating", devID)
-        self.write_file()
+        self.write_dynamic()
 
     def remove_old_device(self):
         """Check all the devices whose timestamp is old and remove them from
@@ -186,7 +188,7 @@ class Catalog(object):
                     del p['devices'][index]
 
         print(self.dynamic)
-        self.write_file()
+        self.write_dynamic()
 
     def info(self, ID):
         self.load_file()
