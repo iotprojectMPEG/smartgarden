@@ -20,6 +20,37 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
+
+class MyPublisher(object):
+    def __init__(self, clientID, topic, serverIP, port):
+        self.clientID = clientID + '_pub'
+        self.devID = clientID
+        self.topic = topic
+        self.port = port
+        self.messageBroker = serverIP
+        self._paho_mqtt = PahoMQTT.Client(clientID, False)
+        self._paho_mqtt.on_connect = self.my_on_connect
+        self.loop_flag = 1
+
+    def start(self):
+        self._paho_mqtt.connect(self.messageBroker, self.port)
+        self._paho_mqtt.loop_start()
+
+    def stop(self):
+        self._paho_mqtt.loop_stop()
+        self._paho_mqtt.disconnect()
+
+    def my_on_connect(self, client, userdata, flags, rc):
+        print ("Connected to %s - Res code: %d" % (self.messageBroker, rc))
+        self.loop_flag = 0
+
+    def my_publish(self, message):
+        print("Publishing on %s:" % self.topic)
+        print(json.dumps(json.loads(message), indent=2))
+        self._paho_mqtt.publish(self.topic, message, 2)
+
+
+
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
@@ -51,8 +82,42 @@ def error(bot, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 def irrigation(bot, update):
-    update.message.reply_text("Avvio irrigazione...")
-    update.message.reply_text("Irrigazione fallita!")
+
+    with open('conf.json', "r") as f:
+        config = json.loads(f.read())
+    url = config["catalogURL"]
+    port = config["port"]
+    string = "http://" + url + ":" + port
+    dynamic = json.loads(requests.get(string + '/dynamic').text)
+    static = json.loads(requests.get(string + '/static').text)
+    broker = json.loads(requests.get(string + '/broker').text)
+    mqtt_port = broker["mqtt_port"]
+    IP = broker["IP"]
+
+    irrigation_list = []
+    for g in static["gardens"]:
+        for p in g["plants"]:
+            for d in p["devices"]:
+                for r in d["resources"]:
+                    if r["n"].lower() == 'irrigation':
+                        irrigation_list.append(d["devID"])
+
+    print(irrigation_list)
+    for d in irrigation_list:
+        try:
+            string = "http://" + url + ":" + port + "/info/" + d
+            print(string)
+            r = json.loads(requests.get(string).text)
+            topic = r["topic"]
+            pub = MyPublisher(d, topic, IP, mqtt_port)
+            message = '{"action": "irrigate"}'
+            pub.my_publish(message)
+            update.message.reply_text("💧 Irrigation started on %s" % d)
+        except:
+            update.message.reply_text("❌ Irrigation FAILED on %s" % d)
+
+
+
     # funzione...
 
 def status(bot, update, args):
