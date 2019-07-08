@@ -144,6 +144,7 @@ class Catalog(object):
             if d['devID'] == devID:
                 found = 1
                 d['timestamp'] = time.time()
+                d['topic'] = topic
 
         # Insert again the device
         if not found:
@@ -190,11 +191,21 @@ class Catalog(object):
 
                 for d in p["devices"]:
                     if d["devID"] == ID:
+                        try:
+                            for g2 in self.dynamic["gardens"]:
+                                for p2 in g2["plants"]:
+                                    for d2 in p2["devices"]:
+                                        if d2["devID"] == ID:
+                                            topic = d2["topic"]
+                        except:
+                            topic = None
+                            print("Something gone wrong")
+
                         info = {"gardenID": g["gardenID"],
                                 "plantID": p["plantID"],
                                 "thingspeakID": p["thingspeakID"],
                                 "devID": ID, "resources": d["resources"],
-                                "name": d["name"]}
+                                "name": d["name"], "topic": topic}
                         return info
         return -1
 
@@ -274,6 +285,7 @@ class Webserver(object):
         if uri[0] == 'info':
             ID = uri[1]
             return catalog.info(ID)
+
 
         if uri[0] == 'api':
             if uri[1] == 'telegramtoken':
