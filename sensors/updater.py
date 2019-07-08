@@ -66,13 +66,16 @@ class Alive(threading.Thread):
             print("Waiting for connection...")
             time.sleep(1)
 
+        topic = ('smartgarden/' + self.gardenID + '/'
+                 + self.plantID + '/' + self.devID)
         message = {
           "bn": self.devID,
           "e": [{
             "n": "alive",
             "t": time.time(),
-            "v": 1
-          }]
+            "v": 1,
+            "topic": topic
+            }]
         }
 
         while True:

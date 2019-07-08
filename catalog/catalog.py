@@ -34,7 +34,6 @@ class Catalog(object):
         self.broker_ip = self.static["broker"]["IP"]
         self.mqtt_port = self.static["broker"]["mqtt_port"]
 
-
     def write_static(self):
         with open(self.filename_s, "w") as fs:
             json.dump(self.static, fs, ensure_ascii=False, indent=2)
@@ -125,28 +124,11 @@ class Catalog(object):
         p["devices"].append(dev_json)
         self.write_static()
 
-    def add_new(self, gardenID, plantID, devID, endpoints, resources):
-        """Insert new device in the static catalog
-        """
-        data = {'gardenID': gardenID, 'plantID': plantID, 'devID': devID}
-        found = 0
-        for g in self.dynamic["gardens"]:
-            if g['gardenID'] == gardenID:
-                break
-
-        for p in g['plants']:
-            if p['plantID'] == plantID:
-                break
-
-        for d in p['devices']:
-            if d['devID'] == devID:
-                return -1  # Device already registered
-
-    def update_device(self, gardenID, plantID, devID):
+    def update_device(self, gardenID, plantID, devID, topic):
         """Update timestamp of a device or insert it again in the dynamic
         catalog if it has expired.
         """
-        data = {'devID': devID, 'timestamp': time.time()}
+        data = {'devID': devID, 'timestamp': time.time(), 'topic': topic}
         self.load_file()
 
         for g in self.dynamic["gardens"]:
@@ -360,12 +342,13 @@ class MySubscriber:
         try:
             for e in message['e']:
                 if e['n'] == 'alive' and e['v'] == 1:
+                    topic = e['topic']
                     (url, port) = read_config(CONFIG)
                     string = 'http://' + url + ':' + port + '/info/' + devID
                     info = json.loads(requests.get(string).text)
                     gardenID = info["gardenID"]
                     plantID = info["plantID"]
-                    catalog.update_device(gardenID, plantID, devID)
+                    catalog.update_device(gardenID, plantID, devID, topic)
         except:
             pass
 
