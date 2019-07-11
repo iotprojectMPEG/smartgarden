@@ -189,6 +189,7 @@ class Catalog(object):
                             "devices": p["devices"]}
                     return info
 
+                topic = None
                 for d in p["devices"]:
                     if d["devID"] == ID:
                         try:
@@ -198,7 +199,6 @@ class Catalog(object):
                                         if d2["devID"] == ID:
                                             topic = d2["topic"]
                         except:
-                            topic = None
                             print("Something gone wrong")
 
                         info = {"gardenID": g["gardenID"],
