@@ -81,7 +81,14 @@ class MySubscriber:
             info = json.loads(requests.get(string).text)
             write_API = info["writeAPI"]
 
-            # Boh.
+            # Convert UNIX timestamp to ISO 8601
+            for item in message["e"]:
+                creation_time = message["bt"] + item["t"]
+
+            creation_time = datetime.datetime.utcfromtimestamp(creation_time).isoformat()
+            req_tt = ('https://api.thingspeak.com/update?api_key=' +
+                      write_API + '&created_at=' + str(creation_time))
+
             for item in message["e"]:
                 if item["n"] == 'alive':
                     pass  # Ignoring alive messages.
@@ -90,15 +97,14 @@ class MySubscriber:
                     for item2 in info_d["resources"]:
                         if item2["n"] == topic:
                             feed = item2["f"]
-                    req_tt = ('https://api.thingspeak.com/update?api_key=' +
-                              write_API + '&field' + str(feed) + '=' +
-                              str(item['v']))
 
-                    request = requests.get(req_tt)
-                    print("UPDATING: %s" % req_tt)
-                    time.sleep(20)
+                    req_tt += ('&field' + str(feed) + '=' + str(item['v']))
+
+            request = requests.get(req_tt)
+            print("UPDATING: %s" % req_tt)
+
         except:
-            print("Message not readable")
+            pass
 
 
 class SubData(threading.Thread):
