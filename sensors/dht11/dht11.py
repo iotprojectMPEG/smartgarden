@@ -22,7 +22,7 @@ import updater
 
 SENSOR = 11
 PIN = 17
-BT = None
+BT = None  # Basetime
 
 def get_data(devID, res):
     """Get humidity and temperature from sensor. Return two jsons.
@@ -133,11 +133,12 @@ def main():
     global BT
     BT = round(time.time())
 
+    # Try to connect to catalog by starting Alive process.
     connected = 0
     while connected == 0:
         try:
             thread1 = updater.Alive(1, "Alive")
-            connected = 1
+            connected = 1  # Catalog is available
         except:
             print("Catalog is not reachable... retry in 5 seconds")
             time.sleep(5)
