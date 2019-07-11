@@ -10,6 +10,7 @@ import threading
 import requests
 
 #TOPIC = 'smartgarden/+/+/+'
+loop_flag = 1
 
 def read_file(filename):
     """Read json file to get devID, catalogURL and port.
@@ -51,30 +52,53 @@ class MySubscriber:
 
     def my_on_connect(self, client, userdata, flags, rc):
         global loop_flag
-        print ("Connected to %s - Result code: %d" % (self.messageBroker, rc))
+        print ("S - Connected to %s - Result code: %d" % (self.messageBroker, rc))
         loop_flag = 0
 
     def my_on_message_received(self, client, userdata, msg):
-        msg.payload = msg.payload.decode("utf-8")
-        msg.topic= msg.topic.decode("utf-8")
-        message = json.loads(msg.payload)
-        devID=message['bn']
-        (self.url, self.port,self.topic) = read_file("conf.json")
-        string = "http://" + self.url + ":" + self.port + "/info/" + devID
-        info = json.loads(requests.get(string).text)
-        thingspeakID=info['thingspeakID']
-        string2 = "http://" + self.url + ":" + self.port + "/api/tschannel" + thingspeakID
-        info2 = json.loads(requests.get(string2).text)
-        write_API=info2["writeAPI"]
+        try:
+            # Read conf.json file
+            (self.url, self.port, self.topic) = read_file("conf.json")
 
-        for item in message["e"]:
-            topic=item["n"]
-            for item2 in info["resources"]:
-                if item2["n"]==topic:
-                    feed=item2["f"]
-            RequestToThingspeak = 'https://api.thingspeak.com/update?api_key='+write_API+'&field'+feed+'='
-            RequestToThingspeak +=str(item['v'])
-            request = requests.get(RequestToThingspeak)
+            # Decode received message and find devID
+            msg.payload = msg.payload.decode("utf-8")
+            message = json.loads(msg.payload)
+            devID = message['bn']
+
+            # Ask catalog for plantID from devID
+            string = "http://" + self.url + ":" + self.port + "/info/" + devID
+            info_d = json.loads(requests.get(string).text)
+            plantID = info_d["plantID"]
+
+            # Ask catalog the thingspeakID for that specific plantID.
+            string = "http://" + self.url + ":" + self.port + "/info/" + plantID
+            info = json.loads(requests.get(string).text)
+            thingspeakID = info['thingspeakID']
+
+            # Ask catalog the APIs for that ThingSpeak ID.
+            string = ("http://" + self.url + ":" + self.port +
+                       "/api/tschannel/" + str(thingspeakID))
+            info = json.loads(requests.get(string).text)
+            write_API = info["writeAPI"]
+
+            # Boh.
+            for item in message["e"]:
+                if item["n"] == 'alive':
+                    pass  # Ignoring alive messages.
+                else:
+                    topic = item["n"]
+                    for item2 in info_d["resources"]:
+                        if item2["n"] == topic:
+                            feed = item2["f"]
+                    req_tt = ('https://api.thingspeak.com/update?api_key=' +
+                              write_API + '&field' + str(feed) + '=' +
+                              str(item['v']))
+
+                    request = requests.get(req_tt)
+                    print("UPDATING: %s" % req_tt)
+                    time.sleep(20)
+        except:
+            print("Message not readable")
 
 
 class SubData(threading.Thread):
@@ -91,8 +115,7 @@ class SubData(threading.Thread):
 
     def run(self):
 
-        sub = MySubscriber("Thingspeak", self.topic, self.broker_ip)#
-        loop_flag = 1
+        sub = MySubscriber("Thingspeak", self.topic, self.broker_ip)
         sub.start()
 
         while loop_flag:
