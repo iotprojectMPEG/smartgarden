@@ -133,9 +133,16 @@ def main():
     global BT
     BT = round(time.time())
 
-    thread1 = updater.Alive(1, "Alive")
-    thread2 = PubData(2, "PubData")
+    connected = 0
+    while connected == 0:
+        try:
+            thread1 = updater.Alive(1, "Alive")
+            connected = 1
+        except:
+            print("Catalog is not reachable... retry in 5 seconds")
+            time.sleep(5)
 
+    thread2 = PubData(2, "PubData")
     thread1.start()
     time.sleep(1)
     thread2.start()
