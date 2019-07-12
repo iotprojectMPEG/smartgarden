@@ -11,6 +11,119 @@ import requests
 
 #TOPIC = 'smartgarden/+/+/+'
 loop_flag = 1
+time_flag = 1
+
+class TheThread(threading.Thread):
+    """Timer
+    """
+    def __init__(self, ThreadID, name):
+        threading.Thread.__init__(self)
+        self.ThreadID = ThreadID
+        self.name = self.name
+
+    def run(self):
+
+
+        thepub = ThePublisher()
+
+        global time_flag
+        while True:
+            time_flag = 1
+            # print("ThingSpeak not available")
+            time.sleep(15)
+            time_flag = 0
+            time.sleep(1)
+            # print("ThingSpeak is available again")
+
+
+# class TheTest(threading.Thread):
+#     """Complex thing
+#     """
+#     def __init__(self, ThreadID, name):
+#         threading.Thread.__init__(self)
+#         self.ThreadID = ThreadID
+#         self.name = self.name
+#
+#     def run(self):
+#         while True:
+#             global time_flag
+#
+#             while time_flag == 0:
+#                 time.sleep(.1)
+#
+#             while time_flag == 1:
+#                 print("Raccolgo dati...")
+#
+#
+#
+#
+#
+#                 time.sleep(.1)
+#
+#             print("Pubblico i dati...")
+
+
+class ThePublisher:
+    def __init__(self):
+        self.list_pub = []
+
+    def get_data(self, data_list):
+        self.list_pub.extend(data_list)
+
+    def publish_data(self):
+        for item in self.list_pub:
+            r = requests.post('https://api.thingspeak.com/update.json',
+                              data=item)
+            time.sleep(15.5)
+
+
+
+
+class TheClass:
+    def __init__(self):
+        self.list_ID = []
+        self.list_data = []
+        self.created_at = datetime.datetime.now().isoformat()
+
+    def create(self, plantID, api_key):
+        # print("Checking %s and %s" %(plantID, api_key))
+        if plantID in self.list_ID:
+            pass
+
+        else:
+            # print("Creating!")
+            self.list_data.append(self.create_new(api_key))
+            self.list_ID.append(plantID)
+            # print(self.list_data)
+
+    def create_new(self, api_key):
+        data = {
+            "api_key": api_key,
+            "created_at": self.created_at,
+        }
+        return data
+
+    def update_data(self, api_key, fieldID, value):
+        print("Adding field%s=%s to %s" %(str(fieldID), value, str(api_key)))
+        up = {
+                "field"+str(fieldID): value,
+             }
+
+        cnt = 0
+
+        for data in self.list_data:
+            if data["api_key"] == api_key:
+                self.list_data[cnt].update(up)
+            cnt += 1
+
+    def export(self):
+        data = self.list_data
+        return data
+
+    def clear(self):
+        self.list_ID = []
+        self.list_data = []
+        self.time = datetime.datetime.now().isoformat()
 
 def read_file(filename):
     """Read json file to get devID, catalogURL and port.
@@ -40,6 +153,8 @@ class MySubscriber:
         self._paho_mqtt.on_connect = self.my_on_connect
         self._paho_mqtt.on_message = self.my_on_message_received
 
+        self.classer = TheClass()
+
     def start(self):
         self._paho_mqtt.connect(self.messageBroker, 1883)
         self._paho_mqtt.loop_start()
@@ -47,6 +162,12 @@ class MySubscriber:
 
     def stop(self):
         self._paho_mqtt.unsubscribe(self.topic)
+
+
+        # Update data
+        # GET request with body
+
+
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
@@ -54,6 +175,12 @@ class MySubscriber:
         global loop_flag
         print ("S - Connected to %s - Result code: %d" % (self.messageBroker, rc))
         loop_flag = 0
+
+
+    def send_data(self):
+        data = self.classer.export()
+        self.classer.clear()
+        return data
 
     def my_on_message_received(self, client, userdata, msg):
         try:
@@ -81,27 +208,41 @@ class MySubscriber:
             info = json.loads(requests.get(string).text)
             write_API = info["writeAPI"]
 
-            # Convert UNIX timestamp to ISO 8601
-            for item in message["e"]:
-                creation_time = message["bt"] + item["t"]
-
-            creation_time = datetime.datetime.utcfromtimestamp(creation_time).isoformat()
-            req_tt = ('https://api.thingspeak.com/update?api_key=' +
-                      write_API + '&created_at=' + str(creation_time))
-
+            self.classer.create(plantID, str(write_API))
             for item in message["e"]:
                 if item["n"] == 'alive':
-                    pass  # Ignoring alive messages.
+                    pass
                 else:
                     topic = item["n"]
                     for item2 in info_d["resources"]:
                         if item2["n"] == topic:
                             feed = item2["f"]
 
-                    req_tt += ('&field' + str(feed) + '=' + str(item['v']))
+                    value = item["v"]
+                    self.classer.update_data(str(write_API), feed, value)
 
-            request = requests.get(req_tt)
-            print("UPDATING: %s" % req_tt)
+
+            # Convert UNIX timestamp to ISO 8601
+            # for item in message["e"]:
+            #     creation_time = message["bt"] + item["t"]
+            #
+            # creation_time = datetime.datetime.utcfromtimestamp(creation_time).isoformat()
+            # req_tt = ('https://api.thingspeak.com/update?api_key=' +
+            #           write_API + '&created_at=' + str(creation_time))
+
+            # for item in message["e"]:
+            #     if item["n"] == 'alive':
+            #         pass  # Ignoring alive messages.
+            #     else:
+            #         topic = item["n"]
+            #         for item2 in info_d["resources"]:
+            #             if item2["n"] == topic:
+            #                 feed = item2["f"]
+            #
+            #         req_tt += ('&field' + str(feed) + '=' + str(item['v']))
+            #
+            # request = requests.get(req_tt)
+            # print("UPDATING: %s" % req_tt)
 
         except:
             pass
@@ -120,20 +261,48 @@ class SubData(threading.Thread):
 
 
     def run(self):
+        global time_flag
 
+        print("Raccolgo dati...")
         sub = MySubscriber("Thingspeak", self.topic, self.broker_ip)
         sub.start()
-
-        while loop_flag:
-            print("Waiting for connection...")
-            time.sleep(.01)
+        p = ThePublisher()
 
         while True:
-            time.sleep(5)
 
-        sub.stop()
+            while time_flag == 0:
+                time.sleep(.1)
+
+            # Inizio a raccogliere dati
+
+
+            while loop_flag:
+                print("Waiting for connection...")
+                time.sleep(.01)
+
+
+            # Finché posso raccogliere dati
+            while time_flag == 1:
+                time.sleep(.1)
+
+            # time_flag = 0
+            data = sub.send_data()
+            print("DATA\n", data)
+
+            # Pubblico i dati
+            p.get_data(data)
+            p.publish_data()
+            print("Pubblico i dati...")
+
+
+
+
 
 
 if __name__ == "__main__":
     thread1 = SubData(1, "SubData")
     thread1.start()
+    thread2 = TheThread(2, "Timer")
+    thread2.start()
+    # thread3 = TheTest(3, "Test")
+    # thread3.start()
