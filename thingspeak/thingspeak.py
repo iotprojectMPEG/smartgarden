@@ -14,6 +14,36 @@ loop_flag = 1
 time_flag = 1
 URL = 'https://api.thingspeak.com/update.json'
 
+
+def TS_publish(list, url):
+    """ Take a list of jsons and publish them on ThingSpeak."""
+    for item in list:
+        print("Publishing:")
+        print(json.dumps(item))
+        r = requests.post(url, data=item)
+
+
+def read_file(filename):
+    """Read json file to get devID, catalogURL and port.
+    """
+    with open(filename, "r") as f:
+        data = json.loads(f.read())
+        url = data["catalogURL"]
+        topic = data["topic"]
+        port = data["port"]
+        return (url, port, topic)
+
+
+def broker_info(url, port):
+    """Send GET request to catalog in order to obrain MQTT broker info.
+    """
+    string = "http://"+ url + ":" + port + "/broker"
+    broker = requests.get(string)
+    broker_ip = json.loads(broker.text)["IP"]
+    mqtt_port = json.loads(broker.text)["mqtt_port"]
+    return (broker_ip, mqtt_port)
+
+
 class Timer(threading.Thread):
     """Prevent publishing on ThingSpeak within 15 seconds."""
     def __init__(self, ThreadID, name):
@@ -32,13 +62,6 @@ class Timer(threading.Thread):
             time.sleep(1)
             # print("ThingSpeak is available again")
 
-
-def TS_publish(list, url):
-    """ Take a list of jsons and publish them on ThingSpeak."""
-    for item in list:
-        print("Publishing:")
-        print(json.dumps(item))
-        r = requests.post(url, data=item)
 
 class Database:
     """Manage a database with info collected from sensors which have to be
@@ -91,24 +114,6 @@ class Database:
         self.list_data = []
         self.time = datetime.datetime.now().isoformat()
 
-def read_file(filename):
-    """Read json file to get devID, catalogURL and port.
-    """
-    with open(filename, "r") as f:
-        data = json.loads(f.read())
-        url = data["catalogURL"]
-        topic = data["topic"]
-        port = data["port"]
-        return (url, port, topic)
-
-def broker_info(url, port):
-    """Send GET request to catalog in order to obrain MQTT broker info.
-    """
-    string = "http://"+ url + ":" + port + "/broker"
-    broker = requests.get(string)
-    broker_ip = json.loads(broker.text)["IP"]
-    mqtt_port = json.loads(broker.text)["mqtt_port"]
-    return (broker_ip, mqtt_port)
 
 class MySubscriber:
     def __init__(self, clientID, topic, serverIP):
