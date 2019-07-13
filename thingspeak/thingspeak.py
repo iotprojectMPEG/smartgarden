@@ -9,7 +9,7 @@ import sys,os,inspect
 import threading
 import requests
 
-#TOPIC = 'smartgarden/+/+/+'
+
 loop_flag = 1
 time_flag = 1
 
@@ -24,7 +24,7 @@ class TheThread(threading.Thread):
     def run(self):
 
 
-        thepub = ThePublisher()
+        # thepub = TSPublisher()
 
         global time_flag
         while True:
@@ -63,7 +63,7 @@ class TheThread(threading.Thread):
 #             print("Pubblico i dati...")
 
 
-class ThePublisher:
+class TSPublisher:
     def __init__(self):
         self.list_pub = []
 
@@ -72,18 +72,22 @@ class ThePublisher:
 
     def publish_data(self):
         for item in self.list_pub:
+            print("Publishing:")
+            print(json.dumps(item))
             r = requests.post('https://api.thingspeak.com/update.json',
                               data=item)
-            time.sleep(15.5)
 
-
+        self.list_pub = []
 
 
 class TheClass:
     def __init__(self):
         self.list_ID = []
         self.list_data = []
-        self.created_at = datetime.datetime.now().isoformat()
+
+        # Current time in ISO 8601
+        now = time.time()
+        self.created_at = datetime.datetime.utcfromtimestamp(now).isoformat()
 
     def create(self, plantID, api_key):
         # print("Checking %s and %s" %(plantID, api_key))
@@ -92,8 +96,10 @@ class TheClass:
 
         else:
             # print("Creating!")
+            # print(api_key)
             self.list_data.append(self.create_new(api_key))
             self.list_ID.append(plantID)
+
             # print(self.list_data)
 
     def create_new(self, api_key):
@@ -104,7 +110,7 @@ class TheClass:
         return data
 
     def update_data(self, api_key, fieldID, value):
-        print("Adding field%s=%s to %s" %(str(fieldID), value, str(api_key)))
+        print("Collected: field%s=%s (%s)" %(str(fieldID), value, api_key))
         up = {
                 "field"+str(fieldID): value,
              }
@@ -221,7 +227,6 @@ class MySubscriber:
                     value = item["v"]
                     self.classer.update_data(str(write_API), feed, value)
 
-
             # Convert UNIX timestamp to ISO 8601
             # for item in message["e"]:
             #     creation_time = message["bt"] + item["t"]
@@ -263,39 +268,31 @@ class SubData(threading.Thread):
     def run(self):
         global time_flag
 
-        print("Raccolgo dati...")
+        # Start subscriber.
         sub = MySubscriber("Thingspeak", self.topic, self.broker_ip)
         sub.start()
-        p = ThePublisher()
+
+        # Start REST ThingSpeak publisher.
+        p = TSPublisher()
 
         while True:
 
             while time_flag == 0:
                 time.sleep(.1)
 
-            # Inizio a raccogliere dati
-
-
+            # Connection callback.
             while loop_flag:
                 print("Waiting for connection...")
                 time.sleep(.01)
 
-
-            # Finché posso raccogliere dati
+            # Collecting data for 15 seconds. When time is expired, time_flag
+            # becomes equal to 0.
             while time_flag == 1:
                 time.sleep(.1)
 
-            # time_flag = 0
-            data = sub.send_data()
-            print("DATA\n", data)
-
-            # Pubblico i dati
-            p.get_data(data)
+            # Publish json data in different channels.
+            p.get_data(sub.send_data())
             p.publish_data()
-            print("Pubblico i dati...")
-
-
-
 
 
 
