@@ -12,20 +12,17 @@ import requests
 
 loop_flag = 1
 time_flag = 1
+URL = 'https://api.thingspeak.com/update.json'
 
-class TheThread(threading.Thread):
-    """Timer
-    """
+class Timer(threading.Thread):
+    """Prevent publishing on ThingSpeak within 15 seconds."""
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = self.name
 
     def run(self):
-
-
         # thepub = TSPublisher()
-
         global time_flag
         while True:
             time_flag = 1
@@ -36,51 +33,17 @@ class TheThread(threading.Thread):
             # print("ThingSpeak is available again")
 
 
-# class TheTest(threading.Thread):
-#     """Complex thing
-#     """
-#     def __init__(self, ThreadID, name):
-#         threading.Thread.__init__(self)
-#         self.ThreadID = ThreadID
-#         self.name = self.name
-#
-#     def run(self):
-#         while True:
-#             global time_flag
-#
-#             while time_flag == 0:
-#                 time.sleep(.1)
-#
-#             while time_flag == 1:
-#                 print("Raccolgo dati...")
-#
-#
-#
-#
-#
-#                 time.sleep(.1)
-#
-#             print("Pubblico i dati...")
+def TS_publish(list, url):
+    """ Take a list of jsons and publish them on ThingSpeak."""
+    for item in list:
+        print("Publishing:")
+        print(json.dumps(item))
+        r = requests.post(url, data=item)
 
-
-class TSPublisher:
-    def __init__(self):
-        self.list_pub = []
-
-    def get_data(self, data_list):
-        self.list_pub.extend(data_list)
-
-    def publish_data(self):
-        for item in self.list_pub:
-            print("Publishing:")
-            print(json.dumps(item))
-            r = requests.post('https://api.thingspeak.com/update.json',
-                              data=item)
-
-        self.list_pub = []
-
-
-class TheClass:
+class Database:
+    """Manage a database with info collected from sensors which have to be
+    published later on ThingSpeak.
+    """
     def __init__(self):
         self.list_ID = []
         self.list_data = []
@@ -90,19 +53,18 @@ class TheClass:
         self.created_at = datetime.datetime.utcfromtimestamp(now).isoformat()
 
     def create(self, plantID, api_key):
-        # print("Checking %s and %s" %(plantID, api_key))
+        """Check if there is an entry corresponding to the plantID, if not
+        create a new entry with the new writeAPI.
+        """
         if plantID in self.list_ID:
             pass
 
         else:
-            # print("Creating!")
-            # print(api_key)
             self.list_data.append(self.create_new(api_key))
             self.list_ID.append(plantID)
 
-            # print(self.list_data)
-
     def create_new(self, api_key):
+        """Create a new json with writeAPI and timestamp (ISO 8601)."""
         data = {
             "api_key": api_key,
             "created_at": self.created_at,
@@ -110,6 +72,7 @@ class TheClass:
         return data
 
     def update_data(self, api_key, fieldID, value):
+        """Append field and value to the current json."""
         print("Collected: field%s=%s (%s)" %(str(fieldID), value, api_key))
         up = {
                 "field"+str(fieldID): value,
@@ -122,11 +85,8 @@ class TheClass:
                 self.list_data[cnt].update(up)
             cnt += 1
 
-    def export(self):
-        data = self.list_data
-        return data
-
-    def clear(self):
+    def reset(self):
+        """Reset lists and time."""
         self.list_ID = []
         self.list_data = []
         self.time = datetime.datetime.now().isoformat()
@@ -158,8 +118,7 @@ class MySubscriber:
         self._paho_mqtt = PahoMQTT.Client(clientID, False)
         self._paho_mqtt.on_connect = self.my_on_connect
         self._paho_mqtt.on_message = self.my_on_message_received
-
-        self.classer = TheClass()
+        self.db = Database()
 
     def start(self):
         self._paho_mqtt.connect(self.messageBroker, 1883)
@@ -168,12 +127,6 @@ class MySubscriber:
 
     def stop(self):
         self._paho_mqtt.unsubscribe(self.topic)
-
-
-        # Update data
-        # GET request with body
-
-
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
@@ -184,8 +137,8 @@ class MySubscriber:
 
 
     def send_data(self):
-        data = self.classer.export()
-        self.classer.clear()
+        data = self.db.list_data
+        self.db.reset()
         return data
 
     def my_on_message_received(self, client, userdata, msg):
@@ -214,7 +167,8 @@ class MySubscriber:
             info = json.loads(requests.get(string).text)
             write_API = info["writeAPI"]
 
-            self.classer.create(plantID, str(write_API))
+            # Update values in the database.
+            self.db.create(plantID, str(write_API))
             for item in message["e"]:
                 if item["n"] == 'alive':
                     pass
@@ -225,36 +179,15 @@ class MySubscriber:
                             feed = item2["f"]
 
                     value = item["v"]
-                    self.classer.update_data(str(write_API), feed, value)
-
-            # Convert UNIX timestamp to ISO 8601
-            # for item in message["e"]:
-            #     creation_time = message["bt"] + item["t"]
-            #
-            # creation_time = datetime.datetime.utcfromtimestamp(creation_time).isoformat()
-            # req_tt = ('https://api.thingspeak.com/update?api_key=' +
-            #           write_API + '&created_at=' + str(creation_time))
-
-            # for item in message["e"]:
-            #     if item["n"] == 'alive':
-            #         pass  # Ignoring alive messages.
-            #     else:
-            #         topic = item["n"]
-            #         for item2 in info_d["resources"]:
-            #             if item2["n"] == topic:
-            #                 feed = item2["f"]
-            #
-            #         req_tt += ('&field' + str(feed) + '=' + str(item['v']))
-            #
-            # request = requests.get(req_tt)
-            # print("UPDATING: %s" % req_tt)
+                    self.db.update_data(str(write_API), feed, value)
 
         except:
             pass
 
 
-class SubData(threading.Thread):
-    """Publish sensor data with MQTT every minute.
+class SubmitData(threading.Thread):
+    """Main thread which calls MQTT subscriber, database and publishing classes
+    and functions.
     """
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
@@ -272,9 +205,6 @@ class SubData(threading.Thread):
         sub = MySubscriber("Thingspeak", self.topic, self.broker_ip)
         sub.start()
 
-        # Start REST ThingSpeak publisher.
-        p = TSPublisher()
-
         while True:
 
             while time_flag == 0:
@@ -291,15 +221,11 @@ class SubData(threading.Thread):
                 time.sleep(.1)
 
             # Publish json data in different channels.
-            p.get_data(sub.send_data())
-            p.publish_data()
-
+            TS_publish(sub.send_data(), URL)
 
 
 if __name__ == "__main__":
-    thread1 = SubData(1, "SubData")
+    thread1 = SubmitData(1, "SubmitData")
     thread1.start()
-    thread2 = TheThread(2, "Timer")
+    thread2 = Timer(2, "Timer")
     thread2.start()
-    # thread3 = TheTest(3, "Test")
-    # thread3.start()
