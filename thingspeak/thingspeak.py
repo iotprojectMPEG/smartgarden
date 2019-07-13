@@ -112,7 +112,8 @@ class Database:
         """Reset lists and time."""
         self.list_ID = []
         self.list_data = []
-        self.time = datetime.datetime.now().isoformat()
+        now = time.time()
+        self.created_at = datetime.datetime.utcfromtimestamp(now).isoformat()
 
 
 class MySubscriber:
