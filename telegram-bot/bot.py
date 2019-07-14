@@ -11,6 +11,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 import logging
 import json
 import requests
+import time
 import paho.mqtt.client as PahoMQTT
 
 
@@ -22,11 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 class MyPublisher(object):
-    def __init__(self, clientID, topic, serverIP, port):
+    def __init__(self, clientID, serverIP, port):
         self.clientID = clientID + '_pub'
         self.devID = clientID
-        self.topic = topic
-        self.port = port
+        self.port = int(port)
         self.messageBroker = serverIP
         self._paho_mqtt = PahoMQTT.Client(clientID, False)
         self._paho_mqtt.on_connect = self.my_on_connect
@@ -41,13 +41,13 @@ class MyPublisher(object):
         self._paho_mqtt.disconnect()
 
     def my_on_connect(self, client, userdata, flags, rc):
-        print ("Connected to %s - Res code: %d" % (self.messageBroker, rc))
+        print ("P - Connected to %s - Res code: %d" % (self.messageBroker, rc))
         self.loop_flag = 0
 
-    def my_publish(self, message):
-        print("Publishing on %s:" % self.topic)
+    def my_publish(self, message, topic):
         print(json.dumps(json.loads(message), indent=2))
-        self._paho_mqtt.publish(self.topic, message, 2)
+        self._paho_mqtt.publish(topic, message, 2)
+        print("Publishing on %s:" % topic)
 
 
 
@@ -102,21 +102,37 @@ def irrigation(bot, update):
                     if r["n"].lower() == 'irrigation':
                         irrigation_list.append(d["devID"])
 
+    pub = MyPublisher('bot', IP, mqtt_port)
+    pub.start()
+
+    while pub.loop_flag:
+        print("Waiting for connection...")
+        time.sleep(.01)
+
     print(irrigation_list)
     for d in irrigation_list:
         try:
             string = "http://" + url + ":" + port + "/info/" + d
-            print(string)
+            # print(string)
             r = json.loads(requests.get(string).text)
             topic = r["topic"]
-            pub = MyPublisher(d, topic, IP, mqtt_port)
-            message = '{"action": "irrigate"}'
-            pub.my_publish(message)
-            update.message.reply_text("💧 Irrigation started on %s" % d)
+
+            if topic == None:
+                update.message.reply_text("❌ Irrigation FAILED on %s" % d)
+            else:
+                message = {
+                           "e": [{
+                             "n": "irrigate", "d": 120
+                                }]
+                           }
+
+                message = json.dumps(message)
+                pub.my_publish(message, topic)
+                update.message.reply_text("💧 Irrigation started on %s" % d)
         except:
-            update.message.reply_text("❌ Irrigation FAILED on %s" % d)
+            print("Something gone wrong")
 
-
+    pub.stop()
 
     # funzione...
 
