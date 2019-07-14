@@ -113,17 +113,26 @@ def get_data(devID,res):
 
 
 def main():
-    # for i in range(30):
-    #     wind = get_data()
-    #     print('Wind: %d kn' %(wind))
     global BT
     BT = round(time.time())
-    thread1=updater.Alive(1,"Alive")
+
+    # Try to connect to catalog by starting Alive process.
+    connected = 0
+    while connected == 0:
+        try:
+            thread1 = updater.Alive(1, "Alive")
+            connected = 1  # Catalog is available
+        except:
+            print("Catalog is not reachable... retry in 5 seconds")
+            time.sleep(5)
+
     thread2 = PubData(2, "PubData")
 
+    # Start threads.
     thread1.start()
     time.sleep(1)
     thread2.start()
+
 
 if __name__ == '__main__':
     main()
