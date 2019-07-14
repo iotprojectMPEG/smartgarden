@@ -54,6 +54,7 @@ def update_broker(filename, key, value):
 def main():
     ip = input("Type catalog IP followed by [Enter]:\n")
     ip2 = input("Type MQTT broker IP followed by [Enter]:\n")
+    ip3 = input("Type the Telegram token followed by [Enter]:\n")
 
     print("Changing files:")
     update_json("./thingspeak/conf.json", "catalogURL", ip)
@@ -66,6 +67,7 @@ def main():
     update_json("./sensors/wind/conf.json", "catalogURL", ip)
     update_json("./catalog/conf.json", "catalogURL", ip)
     update_cherrypy("./catalog/cherrypyconf", "server.socket_host", ip)
+    update_json("./catalog/api.json", "telegramtoken", ip3)
 
 
     update_broker("./catalog/static.json", "IP", ip2)
