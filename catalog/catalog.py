@@ -211,6 +211,7 @@ class Catalog(object):
 
 
     def get_token(self, filename):
+        """Reads api.json and returns Telegram token for Telegram bot."""
         with open(filename, "r") as f:
             api = json.loads(f.read())
 
@@ -218,6 +219,7 @@ class Catalog(object):
         return t
 
     def get_ts_api(self, filename, id):
+        """Reads api.json and returns ThingSpeak channel ID."""
         with open(filename, "r") as f:
             api = json.loads(f.read())
 
@@ -226,6 +228,7 @@ class Catalog(object):
                 return c
 
 def read_config(filename):
+    """Reads conf.json file and returns URL of catalog and REST port."""
     with open(filename, "r") as file:
         f = json.loads(file.read())
         url = f["catalogURL"]
@@ -366,6 +369,7 @@ class MySubscriber:
 
 
 class First(threading.Thread):
+    """Thread: CherryPy."""
     def __init__(self,ThreadID,name):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
@@ -382,7 +386,8 @@ class First(threading.Thread):
 
 
 class Second(threading.Thread):
-    """Subscribe to MQTT in order to update timestamps of sensors
+    """Thread: Subscribe to MQTT in order to update timestamps of sensors in
+    the dynamic part of the catalog.
     """
     def __init__(self,ThreadID,name):
         threading.Thread.__init__(self)
@@ -409,6 +414,7 @@ class Second(threading.Thread):
 
 
 class Third(threading.Thread):
+    """Thread: Remove old devices which do not send alive messages anymore."""
     def __init__(self,ThreadID,name):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
