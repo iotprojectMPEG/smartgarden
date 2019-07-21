@@ -8,9 +8,14 @@ import sys, os
 import threading
 import requests
 import time
+import datetime
+from rain_control import rain_control
 
 FILE1 = "conf.json"
 LIST = []
+
+#
+# def write_catalog(filename):
 
 
 def read_file(filename):
@@ -23,7 +28,25 @@ def read_file(filename):
         return (url, port, gardenID)
 
 
+class Plant(threading.Thread):
+    def __init__(self, ThreadID, name, plantID, hours):
+        threading.Thread.__init__(self)
+        self.ThreadID = ThreadID
+        self.name = name
+        self.plantID = plantID
+        self.hours = hours
 
+    def run(self):
+
+        sec = rain_control.get_result()
+        h = datetime.datetime.strptime(self.hours, '%H:%M')
+        h = h + datetime.timedelta(seconds=sec)
+        h = format(h, '%H:%M')
+        print(h)
+
+        ######################################################################
+        # TO DO: write modification on dynamic part of the catalog.
+        ######################################################################
 
 class UpdateList(threading.Thread):
     """Updates global list of plants every day. If the list is the same as
@@ -57,6 +80,9 @@ class UpdateList(threading.Thread):
 def main():
     upd = UpdateList(1, "UpdateList")
     upd.start()
+
+    plt = Plant(2, "Plant", "p_1001", "08:00")
+    plt.start()
 
 if __name__ == '__main__':
     main()
