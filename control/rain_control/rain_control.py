@@ -54,9 +54,9 @@ def get_result(plantID):
         m = np.mean(data)
         print("mean:", m)
         if m >= 0.4:
-            return 1
+            return -1  # Do not irrigate.
         else:
-            return 0
+            return 0  # No modifications.
 
 def main():
     print(get_result("p_1002"))  # Example.
