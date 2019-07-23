@@ -45,10 +45,14 @@ def get_result(plantID):
     res = json.loads(requests.get(string).text)
     data = []
     for r in res["feeds"]:
-        data.append(int(r["field5"])) # Da cambiare.
+        try:
+            data.append(int(r["field5"])) # Da cambiare.
+        except:
+            pass
 
     if data != []:
         m = np.mean(data)
+        print("mean:", m)
         if m >= 0.4:
             return 1
         else:
