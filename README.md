@@ -9,17 +9,22 @@ Internet of Things project for smart gardening.
 ## How to use
 ### Configuration:
 * Run [set-ip.py](https://github.com/iotprojectMPEG/mainproject/blob/master/set-ip.py) and type the catalog IP. This will change all configuration files to make it works with the new IP.
+* Go to [Sensors installation](https://github.com/iotprojectMPEG/mainproject/blob/master/README.md#sensors-installation) in order to setup your sensors
+* Go to [Catalog](https://github.com/iotprojectMPEG/mainproject/tree/master/catalog) folder and rename [api.json.example](https://github.com/iotprojectMPEG/mainproject/blob/master/catalog/api.json.example) in ``api.json``, then add ThingSpeak channel IDs and their respective APIs.
 
 ### Catalog:
-* Go to [Sensors installation](https://github.com/iotprojectMPEG/mainproject/blob/master/README.md#sensors-installation) in order to setup your sensors
 * Run [catalog.py](https://github.com/iotprojectMPEG/mainproject/tree/master/catalog)
+
+### ThingSpeak
+* Run [thingspeak.py](https://github.com/iotprojectMPEG/mainproject/tree/master/thingspeak)
 
 ### Sensors:
 * Run all scripts of your [sensors](https://github.com/iotprojectMPEG/mainproject/tree/master/sensors)
 
+### Control
+* Run [control.py](https://github.com/iotprojectMPEG/mainproject/tree/master/control)
 
 ### Telegram bot:
-* Create a file named "token" in the [telegram-bot](https://github.com/iotprojectMPEG/mainproject/tree/master/telegram-bot) folder and insert your API inside.
 * Run [bot.py](https://github.com/iotprojectMPEG/mainproject/tree/master/telegram-bot)
 
 
@@ -39,3 +44,4 @@ Fassio Edoardo
 Grasso Paolo  
 Maffei Marzia  
 Rende Gennaro  
+``
