@@ -12,9 +12,13 @@
         {
           "plantID": "p_1001",
           "name": "Dionaea muscipula",
-          "hours": [
-            "07:00",
-            "19:00"
+          "hours": [{
+            "time": "07:00",
+            "type": "morning"
+            },{
+            "time": "19:00",
+            "type": "evening"
+            }
           ],
           "thingspeakID": 741610,
           "environment": {
@@ -76,9 +80,13 @@
         {
           "plantID": "p_1002",
           "name": "Sarracenia leucophylla",
-          "hours": [
-            "07:00",
-            "19:00"
+          "hours": [{
+            "time": "07:00",
+            "type": "morning"
+            },{
+            "time": "19:00",
+            "type": "evening"
+            }
           ],
           "thingspeakID": 822665,
           "environment": {
@@ -162,9 +170,13 @@
         {
           "plantID": "p_1003",
           "name": "Aloe vera",
-          "hours": [
-            "07:00",
-            "19:00"
+          "hours": [{
+            "time": "07:00",
+            "type": "morning"
+            },{
+            "time": "19:00",
+            "type": "evening"
+            }
           ],
           "thingspeakID": 791970,
           "devices": [
