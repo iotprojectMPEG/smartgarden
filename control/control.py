@@ -79,6 +79,16 @@ def temp(plantID, h, type):
     pass
 
 
+def delay_h(h, delta):
+    """Takes as inputs an hour in format "XX:XX" and a number of seconds which
+    has to be added. Returns the delayed hour in format "XX:XX".
+    """
+    h = datetime.datetime.strptime(h, '%H:%M')
+    h = h + datetime.timedelta(seconds=delta)
+    h = format(h, '%H:%M')
+    return h
+
+
 class Plant(threading.Thread):
     def __init__(self, ThreadID, name, list):
         threading.Thread.__init__(self)
@@ -89,25 +99,28 @@ class Plant(threading.Thread):
     def run(self):
         # Create schedules.
         for p in self.list:
+            pID = p["plantID"]
             for h in p["hours"]:
+                t = delay_h(h["time"], -600)
+                ty = h["type"]
                 for d in p["devices"]:
                     for r in d["resources"]:
                         res = r["n"]
                         if res == 'rain':
-                            print("Scheduling %s for %s at %s" % (res, p["plantID"], h["time"]))
-                            schedule.every().day.at(h["time"]).do(rain, p["plantID"], h["time"], h["type"])
+                            print("Schedule: %s - %s - %s" % (t, pID, res))
+                            schedule.every().day.at(t).do(rain, pID, t, ty)
                         if res == 'light':
-                            print("Scheduling %s for %s at %s" % (res, p["plantID"], h["time"]))
-                            schedule.every().day.at(h["time"]).do(light, p["plantID"], h["time"], h["type"])
+                            print("Schedule: %s - %s - %s" % (t, pID, res))
+                            schedule.every().day.at(t).do(light, pID, t, ty)
                         if res == 'wind':
-                            print("Scheduling %s for %s at %s" % (res, p["plantID"], h["time"]))
-                            schedule.every().day.at(h["time"]).do(wind, p["plantID"], h["time"], h["type"])
+                            print("Schedule: %s - %s - %s" % (t, pID, res))
+                            schedule.every().day.at(t).do(wind, pID, t, ty)
                         if res == 'humidity':
-                            print("Scheduling %s for %s at %s" % (res, p["plantID"], h["time"]))
-                            schedule.every().day.at(h["time"]).do(hum, p["plantID"], h["time"], h["type"])
+                            print("Schedule: %s - %s - %s" % (t, pID, res))
+                            schedule.every().day.at(t).do(hum, pID, t, ty)
                         if res == 'temperature':
-                            print("Scheduling %s for %s at %s" % (res, p["plantID"], h["time"]))
-                            schedule.every().day.at(h["time"]).do(temp, p["plantID"], h["time"], h["type"])
+                            print("Schedule: %s - %s - %s" % (t, pID, res))
+                            schedule.every().day.at(t).do(temp, pID, t, ty)
 
         # Check schedules every 30 seconds.
         while True:
