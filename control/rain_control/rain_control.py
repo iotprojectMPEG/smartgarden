@@ -12,6 +12,7 @@ import numpy as np
 FILE = "conf.json"
 FIELD = 5 # Da prendere altrove.
 
+
 def read_file(filename):
     """Read json file to get catalogURL, port."""
     with open(filename, "r") as f:
@@ -19,6 +20,7 @@ def read_file(filename):
         url = data["catalogURL"]
         port = data["port"]
         return (url, port)
+
 
 def get_api(plantID):
     """Asks catalog readAPI and channelID."""
@@ -30,6 +32,7 @@ def get_api(plantID):
     r = json.loads(requests.get(string).text)
     readAPI = r["readAPI"]
     return readAPI, channel
+
 
 def get_result(plantID):
     """Get the last entries on rain field and decides if it is necessary or not
@@ -58,8 +61,10 @@ def get_result(plantID):
         else:
             return 0  # No modifications.
 
+
 def main():
     print(get_result("p_1002"))  # Example.
+
 
 if __name__ == '__main__':
     main()

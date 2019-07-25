@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-This script takes rain records on ThingSpeak channels and decide whether to
-irrigate or not.
+This script takes wind records on ThingSpeak channels and decide how much
+irrigation is needed.
 """
 import json
 import sys, os
@@ -10,7 +10,8 @@ import requests
 import numpy as np
 
 FILE = "conf.json"
-FIELD = 3 # Da prendere altrove.
+FIELD = 3  # Da prendere altrove.
+
 
 def read_file(filename):
     """Read json file to get catalogURL, port."""
@@ -19,6 +20,7 @@ def read_file(filename):
         url = data["catalogURL"]
         port = data["port"]
         return (url, port)
+
 
 def get_api(plantID):
     """Asks catalog readAPI and channelID."""
@@ -30,6 +32,7 @@ def get_api(plantID):
     r = json.loads(requests.get(string).text)
     readAPI = r["readAPI"]
     return readAPI, channel
+
 
 def get_result(plantID):
     """Get the last entries on rain field and decides if it is necessary or not
@@ -46,21 +49,23 @@ def get_result(plantID):
     data = []
     for r in res["feeds"]:
         try:
-            data.append(int(r["field3"])) # Da cambiare.
+            data.append(int(r["field3"]))  # Field number (?).
         except:
             pass
 
     if data != []:
         m = np.mean(data)
         if m >= 4:
-            return 300
+            return 300  # Add 300 seconds.
         else:
-            return 0
+            return 0  # Add 0 seconds.
     else:
         return None
 
+
 def main():
     print(get_result("p_1001"))  # Example.
+
 
 if __name__ == '__main__':
     main()
