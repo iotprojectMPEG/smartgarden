@@ -227,6 +227,23 @@ class Catalog(object):
             if c["ID"] == id:
                 return c
 
+    def edit_hour(self, plantID, hour, mod):
+        mod = int(mod)
+        self.load_file()
+        for g in self.dynamic["gardens"]:
+            for p in g["plants"]:
+                if p["plantID"] == plantID:
+                    for h in p["hours"]:
+                        if h["time"] == hour:
+
+                            if mod == -1:
+                                h["mod"] = -1
+
+                            elif h["mod"] != -1:
+                                h["mod"] += mod
+
+        self.write_dynamic()
+
 def read_config(filename):
     """Reads conf.json file and returns URL of catalog and REST port."""
     with open(filename, "r") as file:
@@ -318,6 +335,14 @@ class Webserver(object):
             cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
             print(json.dumps(body))
             cat.add_device(body)
+            return 200
+
+        if uri[0] == 'hours':
+            body = json.loads(cherrypy.request.body.read())
+            cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
+            cat.edit_hour(body["plantID"], body["hour"], body["mod"])
+
+            print(json.dumps(body))
             return 200
 
 class MySubscriber:
