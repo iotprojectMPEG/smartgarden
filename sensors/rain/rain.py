@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-# Sono necessari i seguenti componenti (edo_fax li ha):
-# 1. Rain detection module
-# 2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
-# 3. Un modulo amplificatore LM 393
+# -*- coding: utf-8 -*-
+"""Rain detection sensor.
 
-#Istruzioni montaggio figura "rain.jpg"
-##################
-# Rain Detection #
-##################
+Sono necessari i seguenti componenti:
+1. Rain detection module
+2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
+3. Un modulo amplificatore LM 393
+
+Istruzioni montaggio figura "rain.jpg"
+"""
 try:
     import PCF8591 as ADC
     import RPi.GPIO as GPIO
@@ -20,7 +21,7 @@ import requests
 import threading
 import paho.mqtt.client as PahoMQTT
 import os, sys, inspect
-
+from random import randint
 
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
@@ -36,9 +37,11 @@ try:
 except:
     pass
 
+
 def setup():
     ADC.setup(0x48)
     GPIO.setup(DO, GPIO.IN)
+
 
 class MyPublisher(object):
     def __init__(self, clientID, topic, serverIP, port):
@@ -48,16 +51,13 @@ class MyPublisher(object):
         self.port = port
         self._paho_mqtt = PahoMQTT.Client(clientID, False)
         self._paho_mqtt.on_connect = self.my_on_connect
-        #self._paho_mqtt.on_message = self.my_on_message_received
         self.loop_flag = 1
 
     def start(self):
         self._paho_mqtt.connect(self.messageBroker, self.port)
         self._paho_mqtt.loop_start()
-        #self._paho_mqtt.subscribe(self.topic, 2)
 
     def stop(self):
-        #self._paho_mqtt.unsubscribe(self.topic)
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
@@ -69,6 +69,7 @@ class MyPublisher(object):
         print("Publishing on %s:" % self.topic)
         print(json.dumps(json.loads(message), indent=2))
         self._paho_mqtt.publish(self.topic, message, 2)
+
 
 class PubData(threading.Thread):
     def __init__(self, ThreadID, name):
@@ -104,8 +105,9 @@ class PubData(threading.Thread):
 
         pub.stop()
 
+
 def get_data(devID, res):
-    value=None
+    value = randint(0, 1)
     status=None
     try:
         status = GPIO.input(DO)
@@ -130,26 +132,23 @@ def get_data(devID, res):
 
     return data
 
-# def Print(x):
-#     if x == 1:
-#         print('Not raining')
-#     if x == 0:
-#         print('Raining')
-
 
 def main():
     global BT
     BT = round(time.time())
+
     try:
         setup()
     except:
         pass
+
     thread1=updater.Alive(1,"Alive")
     thread2 = PubData(2, "PubData")
 
     thread1.start()
     time.sleep(1)
     thread2.start()
+
 
 if __name__ == '__main__':
     main()

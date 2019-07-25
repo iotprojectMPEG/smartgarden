@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Real humidity and temperature sensor.
+"""Real humidity and temperature sensor.
 """
 
 try:
@@ -13,7 +12,7 @@ import json
 import time
 import paho.mqtt.client as PahoMQTT
 import threading
-
+from random import randint
 import os, sys, inspect
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
@@ -24,12 +23,12 @@ SENSOR = 11
 PIN = 17
 BT = None  # Basetime
 
+
 def get_data(devID, res):
-    """Get humidity and temperature from sensor. Return two jsons.
-    """
+    """Get humidity and temperature from sensor. Return two jsons."""
     # Initialization.
-    humidity = None
-    temperature = None
+    humidity = randint(0, 100)
+    temperature = randint(0, 100)
 
     # Read data from sensor
     try:
@@ -56,13 +55,11 @@ def get_data(devID, res):
         }]
     }
 
-
     return data
 
 
 class PubData(threading.Thread):
-    """Publish sensor data with MQTT every minute.
-    """
+    """Publish sensor data with MQTT every minute."""
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
@@ -83,9 +80,6 @@ class PubData(threading.Thread):
         pub = MyPublisher(self.devID + '_1', self.topic[0], self.broker_ip,
                           int(self.mqtt_port))
         pub.start()
-        # pub2 = MyPublisher(self.devID + '_2', self.topic[1], self.broker_ip,
-                          # int(self.mqtt_port))
-        # pub2.start()
 
         while pub.loop_flag:
             print("Waiting for connection...")
@@ -144,6 +138,8 @@ def main():
             time.sleep(5)
 
     thread2 = PubData(2, "PubData")
+
+    # Start threads.
     thread1.start()
     time.sleep(1)
     thread2.start()

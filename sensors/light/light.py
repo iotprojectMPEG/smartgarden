@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-# Sono necessari i seguenti componenti (edo_fax li ha):
-# 1. Photoresistor module
-# 2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
+# -*- coding: utf-8 -*-
+"""Light intensity sensor.
 
-#Istruzioni montaggio figura "light.jpg"
-###################
-# Light Intensity #
-###################
+Sono necessari i seguenti componenti:
+1. Photoresistor module
+2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
+
+Istruzioni montaggio figura "light.jpg"
+"""
 try:
     import PCF8591 as ADC
     import RPi.GPIO as GPIO
@@ -18,6 +19,7 @@ import threading
 import paho.mqtt.client as PahoMQTT
 import os, sys, inspect
 import time
+from random import randint
 
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
@@ -33,9 +35,11 @@ try:
 except:
     pass
 
+
 def setup():
     ADC.setup(0x48)
     GPIO.setup(DO, GPIO.IN)
+
 
 class MyPublisher(object):
     def __init__(self, clientID, topic, serverIP, port):
@@ -104,7 +108,7 @@ class PubData(threading.Thread):
 
 
 def get_data(devID, res):
-    value=None
+    value = randint(0, 255)
     try:
         value = ADC.read(0)
     except:
@@ -124,6 +128,7 @@ def get_data(devID, res):
 
     return data
 
+
 def main():
     global BT
     BT = round(time.time())
@@ -138,6 +143,7 @@ def main():
     thread1.start()
     time.sleep(1)
     thread2.start()
+
 
 if __name__ == '__main__':
     main()
