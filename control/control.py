@@ -58,8 +58,12 @@ def rain(plantID, h, type, env):
 
 
 def light(plantID, h, type, env):
+    """Type: morning/evening.
+    Morning: anticipate irrigation if there is too much light.
+    Evening: posticipate irrigation if there is too much light.
+    """
     print(plantID, type)
-    sec = rain_control.get_result(plantID, env)
+    sec = rain_control.get_result(plantID, env, type)
     pass
 
 
