@@ -10,7 +10,7 @@ import requests
 import numpy as np
 
 FILE = "conf.json"
-FIELD = 5 # Da prendere altrove.
+FIELD = 5  # Da prendere altrove.
 
 
 def read_file(filename):
@@ -34,7 +34,7 @@ def get_api(plantID):
     return readAPI, channel
 
 
-def get_result(plantID):
+def get_result(plantID, env):
     """Get the last entries on rain field and decides if it is necessary or not
     to irrigate.
     """

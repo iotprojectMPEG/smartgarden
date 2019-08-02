@@ -34,7 +34,7 @@ def get_api(plantID):
     return readAPI, channel
 
 
-def get_result(plantID):
+def get_result(plantID, env):
     """Get the last entries on rain field and decides if it is necessary or not
     to irrigate.
     """

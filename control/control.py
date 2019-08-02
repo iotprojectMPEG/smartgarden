@@ -52,30 +52,30 @@ def post_mod(plantID, h, mod):
     r = requests.post(string, data=json.dumps(data))
 
 
-def rain(plantID, h, type):
-    if rain_control.get_result(plantID):
+def rain(plantID, h, type, env):
+    if rain_control.get_result(plantID, env):
         pass
 
 
-def light(plantID, h, type):
+def light(plantID, h, type, env):
     print(plantID, type)
-    sec = rain_control.get_result(plantID)
+    sec = rain_control.get_result(plantID, env)
     pass
 
 
-def wind(plantID, h, type):
-    sec = wind_control.get_result(plantID)
+def wind(plantID, h, type, env):
+    sec = wind_control.get_result(plantID, env)
     post_mod(plantID, h, sec)
     pass
 
 
-def hum(plantID, h, type):
-    sec = hum_control.get_result(plantID)
+def hum(plantID, h, type, env):
+    sec = hum_control.get_result(plantID, env)
     pass
 
 
-def temp(plantID, h, type):
-    sec = temp_control.get_result(plantID)
+def temp(plantID, h, type, env):
+    sec = temp_control.get_result(plantID, env)
     pass
 
 
@@ -100,6 +100,7 @@ class Plant(threading.Thread):
         # Create schedules.
         for p in self.list:
             pID = p["plantID"]
+            env = p["environment"]
             for h in p["hours"]:
                 t = delay_h(h["time"], -600)
                 ty = h["type"]
@@ -108,19 +109,19 @@ class Plant(threading.Thread):
                         res = r["n"]
                         if res == 'rain':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(rain, pID, t, ty)
+                            schedule.every().day.at(t).do(rain, pID, t, ty, env)
                         if res == 'light':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(light, pID, t, ty)
+                            schedule.every().day.at(t).do(light, pID, t, ty, env)
                         if res == 'wind':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(wind, pID, t, ty)
+                            schedule.every().day.at(t).do(wind, pID, t, ty, env)
                         if res == 'humidity':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(hum, pID, t, ty)
+                            schedule.every().day.at(t).do(hum, pID, t, ty, env)
                         if res == 'temperature':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(temp, pID, t, ty)
+                            schedule.every().day.at(t).do(temp, pID, t, ty, env)
 
         # Check schedules every 30 seconds.
         while True:
