@@ -8,11 +8,13 @@
           "hours": [
             {
               "time": "07:00",
-              "mod": 0
+              "mod": 640,
+              "modh": -500
             },
             {
               "time": "19:00",
-              "mod": 0
+              "mod": 0,
+              "modh": 0
             }
           ],
           "devices": [
@@ -38,11 +40,13 @@
           "hours": [
             {
               "time": "07:00",
-              "mod": 0
+              "mod": 0,
+              "modh": 0
             },
             {
               "time": "19:00",
-              "mod": 0
+              "mod": 0,
+              "modh": 0
             }
           ],
           "devices": [
@@ -72,11 +76,13 @@
           "hours": [
             {
               "time": "07:00",
-              "mod": 0
+              "mod": 0,
+              "modh": 0
             },
             {
               "time": "19:00",
-              "mod": 0
+              "mod": 0,
+              "modh": 0
             }
           ],
           "devices": [

@@ -38,11 +38,12 @@ def read_file(filename):
         return (url, port, gardenID)
 
 
-def post_mod(plantID, h, mod):
+def post_mod(plantID, h, mod=0, modh=0):
     data = {
         "plantID": plantID,
         "hour": h,
-        "mod": mod
+        "mod": mod,
+        "modh": modh
     }
     string = "http://" + URL + ":" +str(PORT) + "/hours"
 

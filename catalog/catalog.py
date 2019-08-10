@@ -227,7 +227,7 @@ class Catalog(object):
             if c["ID"] == id:
                 return c
 
-    def edit_hour(self, plantID, hour, mod):
+    def edit_hour(self, plantID, hour, mod, modh):
         mod = int(mod)
         self.load_file()
         for g in self.dynamic["gardens"]:
@@ -235,6 +235,7 @@ class Catalog(object):
                 if p["plantID"] == plantID:
                     for h in p["hours"]:
                         if h["time"] == hour:
+                            h["modh"] += modh
 
                             if mod == -1:
                                 h["mod"] = -1
@@ -340,7 +341,8 @@ class Webserver(object):
         if uri[0] == 'hours':
             body = json.loads(cherrypy.request.body.read())
             cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
-            cat.edit_hour(body["plantID"], body["hour"], body["mod"])
+            cat.edit_hour(body["plantID"], body["hour"], body["mod"],
+                          body["modh"])
 
             print(json.dumps(body))
             return 200
