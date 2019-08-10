@@ -13,6 +13,7 @@ import json
 import requests
 import time
 import paho.mqtt.client as PahoMQTT
+import numpy as np
 
 
 # Enable logging
@@ -136,8 +137,67 @@ def irrigation(bot, update):
 
     # funzione...
 
+
+def values(bot, update, args):
+    """Gets information about all sensor values for every plant."""
+
+    try:
+        plantID = " ".join(args)
+    except:
+        pass
+
+    with open('conf.json', "r") as f:
+        config = json.loads(f.read())
+    url = config["catalogURL"]
+    port = config["port"]
+    string = "http://" + url + ":" + port
+    # dynamic = json.loads(requests.get(string + '/dynamic').text)
+    # static = json.loads(requests.get(string + '/static').text)
+    #
+    # for g in static["gardens"]:
+    #     for p in g["plants"]:
+    #         if p["plantID"] == plantID:
+
+    r = json.loads(requests.get(string + '/info/' + plantID).text)
+    thingspeakID = str(r["thingspeakID"])
+    name = str(r["name"])
+
+    list = []
+    for d in r["devices"]:
+        for res in d["resources"]:
+            if res["n"] != 'irrigation':
+                list.append((res["n"], res["u"], res["f"], None))
+
+    r = json.loads(requests.get(string + '/api/tschannel/' + thingspeakID).text)
+    readAPI = r["readAPI"]
+
+
+    message = '🌱 ' + name
+    for i in list:
+
+        string = ("https://api.thingspeak.com/channels/" + thingspeakID +
+                  "/fields/" + str(i[2]) + ".json?api_key=" + readAPI +
+                  "&minutes=" + str(5))
+        res = json.loads(requests.get(string).text)
+        fi = 'field'+ str(i[2])
+        data = []
+        for f in res["feeds"]:
+            if f[fi] != None:
+                data.append(int(f[fi]))
+
+        if data == []:
+            message += '\n    ' + i[0].capitalize() + ' = ' + str('n.a.')
+        else:
+            m = np.mean(data)
+            message += ('\n    ' + i[0].capitalize() + ' = ' +
+                        str(m.round(2)) + ' ' + i[1])
+
+    message = message.replace('Celsius', '°C')
+    update.message.reply_text(message)
+
+
 def status(bot, update, args):
-    """Gets information about all the sensors in the gardens and their status
+    """Gets information about all the sensors n the gardens and their status
     Connected/Disconnected, and sends a summary to the user.
     """
 
@@ -227,6 +287,7 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("status", status, pass_args=True))
+    dp.add_handler(CommandHandler("values", values, pass_args=True))
     dp.add_handler(CommandHandler("irrigate", irrigation))
 
     # on noncommand i.e message - echo the message on Telegram
