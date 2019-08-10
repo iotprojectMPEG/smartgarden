@@ -151,13 +151,6 @@ def values(bot, update, args):
     url = config["catalogURL"]
     port = config["port"]
     string = "http://" + url + ":" + port
-    # dynamic = json.loads(requests.get(string + '/dynamic').text)
-    # static = json.loads(requests.get(string + '/static').text)
-    #
-    # for g in static["gardens"]:
-    #     for p in g["plants"]:
-    #         if p["plantID"] == plantID:
-
     r = json.loads(requests.get(string + '/info/' + plantID).text)
     thingspeakID = str(r["thingspeakID"])
     name = str(r["name"])
