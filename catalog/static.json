@@ -139,7 +139,7 @@
               "resources": [
                 {
                   "n": "rain",
-                  "u": "n.a.",
+                  "u": "(bool)",
                   "f": 5
                 }
               ]
