@@ -12,6 +12,7 @@ import logging
 import json
 import requests
 import time
+import datetime
 import paho.mqtt.client as PahoMQTT
 import numpy as np
 
@@ -143,17 +144,32 @@ def values(bot, update, args):
 
     try:
         plantID = " ".join(args)
-    except:
-        pass
+        if plantID[0:2] != 'p_':
+            raise Exception
+
+    except Exception:
+        msg = "You must provide a `plantID`"
+        bot.sendMessage(chat_id=update.message.chat_id, text=msg,
+                        parse_mode=ParseMode.MARKDOWN)
+        return
 
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
     url = config["catalogURL"]
     port = config["port"]
     string = "http://" + url + ":" + port
-    r = json.loads(requests.get(string + '/info/' + plantID).text)
-    thingspeakID = str(r["thingspeakID"])
-    name = str(r["name"])
+
+    try:
+        r = json.loads(requests.get(string + '/info/' + plantID).text)
+        thingspeakID = str(r["thingspeakID"])
+        name = str(r["name"])
+        
+    except:
+        msg = "You must provide a valid `plantID`"
+        bot.sendMessage(chat_id=update.message.chat_id, text=msg,
+                        parse_mode=ParseMode.MARKDOWN)
+        return
+
 
     list = []
     for d in r["devices"]:
@@ -164,8 +180,9 @@ def values(bot, update, args):
     r = json.loads(requests.get(string + '/api/tschannel/' + thingspeakID).text)
     readAPI = r["readAPI"]
 
-
+    now = datetime.datetime.now()
     message = '🌱 ' + name
+    message += '\n    🕒' + ' ' + str(now.hour) + ':' + str(now.minute)
     for i in list:
 
         string = ("https://api.thingspeak.com/channels/" + thingspeakID +
@@ -179,10 +196,10 @@ def values(bot, update, args):
                 data.append(int(f[fi]))
 
         if data == []:
-            message += '\n    ' + i[0].capitalize() + ' = ' + str('n.a.')
+            message += '\n    🔺' + i[0].capitalize() + ': ' + str('n.a.')
         else:
             m = np.mean(data)
-            message += ('\n    ' + i[0].capitalize() + ' = ' +
+            message += ('\n    🔸' + i[0].capitalize() + ': ' +
                         str(m.round(2)) + ' ' + i[1])
 
     message = message.replace('Celsius', '°C')
