@@ -155,6 +155,11 @@ class Actuator(object):
                             modh = ho["modh"]
                             break
 
+
+        # Reset data of plant
+        post_mod(plantID, h, reset=1)
+
+
         # If there is no delay: publish irrigation and duration.
         if modh == 0:
             if topic != None:
@@ -246,7 +251,7 @@ class Plant(threading.Thread):
                             # print("Schedule: %s - %s - %s" % (h["time"], pID, res))
                             # schedule.every().day.at(t).do(sch.irr, pID, devID, h["time"], ty, env)
 
-                            TIME = '12:07'
+                            TIME = '18:13'
                             print("Schedule: %s - %s - %s" % (TIME, pID, res))
                             schedule.every().day.at(TIME).do(sch.irr, pID, devID, h["time"], ty, env)
 

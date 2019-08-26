@@ -227,7 +227,7 @@ class Catalog(object):
             if c["ID"] == id:
                 return c
 
-    def edit_hour(self, plantID, hour, mod, modh):
+    def edit_hour(self, plantID, hour, mod, modh, reset):
         mod = int(mod)
         self.load_file()
         for g in self.dynamic["gardens"]:
@@ -235,13 +235,23 @@ class Catalog(object):
                 if p["plantID"] == plantID:
                     for h in p["hours"]:
                         if h["time"] == hour:
-                            h["modh"] += modh
 
-                            if mod == -1:
-                                h["mod"] = -1
+                            # Irrigation has be just programmed and data should
+                            # be reset.
+                            if reset == 1:
+                                h["mod"] = 120  # Reset value
+                                h["modh"] = 0
 
-                            elif h["mod"] != -1:
-                                h["mod"] += mod
+                            # No reset -> Update irrigation.
+                            else:
+                                h["modh"] += modh
+
+                                if mod == -1:  # Raining.
+                                    h["mod"] = -1  # No irrigation.
+
+                                elif h["mod"] != -1:  # Not raining.
+                                    h["mod"] += mod  # Irrigation.
+
 
         self.write_dynamic()
 
@@ -342,7 +352,7 @@ class Webserver(object):
             body = json.loads(cherrypy.request.body.read())
             cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
             cat.edit_hour(body["plantID"], body["hour"], body["mod"],
-                          body["modh"])
+                          body["modh"], body["reset"])
 
             print(json.dumps(body))
             return 200
