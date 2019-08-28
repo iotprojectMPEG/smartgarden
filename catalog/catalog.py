@@ -255,6 +255,27 @@ class Catalog(object):
 
         self.write_dynamic()
 
+
+    def edit_static_hour(self, plantID, hour, new_hour):
+        self.load_file()
+        for g in self.static["gardens"]:
+            for p in g["plants"]:
+                if p["plantID"] == plantID:
+                    for h in p["hours"]:
+                        if h["time"] == hour:
+                            h["time"] = new_hour
+
+        self.write_static()
+
+        for g in self.dynamic["gardens"]:
+            for p in g["plants"]:
+                if p["plantID"] == plantID:
+                    for h in p["hours"]:
+                        if h["time"] == hour:
+                            h["time"] = new_hour
+
+        self.write_dynamic()
+
 def read_config(filename):
     """Reads conf.json file and returns URL of catalog and REST port."""
     with open(filename, "r") as file:
@@ -351,11 +372,19 @@ class Webserver(object):
         if uri[0] == 'hours':
             body = json.loads(cherrypy.request.body.read())
             cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
-            cat.edit_hour(body["plantID"], body["hour"], body["mod"],
-                          body["modh"], body["reset"])
 
-            print(json.dumps(body))
-            return 200
+            if body["static"] == 0:
+                cat.edit_hour(body["plantID"], body["hour"], body["mod"],
+                              body["modh"], body["reset"])
+
+                print(json.dumps(body))
+                return 200
+
+            elif body["static"] == 1:
+                cat.edit_static_hour(body["plantID"], body["hour"],
+                                     body["new_hour"])
+                return 200
+
 
 class MySubscriber:
     def __init__(self, clientID, topic, serverIP):
