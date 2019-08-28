@@ -9,16 +9,29 @@ import requests
 import threading
 import paho.mqtt.client as PahoMQTT
 
+
+############################ Global variables ############################
 JSON_STATIC = 'static.json'
 JSON_DYNAMIC = 'dynamic.json'
 APIFILE = 'api.json'
 CHERRY_CONF = 'cherrypyconf'
 CONFIG = 'conf.json'
 TOPIC = 'smartgarden/+/+/+'
-
 OLD_MAX = 300
 REMOVE_AFTER = 600
 
+
+############################ Functions ############################
+def read_config(filename):
+    """Reads conf.json file and returns URL of catalog and REST port."""
+    with open(filename, "r") as file:
+        f = json.loads(file.read())
+        url = f["catalogURL"]
+        port = f["port"]
+    return (url, port)
+
+
+############################ Classes ############################
 class Catalog(object):
     def __init__(self, filename_static, filename_dynamic):
         self.filename_s = filename_static
@@ -209,7 +222,6 @@ class Catalog(object):
                         return info
         return -1
 
-
     def get_token(self, filename):
         """Reads api.json and returns Telegram token for Telegram bot."""
         with open(filename, "r") as f:
@@ -227,8 +239,7 @@ class Catalog(object):
             if c["ID"] == id:
                 return c
 
-    def edit_hour(self, plantID, hour, mod, modh, reset):
-        mod = int(mod)
+    def edit_hour(self, plantID, hour, duration, delay, reset):
         self.load_file()
         for g in self.dynamic["gardens"]:
             for p in g["plants"]:
@@ -244,13 +255,13 @@ class Catalog(object):
 
                             # No reset -> Update irrigation.
                             else:
-                                h["modh"] += modh
+                                h["modh"] += delay
 
-                                if mod == -1:  # Raining.
+                                if duration == -1:  # Raining.
                                     h["mod"] = -1  # No irrigation.
 
                                 elif h["mod"] != -1:  # Not raining.
-                                    h["mod"] += mod  # Irrigation.
+                                    h["mod"] += duration  # Irrigation.
 
 
         self.write_dynamic()
@@ -276,13 +287,7 @@ class Catalog(object):
 
         self.write_dynamic()
 
-def read_config(filename):
-    """Reads conf.json file and returns URL of catalog and REST port."""
-    with open(filename, "r") as file:
-        f = json.loads(file.read())
-        url = f["catalogURL"]
-        port = f["port"]
-    return (url, port)
+
 
 class Webserver(object):
     exposed = True
@@ -297,47 +302,15 @@ class Webserver(object):
         if uri[0] == 'broker':
             return catalog.static["broker"]
 
-        # if uri[0] == 'devices':
-        #     """Get all devices from a specific plant in the garden.
-        #     If the plant is present it returns a json with the list of devices.
-        #     If the plant is not found it returns -1.
-        #     """
-        #     gardenID = uri[1]
-        #     plantID = uri[2]
-        #     g_found = 0
-        #     p_found = 0
-        #
-        #     for g in catalog.dynamic["gardens"]:
-        #         if g["gardenID"] == gardenID:
-        #             g_found = 1
-        #             break
-        #
-        #     for p in g["plants"]:
-        #         if p["plantID"] == plantID:
-        #             p_found = 1
-        #             break
-        #
-        #     if g_found and p_found:
-        #         devices = p["devices"]
-        #         return devices
-        #
-        #     else:
-        #         return -1
-
-        #catalog.add_device("garden1", "plant1", "dht11")
-        #catalog.load_file()
-
         if uri[0] == 'dynamic':
             return catalog.dynamic
 
         if uri[0] == 'static':
             return catalog.static
 
-
         if uri[0] == 'info':
             ID = uri[1]
             return catalog.info(ID)
-
 
         if uri[0] == 'api':
             if uri[1] == 'telegramtoken':
@@ -434,6 +407,7 @@ class MySubscriber:
             pass
 
 
+############################ Threads ############################
 class First(threading.Thread):
     """Thread: CherryPy."""
     def __init__(self,ThreadID,name):
@@ -493,6 +467,8 @@ class Third(threading.Thread):
             cat.remove_old_device()
             time.sleep(REMOVE_AFTER)
 
+
+#### Main ####
 def main():
     thread1 = First(1,"CherryPy")
     thread2 = Second(2, "Updater")
