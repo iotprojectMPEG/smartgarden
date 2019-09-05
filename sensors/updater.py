@@ -13,8 +13,7 @@ import threading
 
 
 def read_file(filename):
-    """Read json file to get devID, catalogURL and port.
-    """
+    """Read json file to get devID, catalogURL and port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
         url = data["catalogURL"]
@@ -25,7 +24,7 @@ def read_file(filename):
 
 def find_me(devID, url, port):
     """Send GET request to catalog with devID in order to obtain gardenID,
-       plantID, resources.
+    plantID, resources.
     """
     string = "http://" + url + ":" + port + "/info/" + devID
     info = json.loads(requests.get(string).text)
@@ -36,8 +35,7 @@ def find_me(devID, url, port):
 
 
 def broker_info(url, port):
-    """Send GET request to catalog in order to obrain MQTT broker info.
-    """
+    """Send GET request to catalog in order to obrain MQTT broker info."""
     string = "http://"+ url + ":" + port + "/broker"
     broker = requests.get(string)
     broker_ip = json.loads(broker.text)["IP"]
@@ -46,7 +44,8 @@ def broker_info(url, port):
 
 
 class Alive(threading.Thread):
-    """Send "I'm alive" messages every now and then.
+    """Thread which sends "alive" messages to update devices timestamp on
+    dynamic catalog.
     """
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
@@ -80,8 +79,6 @@ class Alive(threading.Thread):
 
         while True:
             for r in self.resources:
-                #topic = ("smartgarden/" + self.gardenID + "/" +
-                #         self.plantID + "/" + r)
                 topic = ('smartgarden/' + self.gardenID + '/'
                          + self.plantID + '/' + self.devID)
                 print("Publishing %s on %s" %(message, topic))
@@ -91,32 +88,8 @@ class Alive(threading.Thread):
         pub.stop()
 
 
-class When(threading.Thread):
-    """Subscribe to MQTT in order to know when to publish data.
-    """
-    def __init__(self, ThreadID, name):
-        threading.Thread.__init__(self)
-        self.ThreadID = ThreadID
-        self.name = self.name
-        self.topic = "smartgarden/commands"
-        (self.devID, self.url, self.port) = read_file("conf.json")
-        (self.gardenID, self.plantID, self.resources) = find_me(self.devID,
-                                                        self.url, self.port)
-        (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
-        self.mqtt_port = int(mqtt_port)
-
-    def run(self):
-        sub = SubAndPub(self.devID, self.topic, self.broker_ip)
-        sub.start()
-
-        while sub.loop_flag:
-            print("Waiting for connection...")
-            time.sleep(1)
-
-        sub.stop()
-
-
 class PubImAlive(object):
+    """MQTT publisher."""
     def __init__(self, clientID, serverIP, port):
         self.clientID = clientID + '_pub'
         self.messageBroker = serverIP
