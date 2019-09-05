@@ -1,5 +1,6 @@
 {
   "catalogURL": "127.0.0.1",
   "port": "8080",
-  "topic": "smartgarden/+/+/+"
+  "topic": "smartgarden/+/+/+",
+  "thingspeakURL": "https://api.thingspeak.com/update.json"
 }
