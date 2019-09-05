@@ -18,9 +18,9 @@ from hum_control import hum_control
 from temp_control import temp_control
 
 FILE1 = "conf.json"
-LIST = []  # Plant list
 URL = None  # Catalog URL
 PORT = None  # Catalog port
+plant_list = []  # Plant list
 
 
 def read_file(filename):
@@ -31,27 +31,29 @@ def read_file(filename):
         port = data["port"]
         gardenID = data["gardenID"]
 
-        global URL
-        URL = url
-        global PORT
-        PORT = port
-
         return (url, port, gardenID)
 
 
-def post_mod(plantID, h, mod=0, modh=0, reset=0):
+def update_global(url, port):
+    global URL
+    URL = url
+    global PORT
+    PORT = port
+
+
+def post_mod(plantID, h, mod=0, modh=0, reset=0, static=0, new_hour=None):
     data = {
         "plantID": plantID,
         "hour": h,
         "mod": mod,
         "modh": modh,
-        "reset": reset
+        "reset": reset,
+        "static": static,
+        "new_hour": new_hour
     }
-    string = "http://" + URL + ":" +str(PORT) + "/hours"
 
-    # Write on catalog.
-    print(string)
-    print(json.dumps(data))
+    # POST on catalog.
+    string = "http://" + URL + ":" +str(PORT) + "/hours"
     r = requests.post(string, data=json.dumps(data))
 
 
@@ -67,7 +69,6 @@ def light(plantID, h, type, env):
     """
     print(plantID, type)
     sec = rain_control.get_result(plantID, env, type)
-    pass
 
 
 def wind(plantID, h, type, env):
@@ -110,9 +111,9 @@ class MyPublisher(object):
         self.loop_flag = 0
 
     def my_publish(self, message, topic):
-        print(json.dumps(json.loads(message), indent=2))
         self._paho_mqtt.publish(topic, message, 2)
         print("Publishing on %s:" % topic)
+        print(json.dumps(json.loads(message), indent=2))
 
 
 class Actuator(object):
@@ -133,7 +134,7 @@ class Actuator(object):
                    }
         self.pub.my_publish(json.dumps(message), topic)
 
-    def irr(self, plantID, devID, h, type, env, url='127.0.0.1', port='8080'):
+    def irr(self, plantID, devID, h, type, env, url, port):
 
         # Get dynamic catalog.
         string = "http://" + url + ":" + port + "/dynamic"
@@ -145,7 +146,7 @@ class Actuator(object):
         topic = data_dev["topic"]
 
         # Find hour modifications.
-        print(plantID)
+        # print(plantID)
         for g in data["gardens"]:
             for p in g["plants"]:
                 if p["plantID"] == plantID:
@@ -156,18 +157,31 @@ class Actuator(object):
                             break
 
 
-        # Reset data of plant
+        # Reset data about duration and delay on catalog. Next day it will be
+        # generated again.
         post_mod(plantID, h, reset=1)
 
-
-        # If there is no delay: publish irrigation and duration.
+        # If there is no delay: publish via MQTT irrigation and duration.
         if modh == 0:
             if topic != None:
                 self.publish(mod, topic)
 
-        else:
-            thr = ThreadScheduler(devID.replace('d_', ''), devID+"_sch", modh, self.pub, mod, topic)
+        # If the irrigation has to be anticipated do the same as before but
+        # write on catalog that the next day it has to be anticipated.
+        elif modh < 0:
+            if topic != None:
+                self.publish(mod, topic)
+
+            new_h = delay_h(h, modh)
+            print(new_h)
+            post_mod(plantID, h, static=1, new_hour=new_h)
+
+        # If there is a delay: start thread with a countdown and then publish.
+        elif modh > 0:
+            thr = ThreadScheduler(devID.replace('d_', ''), devID + "_sch",
+                                  modh, self.pub, mod, topic)
             thr.start()
+
 
 
 class ThreadScheduler(threading.Thread):
@@ -185,9 +199,8 @@ class ThreadScheduler(threading.Thread):
         self.pub = pub
 
     def run(self):
-        print("Waiting %d seconds" % self.delay)
+        print("Thread status: Waiting %d seconds" % self.delay)
         time.sleep(self.delay)
-        print("Done!")
         self.publish(self.mod, self.topic)
 
     def publish(self, duration, topic):
@@ -210,7 +223,7 @@ def delay_h(h, delta):
 
 
 class Plant(threading.Thread):
-    def __init__(self, ThreadID, name, list, IP='127.0.0.1', mqtt_port=1883):
+    def __init__(self, ThreadID, name, list, IP, mqtt_port):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
@@ -222,6 +235,7 @@ class Plant(threading.Thread):
         sch = Actuator('my_ID', self.IP, self.mqtt_port)
 
         # Create schedules.
+        (c_url, c_port, garden_id) = read_file(FILE1)
         for p in self.list:
             pID = p["plantID"]
             env = p["environment"]
@@ -251,9 +265,9 @@ class Plant(threading.Thread):
                             # print("Schedule: %s - %s - %s" % (h["time"], pID, res))
                             # schedule.every().day.at(t).do(sch.irr, pID, devID, h["time"], ty, env)
 
-                            TIME = '18:13'
+                            TIME = '16:00'
                             print("Schedule: %s - %s - %s" % (TIME, pID, res))
-                            schedule.every().day.at(TIME).do(sch.irr, pID, devID, h["time"], ty, env)
+                            schedule.every().day.at(TIME).do(sch.irr, pID, devID, h["time"], ty, env, c_url, c_port)
 
 
         # Check schedules every 30 seconds.
@@ -282,20 +296,26 @@ class UpdateList(threading.Thread):
         self.name = name
 
     def run(self):
-        global LIST
+        global plant_list
         while True:
             new_list = []
             url, port, gardenID = read_file(FILE1)
             string = "http://" + url + ":" + port + "/static"
             data = json.loads(requests.get(string).text)
+
+            string2 = "http://" + url + ":" + port + "/broker"
+            broker_info = json.loads(requests.get(string2).text)
+            broker_ip = broker_info["IP"]
+            mqtt_port = broker_info["mqtt_port"]
+
             for g in data["gardens"]:
                 if g["gardenID"] == gardenID:
                     for p in g["plants"]:
                         new_list.append(p)
 
-            if LIST != new_list:
-                LIST = new_list
-                print("Updated list!")
+            if plant_list != new_list:
+                plant_list = new_list
+                print("Thread status: updated plant list!")
 
                 # Stop thread.
                 try:
@@ -304,11 +324,13 @@ class UpdateList(threading.Thread):
                     pass
 
                 # (Re)start thread.
-                planter = Plant(101, "Planter", new_list)
+                planter = Plant(101, "Planter", new_list, broker_ip, mqtt_port)
                 planter.start()
 
             else:
-                print("List is up to date.")
+                print("Thread status: list is up to date.")
+                planter.stop()
+                planter.start()
 
             time.sleep(86400)
 
@@ -319,4 +341,6 @@ def main():
 
 
 if __name__ == '__main__':
+    (gardenID, url, port) = read_file(FILE1)
+    update_global(url, port)
     main()
