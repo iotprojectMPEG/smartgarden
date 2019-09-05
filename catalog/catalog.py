@@ -16,7 +16,6 @@ JSON_DYNAMIC = 'dynamic.json'
 APIFILE = 'api.json'
 CHERRY_CONF = 'cherrypyconf'
 CONFIG = 'conf.json'
-TOPIC = 'smartgarden/+/+/+'
 OLD_MAX = 300
 REMOVE_AFTER = 600
 
@@ -28,7 +27,8 @@ def read_config(filename):
         f = json.loads(file.read())
         url = f["catalogURL"]
         port = f["port"]
-    return (url, port)
+        topic = f["topic"]
+    return (url, port, topic)
 
 
 ############################ Classes ############################
@@ -290,6 +290,7 @@ class Catalog(object):
 
 
 class Webserver(object):
+    """CherryPy webserver."""
     exposed = True
 
     @cherrypy.tools.json_out()
@@ -297,7 +298,6 @@ class Webserver(object):
 
         catalog = Catalog(JSON_STATIC, JSON_DYNAMIC)
         catalog.load_file()
-
 
         if uri[0] == 'broker':
             return catalog.static["broker"]
@@ -367,6 +367,7 @@ class MySubscriber:
         self._paho_mqtt = PahoMQTT.Client(clientID, False)
         self._paho_mqtt.on_connect = self.my_on_connect
         self._paho_mqtt.on_message = self.my_on_message_received
+        (self.url, self.port, self.smart_topic) = read_config(CONFIG)
 
     def start(self):
         self._paho_mqtt.connect(self.messageBroker, 1883)
@@ -383,8 +384,8 @@ class MySubscriber:
         self.loop_flag = 0
 
     def my_on_message_received(self, client, userdata, msg):
-        """Receives json messages in the topic '/device/updater' from other
-        devices and get info to update old timestamps or insert expired devices.
+        """Receives json messages from other devices and get info to update
+        old timestamps or insert expired devices.
 
         json format:
         {"gardenID": "garden1", "plantID": "plant1", "devID": "dht11"}
@@ -397,8 +398,8 @@ class MySubscriber:
             for e in message['e']:
                 if e['n'] == 'alive' and e['v'] == 1:
                     topic = e['topic']
-                    (url, port) = read_config(CONFIG)
-                    string = 'http://' + url + ':' + port + '/info/' + devID
+                    string = ('http://' + self.url + ':' + self.port +
+                              '/info/' + devID)
                     info = json.loads(requests.get(string).text)
                     gardenID = info["gardenID"]
                     plantID = info["plantID"]
@@ -429,7 +430,7 @@ class Second(threading.Thread):
     """Thread: Subscribe to MQTT in order to update timestamps of sensors in
     the dynamic part of the catalog.
     """
-    def __init__(self,ThreadID,name):
+    def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = self.name
@@ -438,7 +439,8 @@ class Second(threading.Thread):
         cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
         cat.load_file()
         broker_ip = cat.broker_ip #json.loads(broker.text)["IP"]
-        sub = MySubscriber("Sub1", TOPIC, broker_ip)
+        u, p, topic = read_config(CONFIG)
+        sub = MySubscriber("Sub1", topic, broker_ip)
         sub.loop_flag = 1
         sub.start()
 
