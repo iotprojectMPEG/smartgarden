@@ -12,11 +12,10 @@ import requests
 
 loop_flag = 1
 time_flag = 1
-URL = 'https://api.thingspeak.com/update.json'
 
 
-def TS_publish(list, url):
-    """ Take a list of jsons and publish them on ThingSpeak."""
+def ts_publish(list, url):
+    """Take a list of jsons and publish them on ThingSpeak."""
     for item in list:
         print("Publishing:")
         print(json.dumps(item))
@@ -24,19 +23,18 @@ def TS_publish(list, url):
 
 
 def read_file(filename):
-    """Read json file to get devID, catalogURL and port.
-    """
+    """Read json file to get devID, catalogURL and port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
         url = data["catalogURL"]
         topic = data["topic"]
         port = data["port"]
-        return (url, port, topic)
+        ts_url = data["thingspeakURL"]
+        return (url, port, topic, ts_url)
 
 
 def broker_info(url, port):
-    """Send GET request to catalog in order to obrain MQTT broker info.
-    """
+    """Send GET request to catalog in order to obrain MQTT broker info."""
     string = "http://"+ url + ":" + port + "/broker"
     broker = requests.get(string)
     broker_ip = json.loads(broker.text)["IP"]
@@ -56,11 +54,9 @@ class Timer(threading.Thread):
         global time_flag
         while True:
             time_flag = 1
-            # print("ThingSpeak not available")
             time.sleep(15)
             time_flag = 0
             time.sleep(1)
-            # print("ThingSpeak is available again")
 
 
 class Database:
@@ -150,7 +146,7 @@ class MySubscriber:
     def my_on_message_received(self, client, userdata, msg):
         try:
             # Read conf.json file
-            (self.url, self.port, self.topic) = read_file("conf.json")
+            (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
 
             # Decode received message and find devID
             msg.payload = msg.payload.decode("utf-8")
@@ -188,6 +184,7 @@ class MySubscriber:
                     self.db.update_data(str(write_API), feed, value)
 
         except:
+            "Error"
             pass
 
 
@@ -199,10 +196,9 @@ class SubmitData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.url, self.port, self.topic) = read_file("conf.json")
+        (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
         (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
-
 
     def run(self):
         global time_flag
@@ -227,7 +223,7 @@ class SubmitData(threading.Thread):
                 time.sleep(.1)
 
             # Publish json data in different channels.
-            TS_publish(sub.send_data(), URL)
+            ts_publish(sub.send_data(), self.ts_url)
 
 
 if __name__ == "__main__":
