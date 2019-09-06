@@ -3,38 +3,33 @@
     "IP": "127.0.0.1",
     "mqtt_port": "1883"
   },
-  "gardens": [
-    {
+  "gardens": [{
       "gardenID": "g_1001",
       "name": "Casa in montagna",
       "location": "Torino",
-      "plants": [
-        {
+      "plants": [{
           "plantID": "p_1001",
           "name": "Dionaea muscipula",
           "hours": [{
             "time": "07:00",
             "type": "morning"
-            },{
+          }, {
             "time": "19:00",
             "type": "evening"
-            }
-          ],
-          "thingspeakID": 741610,
+          }],
+          "thingspeakID": 789145,
           "environment": {
             "water": 100,
             "humidity": 90,
             "temperature": 30
           },
-          "devices": [
-            {
+          "devices": [{
               "devID": "d_1001",
               "name": "DHT11",
               "endpoints": [
                 "MQTT"
               ],
-              "resources": [
-                {
+              "resources": [{
                   "n": "humidity",
                   "u": "%",
                   "f": 2
@@ -52,13 +47,11 @@
               "endpoints": [
                 "MQTT"
               ],
-              "resources": [
-                {
-                  "n": "wind",
-                  "u": "kn",
-                  "f": 3
-                }
-              ]
+              "resources": [{
+                "n": "wind",
+                "u": "kn",
+                "f": 3
+              }]
             },
             {
               "devID": "d_1003",
@@ -67,13 +60,11 @@
                 "MQTT",
                 "REST"
               ],
-              "resources": [
-                {
-                  "n": "irrigation",
-                  "u": "n.a.",
-                  "f": 4
-                }
-              ]
+              "resources": [{
+                "n": "irrigation",
+                "u": "n.a.",
+                "f": 4
+              }]
             }
           ]
         },
@@ -83,26 +74,23 @@
           "hours": [{
             "time": "07:00",
             "type": "morning"
-            },{
+          }, {
             "time": "19:00",
             "type": "evening"
-            }
-          ],
-          "thingspeakID": 822665,
+          }],
+          "thingspeakID": 791968,
           "environment": {
             "water": 100,
             "humidity": 90,
             "temperature": 30
           },
-          "devices": [
-            {
+          "devices": [{
               "devID": "d_1004",
               "name": "DHT11",
               "endpoints": [
                 "MQTT"
               ],
-              "resources": [
-                {
+              "resources": [{
                   "n": "humidity",
                   "u": "%",
                   "f": 2
@@ -121,13 +109,11 @@
                 "MQTT",
                 "REST"
               ],
-              "resources": [
-                {
-                  "n": "light",
-                  "u": "lm",
-                  "f": 6
-                }
-              ]
+              "resources": [{
+                "n": "light",
+                "u": "lm",
+                "f": 6
+              }]
             },
             {
               "devID": "d_1006",
@@ -136,13 +122,11 @@
                 "MQTT",
                 "REST"
               ],
-              "resources": [
-                {
-                  "n": "rain",
-                  "u": "(bool)",
-                  "f": 5
-                }
-              ]
+              "resources": [{
+                "n": "rain",
+                "u": "(bool)",
+                "f": 5
+              }]
             },
             {
               "devID": "d_1007",
@@ -150,13 +134,11 @@
               "endpoints": [
                 "MQTT"
               ],
-              "resources": [
-                {
-                  "n": "irrigation",
-                  "u": "n.a.",
-                  "f": 4
-                }
-              ]
+              "resources": [{
+                "n": "irrigation",
+                "u": "n.a.",
+                "f": 4
+              }]
             }
           ]
         }
@@ -166,71 +148,62 @@
       "gardenID": "g_1002",
       "name": "Giardino al mare",
       "location": "Palermo",
-      "plants": [
-        {
-          "plantID": "p_1003",
-          "name": "Aloe vera",
-          "hours": [{
-            "time": "07:00",
-            "type": "morning"
-            },{
-            "time": "19:00",
-            "type": "evening"
-            }
-          ],
-          "thingspeakID": 791970,
-          "devices": [
-            {
-              "devID": "d_1008",
-              "name": "DHT11",
-              "endpoints": [
-                "MQTT"
-              ],
-              "resources": [
-                {
-                  "n": "humidity",
-                  "u": "%",
-                  "f": 2
-                },
-                {
-                  "n": "temperature",
-                  "u": "Celsius",
-                  "f": 1
-                }
-              ]
-            },
-            {
-              "devID": "d_1009",
-              "name": "Wind sensor",
-              "endpoints": [
-                "MQTT",
-                "REST"
-              ],
-              "resources": [
-                {
-                  "n": "wind",
-                  "u": "kn",
-                  "f": 3
-                }
-              ]
-            },
-            {
-              "devID": "d_1010",
-              "name": "Irrigator",
-              "endpoints": [
-                "MQTT"
-              ],
-              "resources": [
-                {
-                  "n": "irrigation",
-                  "u": "n.a.",
-                  "f": 4
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "plants": [{
+        "plantID": "p_1003",
+        "name": "Aloe vera",
+        "hours": [{
+          "time": "07:00",
+          "type": "morning"
+        }, {
+          "time": "19:00",
+          "type": "evening"
+        }],
+        "thingspeakID": 791970,
+        "devices": [{
+            "devID": "d_1008",
+            "name": "DHT11",
+            "endpoints": [
+              "MQTT"
+            ],
+            "resources": [{
+                "n": "humidity",
+                "u": "%",
+                "f": 2
+              },
+              {
+                "n": "temperature",
+                "u": "Celsius",
+                "f": 1
+              }
+            ]
+          },
+          {
+            "devID": "d_1009",
+            "name": "Wind sensor",
+            "endpoints": [
+              "MQTT",
+              "REST"
+            ],
+            "resources": [{
+              "n": "wind",
+              "u": "kn",
+              "f": 3
+            }]
+          },
+          {
+            "devID": "d_1010",
+            "name": "Irrigator",
+            "endpoints": [
+              "MQTT"
+            ],
+            "resources": [{
+              "n": "irrigation",
+              "u": "n.a.",
+              "f": 4
+            }]
+          }
+        ]
+      }]
     }
   ]
 }

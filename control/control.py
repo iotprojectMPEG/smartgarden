@@ -336,6 +336,10 @@ class UpdateList(threading.Thread):
                 except:
                     pass
 
+
+                # TO DO
+
+
                 # (Re)start thread.
                 plant_mng = PlantMng(101, "PlantManager", new_list,
                                    broker_ip, mqtt_port)
