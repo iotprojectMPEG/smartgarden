@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""ThingSpeak adaptor.
+It collects SenML-formatted json files from sensors via MQTT and publish them
+on ThingSpeak every 15 seconds.
+"""
 import numpy as np
 import json
 import paho.mqtt.client as PahoMQTT
@@ -14,8 +18,9 @@ loop_flag = 1
 time_flag = 1
 
 
+############################ Functions ############################
 def ts_publish(list, url):
-    """Take a list of jsons and publish them on ThingSpeak."""
+    """Take a list of jsons and publish them via REST on ThingSpeak."""
     for item in list:
         print("Publishing:")
         print(json.dumps(item))
@@ -35,31 +40,33 @@ def read_file(filename):
 
 def broker_info(url, port):
     """Send GET request to catalog in order to obrain MQTT broker info."""
-    string = "http://"+ url + ":" + port + "/broker"
+    string = "http://" + url + ":" + port + "/broker"
     broker = requests.get(string)
     broker_ip = json.loads(broker.text)["IP"]
     mqtt_port = json.loads(broker.text)["mqtt_port"]
     return (broker_ip, mqtt_port)
 
 
+############################ Classes ############################
 class Timer(threading.Thread):
-    """Prevent publishing on ThingSpeak within 15 seconds."""
+    """15-second timer. It is used to prevent publishing on ThingSpeak too
+    often.
+    """
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = self.name
 
     def run(self):
-        # thepub = TSPublisher()
         global time_flag
         while True:
-            time_flag = 1
-            time.sleep(15)
-            time_flag = 0
-            time.sleep(1)
+            time_flag = 1  # Start timer.
+            time.sleep(15)  # Wait 15 seconds.
+            time_flag = 0  # Stop timer.
+            time.sleep(1)  # 1-sec cooldown.
 
 
-class Database:
+class Database(object):
     """Manage a database with info collected from sensors which have to be
     published later on ThingSpeak.
     """
@@ -76,9 +83,10 @@ class Database:
         create a new entry with the new writeAPI.
         """
         if plantID in self.list_ID:
-            pass
+            pass  # The plantID is already in the database.
 
         else:
+            # Create a new entry with the current plantID and writeAPI.
             self.list_data.append(self.create_new(api_key))
             self.list_ID.append(plantID)
 
@@ -91,10 +99,10 @@ class Database:
         return data
 
     def update_data(self, api_key, fieldID, value):
-        """Append field and value to the current json."""
+        """Append or update field and value to the current json."""
         print("Collected: field%s=%s (%s)" %(str(fieldID), value, api_key))
         up = {
-                "field"+str(fieldID): value,
+                "field" + str(fieldID): value,
              }
 
         cnt = 0
@@ -112,7 +120,7 @@ class Database:
         self.created_at = datetime.datetime.utcfromtimestamp(now).isoformat()
 
 
-class MySubscriber:
+class MySubscriber(object):
     def __init__(self, clientID, topic, serverIP):
         self.clientID = clientID
         self.topic = topic
@@ -139,6 +147,7 @@ class MySubscriber:
 
 
     def send_data(self):
+        """Takes data from database, empties the database, returns data."""
         data = self.db.list_data
         self.db.reset()
         return data
@@ -184,10 +193,11 @@ class MySubscriber:
                     self.db.update_data(str(write_API), feed, value)
 
         except:
-            "Error"
+            print("Invalid message type")
             pass
 
 
+############################ Threads ############################
 class SubmitData(threading.Thread):
     """Main thread which calls MQTT subscriber, database and publishing classes
     and functions.

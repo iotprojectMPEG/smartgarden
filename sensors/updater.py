@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Documentation
+"""Collection of functions and classes which are used by other sensor scripts.
+It includes catalog related GET functions and a thread to send "alive" messages
+in order to update timestamps on catalog.
 """
 
 import paho.mqtt.client as PahoMQTT
@@ -35,7 +37,7 @@ def find_me(devID, url, port):
 
 
 def broker_info(url, port):
-    """Send GET request to catalog in order to obrain MQTT broker info."""
+    """Send GET request to catalog in order to obtain MQTT broker info."""
     string = "http://"+ url + ":" + port + "/broker"
     broker = requests.get(string)
     broker_ip = json.loads(broker.text)["IP"]
@@ -44,8 +46,8 @@ def broker_info(url, port):
 
 
 class Alive(threading.Thread):
-    """Thread which sends "alive" messages to update devices timestamp on
-    dynamic catalog.
+    """Thread which sends "alive" messages via MQTT to update devices timestamp
+    on dynamic catalog.
     """
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
@@ -89,7 +91,7 @@ class Alive(threading.Thread):
 
 
 class PubImAlive(object):
-    """MQTT publisher."""
+    """Standard MQTT publisher."""
     def __init__(self, clientID, serverIP, port):
         self.clientID = clientID + '_pub'
         self.messageBroker = serverIP

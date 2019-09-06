@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-This script...
+"""This script schedules all strategies for delaying or increase irrigation
+times. It takes standard hours from catalog and schedules sensor controls
+ten minutes before, then irrigation strategies are modified as a result.
 """
 import json
 import sys, os
@@ -222,7 +223,7 @@ def delay_h(h, delta):
     return h
 
 
-class Plant(threading.Thread):
+class PlantMng(threading.Thread):
     def __init__(self, ThreadID, name, list, IP, mqtt_port):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
@@ -247,23 +248,31 @@ class Plant(threading.Thread):
                         res = r["n"]
                         if res == 'rain':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(rain, pID, t, ty, env)
+                            schedule.every().day.at(t).do(rain, pID,
+                                                          t, ty, env)
                         if res == 'light':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(light, pID, t, ty, env)
+                            schedule.every().day.at(t).do(light, pID,
+                                                          t, ty, env)
                         if res == 'wind':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(wind, pID, t, ty, env)
+                            schedule.every().day.at(t).do(wind, pID,
+                                                          t, ty, env)
                         if res == 'humidity':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(hum, pID, t, ty, env)
+                            schedule.every().day.at(t).do(hum, pID,
+                                                          t, ty, env)
                         if res == 'temperature':
                             print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(temp, pID, t, ty, env)
+                            schedule.every().day.at(t).do(temp, pID,
+                                                          t, ty, env)
                         if res == 'irrigation':
                             devID = d["devID"]
-                            # print("Schedule: %s - %s - %s" % (h["time"], pID, res))
-                            # schedule.every().day.at(t).do(sch.irr, pID, devID, h["time"], ty, env)
+                            # print("Schedule: %s - %s - %s" % (h["time"],
+                            #                                   pID, res))
+                            # schedule.every().day.at(t).do(sch.irr, pID, devID,
+                            #                               h["time"], ty, env)
+
 
                             TIME = '16:00'
                             print("Schedule: %s - %s - %s" % (TIME, pID, res))
@@ -289,6 +298,9 @@ class Plant(threading.Thread):
 class UpdateList(threading.Thread):
     """Updates global list of plants every day. If the list is the same as
     before, it does not update it.
+    It automatically calls the thread which schedules control strategies.
+    Every day it resets the control schedules in order to include new plants
+    and different hours.
     """
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
@@ -300,6 +312,7 @@ class UpdateList(threading.Thread):
         while True:
             new_list = []
             url, port, gardenID = read_file(FILE1)
+            update_global(url, port)
             string = "http://" + url + ":" + port + "/static"
             data = json.loads(requests.get(string).text)
 
@@ -319,18 +332,19 @@ class UpdateList(threading.Thread):
 
                 # Stop thread.
                 try:
-                    planter.stop()
+                    plant_mng.stop()
                 except:
                     pass
 
                 # (Re)start thread.
-                planter = Plant(101, "Planter", new_list, broker_ip, mqtt_port)
-                planter.start()
+                plant_mng = PlantMng(101, "PlantManager", new_list,
+                                   broker_ip, mqtt_port)
+                plant_mng.start()
 
             else:
                 print("Thread status: list is up to date.")
-                planter.stop()
-                planter.start()
+                plant_mng.stop()
+                plant_mng.start()
 
             time.sleep(86400)
 
@@ -341,6 +355,4 @@ def main():
 
 
 if __name__ == '__main__':
-    (gardenID, url, port) = read_file(FILE1)
-    update_global(url, port)
     main()
