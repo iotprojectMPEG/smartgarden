@@ -42,9 +42,9 @@ def get_result(plantID, env):
     fieldID = str(FIELD)
     channelID = str(channelID)
     readAPI = str(readAPI)
-    minutes = str(720)
+    hours = str(12)
     string = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
-              fieldID + ".json?api_key=" + readAPI + "&minutes=" + minutes)
+              fieldID + ".json?api_key=" + readAPI + "&hours=" + hours)
     res = json.loads(requests.get(string).text)
     data = []
     for r in res["feeds"]:
@@ -56,8 +56,12 @@ def get_result(plantID, env):
     if data != []:
         m = np.mean(data)
         print("mean:", m)
-        if m >= 0.4:
+        if m >= 0.6:
             return -1  # Do not irrigate.
+
+        elif (m => 0.2) and (m < 0.6):
+            return -120  # Remove 120 seconds.
+
         else:
             return 0  # No modifications.
 

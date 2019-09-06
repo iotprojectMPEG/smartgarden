@@ -34,7 +34,7 @@ def get_api(plantID):
     return readAPI, channel
 
 
-def get_result(plantID, env):
+def get_result(plantID):
     """Get the last entries on rain field and decides if it is necessary or not
     to irrigate.
     """
@@ -42,25 +42,52 @@ def get_result(plantID, env):
     fieldID = str(FIELD)
     channelID = str(channelID)
     readAPI = str(readAPI)
-    minutes = str(60)
-    string = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
+    minutes = str(10)
+    hours = str(12)
+
+    string1 = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
               fieldID + ".json?api_key=" + readAPI + "&minutes=" + minutes)
-    res = json.loads(requests.get(string).text)
-    data = []
-    for r in res["feeds"]:
+    res1 = json.loads(requests.get(string1).text)
+    data1 = []
+    for r in res1["feeds"]:
         try:
-            data.append(int(r["field3"]))  # Field number (?).
+            data1.append(int(r["field3"]))  # Field number (?).
         except:
             pass
 
-    if data != []:
-        m = np.mean(data)
-        if m >= 4:
-            return 300  # Add 300 seconds.
+    string2 = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
+              fieldID + ".json?api_key=" + readAPI + "&hours=" + hours)
+    res2 = json.loads(requests.get(string2).text)
+    data2 = []
+    for r in res2["feeds"]:
+        try:
+            data2.append(int(r["field3"]))  # Field number (?).
+        except:
+            pass
+
+    val1 = 0
+    val2 = 0
+
+    if data2 != []:
+        m2 = np.mean(data2)
+        if (m2 >= 3) and (m2 <= 5):
+            val2 = 60
+        elif m2 > 5:
+            val2 = 120
         else:
-            return 0  # Add 0 seconds.
-    else:
-        return None
+            val2 = 0
+
+    if data1 != []:
+        m1 = np.mean(data1)
+        if (m1 >= 3) and (m1 <= 5):
+            val1 = 90
+        elif m1 > 5:
+            val1 = 150
+        else:
+            val1 = 0
+
+    return val1 + val2
+
 
 
 def main():
