@@ -31,7 +31,7 @@ def get_api(plantID):
     return readAPI, channel
 
 
-    def get_result(plantID, env):
+    def get_result(plantID, type):
         """Get the last entries on humidity field and decides if it is necessary or not
         to adjust
         """
@@ -39,9 +39,9 @@ def get_api(plantID):
         fieldID = str(FIELD)
         channelID = str(channelID)
         readAPI = str(readAPI)
-        hours = str(3)
+        minutes = str(10)
         string = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
-                  fieldID + ".json?api_key=" + readAPI + "&hours=" + hours)
+                  fieldID + ".json?api_key=" + readAPI + "&minutes=" + minutes)
         res = json.loads(requests.get(string).text)
         data = []
         for r in res["feeds"]:
@@ -53,12 +53,42 @@ def get_api(plantID):
         if data != []:
             m = np.mean(data)
 
-            diff = env["humidity"] - m
-            v = 300 * np.arctan(0.1 * diff)  # Add 300 seconds.
-            return v
 
-        else:
-            return None
+        if type ==  'evening':
+
+            if (m >= 100) and (m < 120):
+                return 1800
+
+            elif (m >= 120) and (m < 180):
+                return 3600
+
+            elif (m >= 180):
+                return 7200
+
+            elif (m >= 80 and m < 100):
+                return 0
+
+            elif (m < 80):
+                return -900
+
+
+        elif type == 'morning':
+            if (m >= 100) and (m < 120):
+                return -1800
+
+            elif (m >= 120) and (m < 180):
+                return -3600
+
+            elif (m >= 180):
+                return -7200
+
+            elif (m >= 80 and m < 100):
+                return 0
+
+            elif (m < 80):
+                return +900
+
+
 
     def main():
         print(get_result("p_1001"))  # Example.
