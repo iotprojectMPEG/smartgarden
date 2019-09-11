@@ -57,7 +57,7 @@ def get_result(plantID,devID):
     data = []
     for r in res["feeds"]:
         try:
-            data.append(int(r["field"+str(f)]))
+            data.append(int(r["field"+str(f)])) #
         except:
             pass
 

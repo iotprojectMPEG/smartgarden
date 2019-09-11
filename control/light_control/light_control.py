@@ -54,7 +54,7 @@ def get_api(plantID):
         data = []
         for r in res["feeds"]:
             try:
-                data.append(int(r["field"+str(f)]))
+                data.append(int(r["field"+str(f)])) #
             except:
                 pass
 
