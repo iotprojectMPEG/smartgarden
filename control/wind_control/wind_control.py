@@ -44,7 +44,7 @@ def get_result(plantID,devID):
     string = "http://" + url + ":" + port + "/info/" + devID
     r = json.loads(requests.get(string).text)
     for i in r["resources"]:
-        if i["n"] == "rain":
+        if i["n"] == "wind":
             f = i["f"]
 
     fieldID = str(f)
