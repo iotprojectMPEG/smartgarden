@@ -34,12 +34,20 @@ def get_api(plantID):
     return readAPI, channel
 
 
-def get_result(plantID, env):
+def get_result(plantID, env,devID):
     """Get the last entries on rain field and decides if it is necessary or not
     to irrigate.
     """
     readAPI, channelID = get_api(plantID)
-    fieldID = str(FIELD)
+
+    url, port = read_file(FILE)
+    string = "http://" + url + ":" + port + "/info/" + devID
+    r = json.loads(requests.get(string).text)
+    for i in r["resources"]:
+        if i["n"]=="rain":
+            f=i["f"]
+
+    fieldID = str(f)
     channelID = str(channelID)
     readAPI = str(readAPI)
     hours = str(12)
@@ -49,7 +57,7 @@ def get_result(plantID, env):
     data = []
     for r in res["feeds"]:
         try:
-            data.append(int(r["field5"])) # Da cambiare.
+            data.append(int(r["field"+str(f)])) # Da cambiare.
         except:
             pass
 
