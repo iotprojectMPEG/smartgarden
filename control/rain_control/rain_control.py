@@ -57,7 +57,7 @@ def get_result(plantID, env,devID):
     data = []
     for r in res["feeds"]:
         try:
-            data.append(int(r["field"+str(f)])) # Da cambiare.
+            data.append(int(r["field"+str(f)]))
         except:
             pass
 
