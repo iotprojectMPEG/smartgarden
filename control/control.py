@@ -338,6 +338,61 @@ class UpdateList(threading.Thread):
 
 
                 # TO DO
+                #Prendo dal catalog le piante a cui è associato un irrigatore
+                irrigator_plants=[]
+                field_irr_id=[]
+                for g in data["gardens"]:
+                    for p in g["plants"]:
+                        for d in p["devices"]:
+                            if d["name"]=="Irrigator":
+                                irrigator_plants.append(p["thingspeakID"])
+                                for r in d["resources"]
+                                    if r["n"]=="irrigation":
+                                        field_irr_id=r["f"]
+                # Per ogni pianta a cui è associato un irrigatore, faccio una GET per ottenere le irrigazioni
+                # degli ultimi 5 giorni
+                for id in irrigator_plants:
+                    # ACQUISISCO LE READ KEY
+                    string_api="http://" + url + ":" + port + "/api/tschannel/"+id
+                    api_key=json.loads(requests.get(string_api).text)
+                    read_api_key=api_key["readAPI"]
+                    # Fare GET a ThingSpeak per acquisire le ultime irrigazioni
+                    string_ts = "http://api.thingspeak.com/channels" +id+ "/fields/"+field_irr_id+".json?api_key="+read_api_key+"&days=5"
+                    irrigation=json.loads(requests.get(string_ts).text)
+                    irr_events=irrigation["feeds"]
+                    #Separo le irrigazioni della mattina da quelle serali
+                    hour_morn_irr=[]
+                    min_morn_irr=[]
+                    hour_ev_irr=[]
+                    min_ev_irr=[]
+                    for event in irr_events:
+                        hour_t=int(event["created_at"][11:13])
+                        min_t=int(event["created_at"][14:16])
+
+                        if hour_t<=12:
+                            hour_morn_irr.insert(len(hour_morn_irr),hour_t)
+                            min_morn_irr.insert(len(min_morn_irr),min_t)
+                        else:
+                            hour_ev_irr.insert(len(hour_ev_irr),hour_t)
+                            min_ev_irr.insert(len(min_ev_irr),min_t)
+
+                    hour_morn_mean=int(sum(hour_morn_irr)/len(hour_morn_irr))
+                    min_morn_mean=int(sum(min_morn_irr)/len(min_morn_irr))
+                    hour_ev_mean=int(sum(hour_ev_irr)/len(hour_ev_irr))
+                    min_ev_min=int(sum(hour_ev_irr)/len(hour_ev_irr))
+                    #Prendo l'orario di irrigazione della pianta da static.json e poi
+                    # lo modifico
+
+                    data = json.loads(requests.get(string).text)
+                    for g in data["gardens"]:
+                        for p in g["plants"]:
+                            #DA FINIRE
+
+
+
+
+
+
 
 
                 # (Re)start thread.
