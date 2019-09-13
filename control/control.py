@@ -382,18 +382,18 @@ class UpdateList(threading.Thread):
                     min_ev_min=int(sum(hour_ev_irr)/len(hour_ev_irr))
                     #Prendo l'orario di irrigazione della pianta da static.json e poi
                     # lo modifico
-
+                    update_time={}
                     data = json.loads(requests.get(string).text)
                     for g in data["gardens"]:
                         for p in g["plants"]:
-                            #DA FINIRE
+                            if p["thingspeakID"]==id:
+                                update_time["plantID"]=p["plantID"]
+                                update_time["hours"]=p["hours"]
 
-
-
-
-
-
-
+                    update_time["hours"]["0"]["time"]='{:02d}:{:02d}'.format(hour_morn_irr, min_morn_irr)
+                    update_time["hours"]["1"]["time"] = '{:02d}:{:02d}'.format(hour_ev_irr, min_ev_irr)
+                    upd_string="http://"+url+":"+port+"/time/update"
+                    r = requests.post(upd_string, data=update_time)
 
                 # (Re)start thread.
                 plant_mng = PlantMng(101, "PlantManager", new_list,
