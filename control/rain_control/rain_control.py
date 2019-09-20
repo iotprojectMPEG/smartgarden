@@ -67,7 +67,7 @@ def get_result(plantID, env,devID):
         if m >= 0.6:
             return -1  # Do not irrigate.
 
-        elif (m => 0.2) and (m < 0.6):
+        elif (m >= 0.2) and (m < 0.6):
             return -120  # Remove 120 seconds.
 
         else:

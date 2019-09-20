@@ -346,7 +346,7 @@ class UpdateList(threading.Thread):
                         for d in p["devices"]:
                             if d["name"] == "Irrigator":
                                 irrigator_plants.append(p["thingspeakID"])
-                                for r in d["resources"]
+                                for r in d["resources"]:
                                     if r["n"] == "irrigation":
                                         field_irr_id = r["f"]
 
@@ -355,16 +355,27 @@ class UpdateList(threading.Thread):
                 for id in irrigator_plants:
                     # ACQUISISCO LE READ KEY
                     string_api = ("http://" + url + ":" + port +
-                                  "/api/tschannel/" +id)
+                                  "/api/tschannel/" + str(id))
                     api_key = json.loads(requests.get(string_api).text)
                     read_api_key = api_key["readAPI"]
+
                     # Fare GET a ThingSpeak per acquisire le ultime irrigazioni
-                    string_ts = ("http://api.thingspeak.com/channels" + id +
-                                 "/fields/" + field_irr_id +
-                                 ".json?api_key=" + read_api_key +
-                                 "&days=5")
+                    string_ts = ("http://api.thingspeak.com/channels/" + str(id) +
+                                 "/fields/" + str(field_irr_id) +
+                                 ".json?api_key=" + str(read_api_key) +
+                                 "&days=30")
                     irrigation = json.loads(requests.get(string_ts).text)
                     irr_events = irrigation["feeds"]
+
+                    # Filter null values.
+                    ind = []
+                    c = 0
+                    for ev in irr_events:
+                        if ev["field" + str(field_irr_id)] != None:
+                            ind.append(c)
+                        c = c + 1
+
+                    irr_events = [irr_events[x] for x in ind]
 
                     #Separo le irrigazioni della mattina da quelle serali
                     hour_morn_irr = []
@@ -400,7 +411,8 @@ class UpdateList(threading.Thread):
                     update_time["hours"]["0"]["time"] = '{:02d}:{:02d}'.format(hour_morn_irr, min_morn_irr)
                     update_time["hours"]["1"]["time"] = '{:02d}:{:02d}'.format(hour_ev_irr, min_ev_irr)
                     upd_string="http://"+url+":"+port+"/time/update"
-                    r = requests.post(upd_string, data=update_time)
+                    print(update_time)
+                    #r = requests.post(upd_string, data=update_time)
 
 
                 # (Re)start thread.
