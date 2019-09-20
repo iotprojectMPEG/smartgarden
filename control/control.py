@@ -339,27 +339,43 @@ class UpdateList(threading.Thread):
 
                 # TO DO
                 #Prendo dal catalog le piante a cui è associato un irrigatore
-                irrigator_plants=[]
-                field_irr_id=[]
+                irrigator_plants = []
+                field_irr_id = []
                 for g in data["gardens"]:
                     for p in g["plants"]:
                         for d in p["devices"]:
-                            if d["name"]=="Irrigator":
+                            if d["name"] == "Irrigator":
                                 irrigator_plants.append(p["thingspeakID"])
-                                for r in d["resources"]
-                                    if r["n"]=="irrigation":
-                                        field_irr_id=r["f"]
+                                for r in d["resources"]:
+                                    if r["n"] == "irrigation":
+                                        field_irr_id = r["f"]
+
                 # Per ogni pianta a cui è associato un irrigatore, faccio una GET per ottenere le irrigazioni
                 # degli ultimi 5 giorni
                 for id in irrigator_plants:
                     # ACQUISISCO LE READ KEY
-                    string_api="http://" + url + ":" + port + "/api/tschannel/"+id
-                    api_key=json.loads(requests.get(string_api).text)
-                    read_api_key=api_key["readAPI"]
+                    string_api = ("http://" + url + ":" + port +
+                                  "/api/tschannel/" + str(id))
+                    api_key = json.loads(requests.get(string_api).text)
+                    read_api_key = api_key["readAPI"]
+
                     # Fare GET a ThingSpeak per acquisire le ultime irrigazioni
-                    string_ts = "http://api.thingspeak.com/channels" +id+ "/fields/"+field_irr_id+".json?api_key="+read_api_key+"&days=5"
-                    irrigation=json.loads(requests.get(string_ts).text)
-                    irr_events=irrigation["feeds"]
+                    string_ts = ("http://api.thingspeak.com/channels/" + str(id) +
+                                 "/fields/" + str(field_irr_id) +
+                                 ".json?api_key=" + str(read_api_key) +
+                                 "&days=30")
+                    irrigation = json.loads(requests.get(string_ts).text)
+                    irr_events = irrigation["feeds"]
+
+                    # Filter null values.
+                    ind = []
+                    c = 0
+                    for ev in irr_events:
+                        if ev["field" + str(field_irr_id)] != None:
+                            ind.append(c)
+                        c = c + 1
+
+                    irr_events = [irr_events[x] for x in ind]
 
                     #Prendo l'orario di irrigazione della pianta da static.json e poi
                     # lo modifico
@@ -408,12 +424,14 @@ class UpdateList(threading.Thread):
                                                                                              str(hms_morn_irr.minute))
                                     update_time["hours"]["1"]["time"] = '{:02d}:{:02d}'.format(str(hms_even_irr.hour),
                                                                                                str(hms_even_irr.minute))
-                                    upd_string="http://"+url+":"+port+"/time/update"
-                                    r = requests.post(upd_string, data=update_time)
+                    upd_string="http://"+url+":"+port+"/time/update"
+                    print(update_time)
+                    #r = requests.post(upd_string, data=update_time)
+
 
                 # (Re)start thread.
                 plant_mng = PlantMng(101, "PlantManager", new_list,
-                                   broker_ip, mqtt_port)
+                                     broker_ip, mqtt_port)
                 plant_mng.start()
 
             else:
