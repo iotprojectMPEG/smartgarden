@@ -360,40 +360,56 @@ class UpdateList(threading.Thread):
                     string_ts = "http://api.thingspeak.com/channels" +id+ "/fields/"+field_irr_id+".json?api_key="+read_api_key+"&days=5"
                     irrigation=json.loads(requests.get(string_ts).text)
                     irr_events=irrigation["feeds"]
-                    #Separo le irrigazioni della mattina da quelle serali
-                    hour_morn_irr=[]
-                    min_morn_irr=[]
-                    hour_ev_irr=[]
-                    min_ev_irr=[]
-                    for event in irr_events:
-                        hour_t=int(event["created_at"][11:13])
-                        min_t=int(event["created_at"][14:16])
 
-                        if hour_t<=12:
-                            hour_morn_irr.insert(len(hour_morn_irr),hour_t)
-                            min_morn_irr.insert(len(min_morn_irr),min_t)
-                        else:
-                            hour_ev_irr.insert(len(hour_ev_irr),hour_t)
-                            min_ev_irr.insert(len(min_ev_irr),min_t)
-
-                    hour_morn_mean=int(sum(hour_morn_irr)/len(hour_morn_irr))
-                    min_morn_mean=int(sum(min_morn_irr)/len(min_morn_irr))
-                    hour_ev_mean=int(sum(hour_ev_irr)/len(hour_ev_irr))
-                    min_ev_min=int(sum(hour_ev_irr)/len(hour_ev_irr))
                     #Prendo l'orario di irrigazione della pianta da static.json e poi
                     # lo modifico
                     update_time={}
-                    data = json.loads(requests.get(string).text)
-                    for g in data["gardens"]:
+                    data2 = json.loads(requests.get(string).text)
+                    for g in data2["gardens"]:
                         for p in g["plants"]:
                             if p["thingspeakID"]==id:
                                 update_time["plantID"]=p["plantID"]
                                 update_time["hours"]=p["hours"]
 
-                    update_time["hours"]["0"]["time"]='{:02d}:{:02d}'.format(hour_morn_irr, min_morn_irr)
-                    update_time["hours"]["1"]["time"] = '{:02d}:{:02d}'.format(hour_ev_irr, min_ev_irr)
-                    upd_string="http://"+url+":"+port+"/time/update"
-                    r = requests.post(upd_string, data=update_time)
+                                #Ottengo attuali orari di irrigazione
+                                morn_irr=datetime.timedelta(hours=int(update_time["hours"][0][0:2],
+                                                                      minutes=int(update_time["hours"][0][3:5])))
+                                even_irr=datetime.timedelta(hours=int(update_time["hours"][1][0:2],
+                                                                      minutes=int(update_time["hours"][1][3:5])))
+                                timedeltas_morn=[]
+                                timedeltas_even=[]
+                                #Per ciascun evento di irrigazione, prendo ora e minuti e trovo la differenza
+                                #di tempo rispetto all'attuale orario di irrigazione
+                                for event in irr_events:
+                                    hour_event=int(event["created_at"][11:13])
+                                    minutes_event=int(event["created_at"][14:16])
+                                    event_irr=datetime.timedelta(hours=hour_event,
+                                                                      minutes=minutes_event)
+
+                                    if hour_event<=12:
+                                        delta=(event_irr-morn_irr).total_seconds()
+                                        timedeltas_morn.insert(len(timedeltas_morn),delta)
+
+                                    else:
+                                        delta = (event_irr - event_irr).total_seconds()
+                                        timedeltas_even.insert(len(timedeltas_even), delta)
+                                    #Viene fatta la media di tutte le differenze di tempo per mattino e sera e
+                                    #aggiungo la differenza media al vecchio orario
+                                    delta_morn_mean=sum(timedeltas_morn)/len(timedeltas_morn)
+                                    delta_even_mean=sum(timedeltas_even)/len(timedeltas_even)
+
+                                    new_morn_irr=morn_irr+datetime.timedelta(seconds=delta_morn_mean)
+                                    new_even_irr=even_irr+datetime.timedelta(seconds=delta_even_mean)
+                                    # Ottengo il nuovo orario aggiornato per mattino e sera
+                                    hms_morn_irr=(datetime.datetime.min +new_morn_irr).time()
+                                    hms_even_irr=(datetime.datetime.min +new_even_irr).time()
+
+                                    update_time["hours"]["0"]["time"]='{:02d}:{:02d}'.format(str(hms_morn_irr.hour),
+                                                                                             str(hms_morn_irr.minute))
+                                    update_time["hours"]["1"]["time"] = '{:02d}:{:02d}'.format(str(hms_even_irr.hour),
+                                                                                               str(hms_even_irr.minute))
+                                    upd_string="http://"+url+":"+port+"/time/update"
+                                    r = requests.post(upd_string, data=update_time)
 
                 # (Re)start thread.
                 plant_mng = PlantMng(101, "PlantManager", new_list,
