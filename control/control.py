@@ -356,6 +356,7 @@ class UpdateList(threading.Thread):
                     # ACQUISISCO LE READ KEY
                     string_api = ("http://" + url + ":" + port +
                                   "/api/tschannel/" + str(id))
+                    print(string_api)
                     api_key = json.loads(requests.get(string_api).text)
                     read_api_key = api_key["readAPI"]
 
@@ -364,17 +365,23 @@ class UpdateList(threading.Thread):
                                  "/fields/" + str(field_irr_id) +
                                  ".json?api_key=" + str(read_api_key) +
                                  "&days=30")
+
                     irrigation = json.loads(requests.get(string_ts).text)
                     irr_events = irrigation["feeds"]
 
                     # Filter null values.
                     ind = []
                     c = 0
+                    # print("- - - - - - - - - -", id)
+                    # print(json.dumps(irr_events, indent=1))
                     for ev in irr_events:
+
+                        # print(ev)
                         if ev["field" + str(field_irr_id)] != None:
                             ind.append(c)
                         c = c + 1
 
+                    # print("- - - - - - - - - -")
                     irr_events = [irr_events[x] for x in ind]
 
                     #Prendo l'orario di irrigazione della pianta da static.json e poi
@@ -400,6 +407,7 @@ class UpdateList(threading.Thread):
                                 #Per ciascun evento di irrigazione, prendo ora e minuti e trovo la differenza
                                 #di tempo rispetto all'attuale orario di irrigazione
                                 for event in irr_events:
+                                    print(event)
                                     hour_event = int(event["created_at"][11:13])
                                     minutes_event = int(event["created_at"][14:16])
                                     event_irr = datetime.timedelta(hours=hour_event,
@@ -415,22 +423,25 @@ class UpdateList(threading.Thread):
                                 #Viene fatta la media di tutte le differenze di tempo per mattino e sera e
                                 #aggiungo la differenza media al vecchio orario
 
-                                delta_morn_mean = sum(timedeltas_morn)/len(timedeltas_morn)
-                                delta_even_mean = sum(timedeltas_even)/len(timedeltas_even)
+                                try:
+                                    delta_morn_mean = sum(timedeltas_morn)/len(timedeltas_morn)
+                                    delta_even_mean = sum(timedeltas_even)/len(timedeltas_even)
 
-                                new_morn_irr = morn_irr + datetime.timedelta(seconds=delta_morn_mean)
-                                new_even_irr = even_irr + datetime.timedelta(seconds=delta_even_mean)
-                                # Ottengo il nuovo orario aggiornato per mattino e sera
-                                hms_morn_irr = (datetime.datetime.min +new_morn_irr).time()
-                                hms_even_irr = (datetime.datetime.min +new_even_irr).time()
+                                    new_morn_irr = morn_irr + datetime.timedelta(seconds=delta_morn_mean)
+                                    new_even_irr = even_irr + datetime.timedelta(seconds=delta_even_mean)
+                                    # Ottengo il nuovo orario aggiornato per mattino e sera
+                                    hms_morn_irr = (datetime.datetime.min +new_morn_irr).time()
+                                    hms_even_irr = (datetime.datetime.min +new_even_irr).time()
 
-                                update_time["hours"]["0"]["time"] = '{:02d}:{:02d}'.format(str(hms_morn_irr.hour),
-                                                                                             str(hms_morn_irr.minute))
-                                update_time["hours"]["1"]["time"] = '{:02d}:{:02d}'.format(str(hms_even_irr.hour),
-                                                                                               str(hms_even_irr.minute))
-                                upd_string = "http://" + url + ":" + port + "/time/update"
-                                print(update_time)
-                                #r = requests.post(upd_string, data=update_time)
+
+                                    update_time["hours"][0]["time"] = '{:02d}:{:02d}'.format(hms_morn_irr.hour, hms_morn_irr.minute)
+                                    update_time["hours"][1]["time"] = '{:02d}:{:02d}'.format(hms_even_irr.hour, hms_even_irr.minute)
+                                    upd_string = "http://" + url + ":" + port + "/time/update"
+                                    print("UPDATE:", update_time)
+                                    #r = requests.post(upd_string, data=update_time)
+                                except:
+                                    print("NO")
+                                    pass
 
                 # (Re)start thread.
                 plant_mng = PlantMng(101, "PlantManager", new_list,
