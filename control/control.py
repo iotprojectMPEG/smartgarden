@@ -414,7 +414,7 @@ class UpdateList(threading.Thread):
                                                                       minutes=minutes_event)
 
                                     if hour_event <= 12:
-                                        delta = (event_irr-morn_irr).total_seconds()
+                                        delta = (event_irr - morn_irr).total_seconds()
                                         timedeltas_morn.insert(len(timedeltas_morn), delta)
 
                                     else:
@@ -436,11 +436,13 @@ class UpdateList(threading.Thread):
 
                                     update_time["hours"][0]["time"] = '{:02d}:{:02d}'.format(hms_morn_irr.hour, hms_morn_irr.minute)
                                     update_time["hours"][1]["time"] = '{:02d}:{:02d}'.format(hms_even_irr.hour, hms_even_irr.minute)
-                                    upd_string = "http://" + url + ":" + port + "/time/update"
+                                    upd_string = "http://" + url + ":" + port + "/update/time"
                                     print("UPDATE:", update_time)
-                                    #r = requests.post(upd_string, data=update_time)
+
+                                    print (upd_string, update_time)
+                                    r = requests.post(upd_string, data=json.dumps(update_time))
                                 except:
-                                    print("NO")
+                                    print("Error")
                                     pass
 
                 # (Re)start thread.

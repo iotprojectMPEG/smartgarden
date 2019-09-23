@@ -288,6 +288,25 @@ class Catalog(object):
         self.write_dynamic()
 
 
+    def sub_hour(self, plantID, vector):
+        self.load_file()
+
+        # Static part.
+        for g in self.static["gardens"]:
+            for p in g["plants"]:
+                if p["plantID"] == plantID:
+                    p["hours"] = vector
+        self.write_static()
+
+        # Dynamic part.
+        for g in self.dynamic["gardens"]:
+            for p in g["plants"]:
+                if p["plantID"] == plantID:
+                    c = 0
+                    for h in p["hours"]:
+                        h["time"] = vector[c]["time"]
+                        c = c + 1
+        self.write_dynamic()
 
 class Webserver(object):
     """CherryPy webserver."""
@@ -357,6 +376,13 @@ class Webserver(object):
                 cat.edit_static_hour(body["plantID"], body["hour"],
                                      body["new_hour"])
                 return 200
+
+        if uri[0] == 'update':
+            if uri[1] == 'time':
+                body = json.loads(cherrypy.request.body.read())  # Read body data
+                cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
+                print(body)
+                cat.sub_hour(body["plantID"], body["hours"])
 
 
 class MySubscriber:
