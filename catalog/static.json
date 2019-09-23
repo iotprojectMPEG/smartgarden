@@ -17,7 +17,7 @@
             "time": "19:00",
             "type": "evening"
           }],
-          "thingspeakID": 789145,
+          "thingspeakID": 741610,
           "environment": {
             "water": 100,
             "humidity": 90,
@@ -78,7 +78,7 @@
             "time": "19:00",
             "type": "evening"
           }],
-          "thingspeakID": 791968,
+          "thingspeakID": 822665,
           "environment": {
             "water": 100,
             "humidity": 90,
@@ -158,7 +158,7 @@
           "time": "19:00",
           "type": "evening"
         }],
-        "thingspeakID": 791970,
+        "thingspeakID": 868854,
         "devices": [{
             "devID": "d_1008",
             "name": "DHT11",
