@@ -268,15 +268,15 @@ class PlantMng(threading.Thread):
                                                           t, ty, env)
                         if res == 'irrigation':
                             devID = d["devID"]
-                            # print("Schedule: %s - %s - %s" % (h["time"],
-                            #                                   pID, res))
-                            # schedule.every().day.at(t).do(sch.irr, pID, devID,
-                            #                               h["time"], ty, env)
+                            print("Schedule: %s - %s - %s" % (h["time"],
+                                                              pID, res))
+                            schedule.every().day.at(t).do(sch.irr, pID, devID,
+                                                          h["time"], ty, env)
 
 
-                            TIME = '16:00'
-                            print("Schedule: %s - %s - %s" % (TIME, pID, res))
-                            schedule.every().day.at(TIME).do(sch.irr, pID, devID, h["time"], ty, env, c_url, c_port)
+                            # TIME = '16:00'
+                            # print("Schedule: %s - %s - %s" % (TIME, pID, res))
+                            # schedule.every().day.at(TIME).do(sch.irr, pID, devID, h["time"], ty, env, c_url, c_port)
 
 
         # Check schedules every 30 seconds.
@@ -442,7 +442,7 @@ class UpdateList(threading.Thread):
                                     print (upd_string, update_time)
                                     r = requests.post(upd_string, data=json.dumps(update_time))
                                 except:
-                                    print("Error")
+                                    print("No irrigation data")
                                     pass
 
                 # (Re)start thread.
