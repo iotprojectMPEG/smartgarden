@@ -55,8 +55,8 @@ def post_mod(plantID, h, mod=0, modh=0, reset=0, static=0, new_hour=None):
 
     # POST on catalog.
     string = "http://" + URL + ":" +str(PORT) + "/hours"
-    print(json.dumps(data, indent=1))
-    # r = requests.post(string, data=json.dumps(data))
+    # print(json.dumps(data, indent=1))
+    r = requests.post(string, data=json.dumps(data))
 
 
 def rain(plantID, hour, devID):
@@ -241,9 +241,9 @@ class PlantMng(threading.Thread):
             pID = p["plantID"]
             env = p["environment"]
             for h in p["hours"]:
-                # t = h["time"]
-                t = "11:50"
-                dly = delay_h(t, -600)
+                t = h["time"]
+                # t = "12:07"
+                dly = delay_h(t, -300)
                 ty = h["type"]
                 for d in p["devices"]:
                     for r in d["resources"]:
@@ -273,7 +273,8 @@ class PlantMng(threading.Thread):
                             print("Schedule: %s - %s - %s" % (t, pID, res))
                             schedule.every().day.at(t).do(sch.irr, pID,
                                                           t, devID,
-                                                          ty, env)
+                                                          ty, env,
+                                                          c_url, c_port)
 
 
                             # TIME = '16:00'
