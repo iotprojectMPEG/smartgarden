@@ -5,6 +5,8 @@ This script...
 """
 import json
 import sys, os
+import requests
+import numpy as np
 
 FILE = "conf.json"
 FIELD = 6  # Da prendere altrove.
