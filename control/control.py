@@ -147,7 +147,6 @@ class Actuator(object):
         topic = data_dev["topic"]
 
         # Find hour modifications.
-        # print(plantID)
         for g in data["gardens"]:
             for p in g["plants"]:
                 if p["plantID"] == plantID:
@@ -174,7 +173,6 @@ class Actuator(object):
                 self.publish(mod, topic)
 
             new_h = delay_h(h, modh)
-            print(new_h)
             post_mod(plantID, h, static=1, new_hour=new_h)
 
         # If there is a delay: start thread with a countdown and then publish.
@@ -289,15 +287,6 @@ class PlantMng(threading.Thread):
             time.sleep(3)
 
 
-        # To do later:
-        # if 'light' in self.resources:
-        #     sec = light_control.get_result()
-        #     h = datetime.datetime.strptime(self.hours, '%H:%M')
-        #     h = h + datetime.timedelta(seconds=sec)
-        #     h = format(h, '%H:%M')
-        #     print(h)
-
-
 class UpdateList(threading.Thread):
     """Updates global list of plants every day. If the list is the same as
     before, it does not update it.
@@ -359,7 +348,6 @@ class UpdateList(threading.Thread):
                     # ACQUISISCO LE READ KEY
                     string_api = ("http://" + url + ":" + port +
                                   "/api/tschannel/" + str(id))
-                    print(string_api)
                     api_key = json.loads(requests.get(string_api).text)
                     read_api_key = api_key["readAPI"]
 
@@ -375,16 +363,12 @@ class UpdateList(threading.Thread):
                     # Filter null values.
                     ind = []
                     c = 0
-                    # print("- - - - - - - - - -", id)
-                    # print(json.dumps(irr_events, indent=1))
-                    for ev in irr_events:
 
-                        # print(ev)
+                    for ev in irr_events:
                         if ev["field" + str(field_irr_id)] != None:
                             ind.append(c)
                         c = c + 1
 
-                    # print("- - - - - - - - - -")
                     irr_events = [irr_events[x] for x in ind]
 
                     #Prendo l'orario di irrigazione della pianta da static.json e poi
@@ -410,7 +394,6 @@ class UpdateList(threading.Thread):
                                 #Per ciascun evento di irrigazione, prendo ora e minuti e trovo la differenza
                                 #di tempo rispetto all'attuale orario di irrigazione
                                 for event in irr_events:
-                                    print(event)
                                     hour_event = int(event["created_at"][11:13])
                                     minutes_event = int(event["created_at"][14:16])
                                     event_irr = datetime.timedelta(hours=hour_event,
