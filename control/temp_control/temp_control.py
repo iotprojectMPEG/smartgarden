@@ -33,7 +33,7 @@ def get_api(plantID):
     return readAPI, channel
 
 
-def get_result(plantID,devID):
+def get_result(plantID, devID):
     """Get the last entries on humidity field and decides if it is necessary or not
     to adjust
     """
@@ -41,9 +41,10 @@ def get_result(plantID,devID):
 
     url, port = read_file(FILE)
     string = "http://" + url + ":" + port + "/info/" + devID
+    print(string)
     r = json.loads(requests.get(string).text)
     for i in r["resources"]:
-        if i["n"] == "rain":
+        if i["n"] == "temperature":
             f = i["f"]
 
     fieldID = str(f)

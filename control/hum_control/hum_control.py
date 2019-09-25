@@ -33,7 +33,7 @@ def get_api(plantID):
     return readAPI, channel
 
 
-def get_result(plantID, env,devID):
+def get_result(plantID, devID, env):
     """Get the last entries on humidity field and decides if it is necessary or not
     to adjust
     """

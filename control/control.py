@@ -55,37 +55,37 @@ def post_mod(plantID, h, mod=0, modh=0, reset=0, static=0, new_hour=None):
 
     # POST on catalog.
     string = "http://" + URL + ":" +str(PORT) + "/hours"
-    r = requests.post(string, data=json.dumps(data))
+    print(json.dumps(data, indent=1))
+    # r = requests.post(string, data=json.dumps(data))
 
 
-def rain(plantID, h, type, env):
-    if rain_control.get_result(plantID, env):
-        pass
+def rain(plantID, hour, devID):
+    sec = rain_control.get_result(plantID, devID)
+    post_mod(plantID, hour, sec)
 
 
-def light(plantID, h, type, env):
+def light(plantID, hour, devID, type):
     """Type: morning/evening.
     Morning: anticipate irrigation if there is too much light.
     Evening: posticipate irrigation if there is too much light.
     """
-    print(plantID, type)
-    sec = rain_control.get_result(plantID, env, type)
+    sec = light_control.get_result(plantID, devID, type)
+    post_mod(plantID, hour, sec)
+
+def wind(plantID, hour, devID):
+    sec = wind_control.get_result(plantID, devID)
+    post_mod(plantID, hour, sec)
 
 
-def wind(plantID, h, type, env):
-    sec = wind_control.get_result(plantID, env)
-    post_mod(plantID, h, sec)
-    pass
+
+def hum(plantID, hour, devID, env):
+    sec = hum_control.get_result(plantID, devID, env)
+    post_mod(plantID, hour, sec)
 
 
-def hum(plantID, h, type, env):
-    sec = hum_control.get_result(plantID, env)
-    pass
-
-
-def temp(plantID, h, type, env):
-    sec = temp_control.get_result(plantID, env)
-    pass
+def temp(plantID, hour, devID):
+    sec = temp_control.get_result(plantID, devID)
+    post_mod(plantID, hour, sec)
 
 
 class MyPublisher(object):
@@ -135,7 +135,7 @@ class Actuator(object):
                    }
         self.pub.my_publish(json.dumps(message), topic)
 
-    def irr(self, plantID, devID, h, type, env, url, port):
+    def irr(self, plantID, h, devID, type, env, url, port):
 
         # Get dynamic catalog.
         string = "http://" + url + ":" + port + "/dynamic"
@@ -241,37 +241,39 @@ class PlantMng(threading.Thread):
             pID = p["plantID"]
             env = p["environment"]
             for h in p["hours"]:
-                t = delay_h(h["time"], -600)
+                # t = h["time"]
+                t = "11:50"
+                dly = delay_h(t, -600)
                 ty = h["type"]
                 for d in p["devices"]:
                     for r in d["resources"]:
                         res = r["n"]
+                        devID = d["devID"]
                         if res == 'rain':
-                            print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(rain, pID,
-                                                          t, ty, env)
+                            print("Schedule: %s - %s - %s" % (dly, pID, res))
+                            schedule.every().day.at(dly).do(rain, pID,
+                                                          t, devID)
                         if res == 'light':
-                            print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(light, pID,
-                                                          t, ty, env)
+                            print("Schedule: %s - %s - %s" % (dly, pID, res))
+                            schedule.every().day.at(dly).do(light, pID,
+                                                          t, devID, ty)
                         if res == 'wind':
-                            print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(wind, pID,
-                                                          t, ty, env)
+                            print("Schedule: %s - %s - %s" % (dly, pID, res))
+                            schedule.every().day.at(dly).do(wind, pID,
+                                                          t, devID)
                         if res == 'humidity':
-                            print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(hum, pID,
-                                                          t, ty, env)
+                            print("Schedule: %s - %s - %s" % (dly, pID, res))
+                            schedule.every().day.at(dly).do(hum, pID,
+                                                          t, devID, env)
                         if res == 'temperature':
-                            print("Schedule: %s - %s - %s" % (t, pID, res))
-                            schedule.every().day.at(t).do(temp, pID,
-                                                          t, ty, env)
+                            print("Schedule: %s - %s - %s" % (dly, pID, res))
+                            schedule.every().day.at(dly).do(temp, pID,
+                                                          t, devID)
                         if res == 'irrigation':
-                            devID = d["devID"]
-                            print("Schedule: %s - %s - %s" % (h["time"],
-                                                              pID, res))
-                            schedule.every().day.at(t).do(sch.irr, pID, devID,
-                                                          h["time"], ty, env)
+                            print("Schedule: %s - %s - %s" % (t, pID, res))
+                            schedule.every().day.at(t).do(sch.irr, pID,
+                                                          t, devID,
+                                                          ty, env)
 
 
                             # TIME = '16:00'
