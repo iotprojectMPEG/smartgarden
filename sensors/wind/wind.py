@@ -18,9 +18,10 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 import updater
 
-INTENSITY = [(0, 3), (4, 7), (8, 12)]
+INTENSITY = [(0, 10), (11, 33), (34, 64)]  # Knots.
 FILENAME = "conf.json"
 BT = None
+PREVIOUS_VALUE = 5  # To prevent wind changing drastically from previous value.
 
 class MyPublisher(object):
     def __init__(self, clientID, topic, serverIP, port):
@@ -87,13 +88,24 @@ class PubData(threading.Thread):
 
         pub.stop()
 
-def get_data(devID,res):
-    value=None
+def get_data(devID, res):
+    value = None
     try:
-        intensity = np.random.choice([0, 1, 2], p=[0.7, 0.27, 0.03])
+        intensity = np.random.choice([0, 1, 2], p=[0.6, 0.38, 0.02])
         minimum = INTENSITY[intensity][0]
         maximum = INTENSITY[intensity][1]
         value =  np.random.randint(minimum, maximum+1)
+
+        # Maximum range of change: 5
+        global PREVIOUS_VALUE
+        if (value > PREVIOUS_VALUE + 5):
+            value = PREVIOUS_VALUE + 5
+
+        elif (value < PREVIOUS_VALUE - 5):
+            value = PREVIOUS_VALUE - 5
+
+        PREVIOUS_VALUE = value
+
     except:
         pass
 
@@ -102,7 +114,7 @@ def get_data(devID,res):
         "bn": devID,
         "bt": BT,
         "e":[{
-            "n":res[0]["n"],
+            "n": res[0]["n"],
             "u": res[0]["u"],
             "t": timestamp,
             "v": value
