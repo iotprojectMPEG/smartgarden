@@ -78,18 +78,18 @@ def get_result(plantID, devID):
 
     if data2 != []:
         m2 = np.mean(data2)
-        if (m2 >= 3) and (m2 <= 5):
+        if (m2 >= 0) and (m2 <= 10):
             val2 = 60
-        elif m2 > 5:
+        elif m2 > 10:
             val2 = 120
         else:
             val2 = 0
 
     if data1 != []:
         m1 = np.mean(data1)
-        if (m1 >= 3) and (m1 <= 5):
+        if (m1 >= 0) and (m1 <= 10):
             val1 = 90
-        elif m1 > 5:
+        elif m1 > 10:
             val1 = 150
         else:
             val1 = 0
