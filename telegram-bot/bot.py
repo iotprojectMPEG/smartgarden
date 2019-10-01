@@ -16,6 +16,7 @@ import datetime
 import paho.mqtt.client as PahoMQTT
 import numpy as np
 
+CHAT_ID = None  # For spot.
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -163,7 +164,7 @@ def values(bot, update, args):
         r = json.loads(requests.get(string + '/info/' + plantID).text)
         thingspeakID = str(r["thingspeakID"])
         name = str(r["name"])
-        
+
     except:
         msg = "You must provide a valid `plantID`"
         bot.sendMessage(chat_id=update.message.chat_id, text=msg,
@@ -275,6 +276,21 @@ def status(bot, update, args):
             update.message.reply_text(status)
 
 
+def chat(bot, update):
+    global CHAT_ID
+    CHAT_ID = update.message.chat_id
+
+def spot(bot, update):
+    msg = ("*Irrigation has started now!*\n"
+            "⏱ 10 minutes\n"
+            "🔸 Wind: 12 kn\n"
+            "🔸 Humidity: 36 %\n"
+            "🔸 Temperature: 24 ºC\n"
+            "🔸 Rain: No")
+
+    bot.sendMessage(chat_id=CHAT_ID,
+                    text=msg, parse_mode=ParseMode.MARKDOWN)
+
 ############################ Main ##############################################
 def main():
     """Start the bot."""
@@ -299,6 +315,8 @@ def main():
     dp.add_handler(CommandHandler("status", status, pass_args=True))
     dp.add_handler(CommandHandler("values", values, pass_args=True))
     dp.add_handler(CommandHandler("irrigate", irrigation))
+    dp.add_handler(CommandHandler("spot", spot))
+    dp.add_handler(CommandHandler("chat", chat))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
@@ -317,3 +335,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    spot()
