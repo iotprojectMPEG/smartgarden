@@ -8,11 +8,8 @@ Sono necessari i seguenti componenti:
 
 Istruzioni montaggio figura "light.jpg"
 """
-try:
-    import PCF8591 as ADC
-    import RPi.GPIO as GPIO
-except:
-    pass
+import PCF8591 as ADC
+import RPi.GPIO as GPIO
 import json
 import requests
 import threading
@@ -30,11 +27,7 @@ FILENAME = "conf.json"
 BT = None
 DO = 17
 
-try:
-    GPIO.setmode(GPIO.BCM)
-except:
-    pass
-
+GPIO.setmode(GPIO.BCM)
 
 def setup():
     ADC.setup(0x48)

@@ -9,11 +9,8 @@ Sono necessari i seguenti componenti:
 
 Istruzioni montaggio figura "rain.jpg"
 """
-try:
-    import PCF8591 as ADC
-    import RPi.GPIO as GPIO
-except:
-    pass
+import PCF8591 as ADC
+import RPi.GPIO as GPIO
 import json
 import time
 import math
@@ -31,12 +28,8 @@ import updater
 TOPIC = 'smartgarden/+/+/rain'
 FILENAME = "conf.json"
 BT = None
-DO = 17
-try:
-    GPIO.setmode(GPIO.BCM)
-except:
-    pass
-
+DO = 27
+GPIO.setmode(GPIO.BCM)
 
 def setup():
     ADC.setup(0x48)
