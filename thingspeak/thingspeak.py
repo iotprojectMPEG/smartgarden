@@ -17,6 +17,8 @@ import cherrypy
 
 loop_flag = 1
 time_flag = 1
+CHERRY_CONF = "cherrypyconf"
+FILE = "conf.json"
 
 
 ############################ Functions ############################
@@ -237,49 +239,95 @@ class SubmitData(threading.Thread):
             ts_publish(sub.send_data(), self.ts_url)
 
 
-# class CherryThread(threading.Thread):
-#     def __init__(self, ThreadID, name):
-#         threading.Thread.__init__(self)
-#         self.ThreadID = ThreadID
-#         self.name = name
-#         (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
-#         (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
-#         self.mqtt_port = int(mqtt_port)
-#
-#     def run(self):
-#         try:
-#             cherrypy.tree.mount(WebServer(), '/', config=CHERRY_CONF)
-#             cherrypy.config.update(CHERRY_CONF)
-#             cherrypy.engine.start()
-#             cherrypy.engine.block()
-#         except KeyboardInterrupt:
-#             print ("Stopping the engine")
-#             return
-#
-# class WebServer():
-#     """CherryPy webserver."""
-#     exposed = True
-#
-#     @cherrypy.tools.json_out()
-#     def GET(self, *uri, **params):
-#
-#         catalog = Catalog(JSON_STATIC, JSON_DYNAMIC)
-#         catalog.load_file()
-#
-#         if uri[0] == 'data':
-#             uri[1] == plantID
-#             uri[2] == resource
-#             time = param["time"]
-#             time_value = param["tval"]
-#             plantID = param["plantID"]
-#
-#     string2 = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
-#               fieldID + ".json?api_key=" + readAPI + "&hours=" + hours)
+class CherryThread(threading.Thread):
+    def __init__(self, ThreadID, name):
+        threading.Thread.__init__(self)
+        self.ThreadID = ThreadID
+        self.name = name
+        (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
+        (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
+        self.mqtt_port = int(mqtt_port)
+
+    def run(self):
+        try:
+            cherrypy.tree.mount(WebServer(), '/', config=CHERRY_CONF)
+            cherrypy.config.update(CHERRY_CONF)
+            cherrypy.engine.start()
+            cherrypy.engine.block()
+        except KeyboardInterrupt:
+            print ("Stopping the engine")
+            return
+
+class WebServer():
+    """CherryPy webserver."""
+    exposed = True
+
+    @cherrypy.tools.json_out()
+    def GET(self, *uri, **params):
+
+        if uri[0] == 'data':
+            plantID = uri[1]
+            resource = uri[2]
+            time = params["time"]
+            time_value = str(params["tval"])
+            plantID = params["plantID"]
+            devID = params["devID"]
+
+        readAPI, channelID = get_api(plantID)
+        fieldID = str(get_field(resource, devID))
+
+
+        string2 = ("https://api.thingspeak.com/channels/" + str(channelID) +
+                   "/fields/" + fieldID + ".json?api_key=" + str(readAPI) + "&" +
+                   str(time) + "=" + str(time_value))
+        print("\n", string2, "\n\n")
+        res = json.loads(requests.get(string2).text)
+
+        data = []
+        for r in res["feeds"]:
+            if r["field"+str(fieldID)] != None:
+                data.append(float(r["field"+str(fieldID)]))
+            else:
+                pass
+
+        data = {"data": data}
+        return data
+
+def get_api(plantID):
+    """Asks catalog readAPI and channelID."""
+    url, port = read_file2(FILE)
+    string = "http://" + url + ":" + port + "/info/" + plantID
+    r = json.loads(requests.get(string).text)
+    channel = r["thingspeakID"]
+    string = "http://" + url + ":" + port + "/api/tschannel/" + str(channel)
+    r = json.loads(requests.get(string).text)
+    readAPI = r["readAPI"]
+    return readAPI, channel
+
+def read_file2(filename):
+    """Read json file to get catalogURL, port."""
+    with open(filename, "r") as f:
+        data = json.loads(f.read())
+        url = data["catalogURL"]
+        port = data["port"]
+        return (url, port)
+
+def get_field(resource, devID):
+    url, port = read_file2(FILE)
+    string = "http://" + url + ":" + port + "/info/" + devID
+    print("\n", string, "\n")
+    r = json.loads(requests.get(string).text)
+    for i in r["resources"]:
+        if i["n"] == resource:
+            f = i["f"]
+
+    fieldID = str(f)
+    return fieldID
 
 if __name__ == "__main__":
     thread1 = SubmitData(1, "SubmitData")
     thread1.start()
     thread2 = Timer(2, "Timer")
     thread2.start()
-    # thread3 = CherryThread(3, "CherryServer")
-    # thread3.start()
+    thread3 = CherryThread(3, "CherryServer")
+    thread3.start()
