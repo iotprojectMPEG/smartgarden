@@ -12,6 +12,7 @@ import datetime
 import sys,os,inspect
 import threading
 import requests
+import cherrypy
 
 
 loop_flag = 1
@@ -153,48 +154,48 @@ class MySubscriber(object):
         return data
 
     def my_on_message_received(self, client, userdata, msg):
-        try:
-            # Read conf.json file
-            (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
+        # try:
+        # Read conf.json file
+        (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
 
-            # Decode received message and find devID
-            msg.payload = msg.payload.decode("utf-8")
-            message = json.loads(msg.payload)
-            devID = message['bn']
+        # Decode received message and find devID
+        msg.payload = msg.payload.decode("utf-8")
+        message = json.loads(msg.payload)
+        devID = message['bn']
 
-            # Ask catalog for plantID from devID
-            string = "http://" + self.url + ":" + self.port + "/info/" + devID
-            info_d = json.loads(requests.get(string).text)
-            plantID = info_d["plantID"]
+        # Ask catalog for plantID from devID
+        string = "http://" + self.url + ":" + self.port + "/info/" + devID
+        info_d = json.loads(requests.get(string).text)
+        plantID = info_d["plantID"]
 
-            # Ask catalog the thingspeakID for that specific plantID.
-            string = "http://" + self.url + ":" + self.port + "/info/" + plantID
-            info = json.loads(requests.get(string).text)
-            thingspeakID = info['thingspeakID']
+        # Ask catalog the thingspeakID for that specific plantID.
+        string = "http://" + self.url + ":" + self.port + "/info/" + plantID
+        info = json.loads(requests.get(string).text)
+        thingspeakID = info['thingspeakID']
 
-            # Ask catalog the APIs for that ThingSpeak ID.
-            string = ("http://" + self.url + ":" + self.port +
-                       "/api/tschannel/" + str(thingspeakID))
-            info = json.loads(requests.get(string).text)
-            write_API = info["writeAPI"]
+        # Ask catalog the APIs for that ThingSpeak ID.
+        string = ("http://" + self.url + ":" + self.port +
+                   "/api/tschannel/" + str(thingspeakID))
+        info = json.loads(requests.get(string).text)
+        write_API = info["writeAPI"]
 
-            # Update values in the database.
-            self.db.create(plantID, str(write_API))
-            for item in message["e"]:
-                if item["n"] == 'alive':
-                    pass
-                else:
-                    topic = item["n"]
-                    for item2 in info_d["resources"]:
-                        if item2["n"] == topic:
-                            feed = item2["f"]
+        # Update values in the database.
+        self.db.create(plantID, str(write_API))
+        for item in message["e"]:
+            if item["n"] == 'alive':
+                pass
+            else:
+                topic = item["n"]
+                for item2 in info_d["resources"]:
+                    if item2["n"] == topic:
+                        feed = item2["f"]
 
-                    value = item["v"]
-                    self.db.update_data(str(write_API), feed, value)
+                value = item["v"]
+                self.db.update_data(str(write_API), feed, value)
 
-        except:
-            print("Invalid message type")
-            pass
+        # except:
+        #     print("Invalid message type")
+        #     pass
 
 
 ############################ Threads ############################
@@ -236,8 +237,49 @@ class SubmitData(threading.Thread):
             ts_publish(sub.send_data(), self.ts_url)
 
 
+# class CherryThread(threading.Thread):
+#     def __init__(self, ThreadID, name):
+#         threading.Thread.__init__(self)
+#         self.ThreadID = ThreadID
+#         self.name = name
+#         (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
+#         (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
+#         self.mqtt_port = int(mqtt_port)
+#
+#     def run(self):
+#         try:
+#             cherrypy.tree.mount(WebServer(), '/', config=CHERRY_CONF)
+#             cherrypy.config.update(CHERRY_CONF)
+#             cherrypy.engine.start()
+#             cherrypy.engine.block()
+#         except KeyboardInterrupt:
+#             print ("Stopping the engine")
+#             return
+#
+# class WebServer():
+#     """CherryPy webserver."""
+#     exposed = True
+#
+#     @cherrypy.tools.json_out()
+#     def GET(self, *uri, **params):
+#
+#         catalog = Catalog(JSON_STATIC, JSON_DYNAMIC)
+#         catalog.load_file()
+#
+#         if uri[0] == 'data':
+#             uri[1] == plantID
+#             uri[2] == resource
+#             time = param["time"]
+#             time_value = param["tval"]
+#             plantID = param["plantID"]
+#
+#     string2 = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
+#               fieldID + ".json?api_key=" + readAPI + "&hours=" + hours)
+
 if __name__ == "__main__":
     thread1 = SubmitData(1, "SubmitData")
     thread1.start()
     thread2 = Timer(2, "Timer")
     thread2.start()
+    # thread3 = CherryThread(3, "CherryServer")
+    # thread3.start()
