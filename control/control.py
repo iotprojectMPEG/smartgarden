@@ -406,22 +406,26 @@ class UpdateList(threading.Thread):
                                     else:
                                         delta = (event_irr - event_irr).total_seconds()
                                         timedeltas_even.insert(len(timedeltas_even), delta)
+
                                 #Viene fatta la media di tutte le differenze di tempo per mattino e sera e
                                 #aggiungo la differenza media al vecchio orario
 
                                 try:
-                                    delta_morn_mean = sum(timedeltas_morn)/len(timedeltas_morn)
-                                    delta_even_mean = sum(timedeltas_even)/len(timedeltas_even)
+                                    delta_morn_mean = round(sum(timedeltas_morn)/len(timedeltas_morn))
+                                    delta_even_mean = round(sum(timedeltas_even)/len(timedeltas_even))
 
-                                    new_morn_irr = morn_irr + datetime.timedelta(seconds=delta_morn_mean)
-                                    new_even_irr = even_irr + datetime.timedelta(seconds=delta_even_mean)
-                                    # Ottengo il nuovo orario aggiornato per mattino e sera
-                                    hms_morn_irr = (datetime.datetime.min +new_morn_irr).time()
-                                    hms_even_irr = (datetime.datetime.min +new_even_irr).time()
+                                    if (delta_morn_mean >= 600) or (delta_morn_mean <= -600):
+                                        new_morn_irr = morn_irr + datetime.timedelta(seconds=delta_morn_mean)
+                                        hms_morn_irr = (datetime.datetime.min +new_morn_irr).time()
+                                        update_time["hours"][0]["time"] = '{:02d}:{:02d}'.format(hms_morn_irr.hour, hms_morn_irr.minute)
 
 
-                                    update_time["hours"][0]["time"] = '{:02d}:{:02d}'.format(hms_morn_irr.hour, hms_morn_irr.minute)
-                                    update_time["hours"][1]["time"] = '{:02d}:{:02d}'.format(hms_even_irr.hour, hms_even_irr.minute)
+                                    if (delta_even_mean >= 600) or (delta_even_mean <= -600):
+                                        new_even_irr = even_irr + datetime.timedelta(seconds=delta_even_mean)
+                                        hms_even_irr = (datetime.datetime.min +new_even_irr).time()
+                                        update_time["hours"][1]["time"] = '{:02d}:{:02d}'.format(hms_even_irr.hour, hms_even_irr.minute)
+
+
                                     upd_string = "http://" + url + ":" + port + "/update/time"
                                     print("UPDATE:", update_time)
 
