@@ -9,63 +9,36 @@ import numpy as np
 import requests
 
 FILE = "conf.json"
-FIELD = 1  # Da prendere altrove.
-
 
 def read_file(filename):
     """Read json file to get catalogURL, port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
-        url = data["catalogURL"]
-        port = data["port"]
+        url = "http://" + data["URL"]
+        port = data["thing_port"]
         return (url, port)
-
-
-def get_api(plantID):
-    """Asks catalog readAPI and channelID."""
-    url, port = read_file(FILE)
-    string = "http://" + url + ":" + port + "/info/" + plantID
-    r = json.loads(requests.get(string).text)
-    channel = r["thingspeakID"]
-    string = "http://" + url + ":" + port + "/api/tschannel/" + str(channel)
-    r = json.loads(requests.get(string).text)
-    readAPI = r["readAPI"]
-    return readAPI, channel
-
 
 def get_result(plantID, devID):
     """Get the last entries on humidity field and decides if it is necessary or not
     to adjust
     """
-    readAPI, channelID = get_api(plantID)
 
+    plantID = plantID
+    devID = devID
+    resource = "temperature"
+    time = "days"
+    tval = str(3)
     url, port = read_file(FILE)
-    string = "http://" + url + ":" + port + "/info/" + devID
-    print(string)
-    r = json.loads(requests.get(string).text)
-    for i in r["resources"]:
-        if i["n"] == "temperature":
-            f = i["f"]
+    string = (url + ":" + port + "/data/" + plantID + "/" + resource + "?time="
+              + time + "&tval=" + tval + "&plantID=" + plantID + "&devID=" +
+              devID)
 
-    fieldID = str(f)
-    channelID = str(channelID)
-    readAPI = str(readAPI)
-    hours = str(11)
-    string = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
-              fieldID + ".json?api_key=" + readAPI + "&hours=" + hours)
-    res = json.loads(requests.get(string).text)
-    print(string)
-    data = []
-    for r in res["feeds"]:
-        try:
-            data.append(int(r["field"+str(f)])) #
-        except:
-            pass
-
+    #"http://127.0.0.1:8081/data/p_1001/temperature?time=hours&tval=11&plantID=p_1001&devID=d_1001"
+    data = json.loads(requests.get(string).text)
+    data = data["data"]
     if data != []:
         m = np.mean(data)
-
-        v = 80 * np.arctan(0.05 * m)  # Add 300 seconds.
+        v = 80 * np.arctan(0.05 * m)
         return v
 
     else:
@@ -73,7 +46,7 @@ def get_result(plantID, devID):
 
 def main():
 
-    print(get_result("p_1001"))  # Example.
+    print(get_result("p_1001", "d_1001"))  # Example.
 
 if __name__ == '__main__':
     main()
