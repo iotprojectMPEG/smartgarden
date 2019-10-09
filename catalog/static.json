@@ -19,9 +19,8 @@
           }],
           "thingspeakID": 741610,
           "environment": {
-            "water": 100,
-            "humidity": 90,
-            "temperature": 30
+            "water": 600,
+            "humidity": 90
           },
           "devices": [{
               "devID": "d_1001",
@@ -80,9 +79,8 @@
           }],
           "thingspeakID": 822665,
           "environment": {
-            "water": 100,
-            "humidity": 90,
-            "temperature": 30
+            "water": 600,
+            "humidity": 90
           },
           "devices": [{
               "devID": "d_1004",
@@ -159,6 +157,10 @@
           "type": "evening"
         }],
         "thingspeakID": 868854,
+        "environment": {
+          "water": 600,
+          "humidity": 90
+        },
         "devices": [{
             "devID": "d_1008",
             "name": "DHT11",
