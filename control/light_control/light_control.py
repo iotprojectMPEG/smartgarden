@@ -66,37 +66,38 @@ def get_result(plantID, devID, type):
     try:
         if type ==  'evening':
 
-            if (m >= 100) and (m < 120):
-                return 1800
+            if (m >= 140) and (m < 160):  # Very dark
+                return -1800  # Anticipation of 30 minutes
 
-            elif (m >= 120) and (m < 180):
-                return 3600
+            elif (m >= 110) and (m < 140):  # Dark
+                return -900  # Anticipation of 15 minutes
 
-            elif (m >= 180):
-                return 7200
+            elif (m >= 90 and m < 110):  # Ideal
+                return 0  # Ideal time, no delay
 
-            elif (m >= 80 and m < 100):
-                return 0
+            elif (m >= 70 and m < 90):  # Bright
+                return 1800  # Posticipation of 30 minutes
 
-            elif (m < 80):
-                return -900
+            elif (m < 70):  # Very bright
+                return 3600  # Posticipation of 60 minutes
 
 
         elif type == 'morning':
-            if (m >= 100) and (m < 120):
-                return -1800
 
-            elif (m >= 120) and (m < 180):
-                return -3600
+            if (m >= 140) and (m < 160):  # Very dark
+                return 3600  # Posticipation of 60 minutes
 
-            elif (m >= 180):
-                return -7200
+            elif (m >= 110) and (m < 140):  # Dark
+                return 1800  # Posticipation of 30 minutes
 
-            elif (m >= 80 and m < 100):
-                return 0
+            elif (m >= 90 and m < 110):  # Ideal
+                return 0  # Ideal time, no delay
 
-            elif (m < 80):
-                return +900
+            elif (m >= 70 and m < 90):  # Bright
+                return -900  # Anticipation of 15 minutes
+
+            elif (m < 70):  # Very bright
+                return -1800  # Anticipation of 30 minutes
 
     except:
         return 0

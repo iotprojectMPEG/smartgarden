@@ -64,14 +64,14 @@ def get_result(plantID, devID):
     if data != []:
         m = np.mean(data)
         print("mean:", m)
-        if m >= 0.6:
-            return -1  # Do not irrigate.
+        if m >= 0.6:  # Rain for at least 60% of the time
+            return -1  # Do not irrigate
 
-        elif (m >= 0.2) and (m < 0.6):
-            return -120  # Remove 120 seconds.
+        elif (m >= 0.4) and (m < 0.6):  # Rain from 40-60% of the time
+            return -120  # Remove 120 seconds
 
-        else:
-            return 0  # No modifications.
+        else:  # Almost no rain
+            return 0  # No modifications
 
 
 def main():

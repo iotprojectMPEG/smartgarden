@@ -56,46 +56,47 @@ def get_result(plantID, devID):
     string1 = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
               fieldID + ".json?api_key=" + readAPI + "&minutes=" + minutes)
     res1 = json.loads(requests.get(string1).text)
-    data1 = []
+    data_short = []
     for r in res1["feeds"]:
         try:
-            data1.append(int(r["field"+str(f)])) #
+            data_short.append(int(r["field"+str(f)])) #
         except:
             pass
 
     string2 = ("https://api.thingspeak.com/channels/" + channelID + "/fields/" +
               fieldID + ".json?api_key=" + readAPI + "&hours=" + hours)
     res2 = json.loads(requests.get(string2).text)
-    data2 = []
+    data_long = []
     for r in res2["feeds"]:
         try:
-            data2.append(int(r["field"+str(f)]))  # Field number (?).
+            data_long.append(int(r["field"+str(f)]))  # Field number (?).
         except:
             pass
 
     val1 = 0
     val2 = 0
 
-    if data2 != []:
-        m2 = np.mean(data2)
-        if (m2 >= 0) and (m2 <= 10):
-            val2 = 60
-        elif m2 > 10:
-            val2 = 120
-        else:
-            val2 = 0
+    # During an extended period of time.
+    if data_long != []:
+        m2 = np.mean(data_long)
+        if (m2 >= 3) and (m2 <= 10):  # Light wind
+            val2 = 60  # Augment duration by 60 seconds
+        elif m2 > 10:  # Strong wind
+            val2 = 120  # Augment duration by 120 seconds
+        else:  # No wind
+            val2 = 0  # No modification
 
-    if data1 != []:
-        m1 = np.mean(data1)
-        if (m1 >= 0) and (m1 <= 10):
-            val1 = 90
-        elif m1 > 10:
-            val1 = 150
-        else:
-            val1 = 0
+    # In real time.
+    if data_short != []:
+        m1 = np.mean(data_short)
+        if (m1 >= 3) and (m1 <= 10):  # Light wind
+            val1 = 90  # Augment duration by 90 seconds
+        elif m1 > 10:  # Strong wind
+            val1 = 150  # Augment duration by 150 seconds
+        else:  # No wind
+            val1 = 0  # No modification
 
     return val1 + val2
-
 
 
 def main():
