@@ -241,6 +241,8 @@ class Catalog(object):
 
     def edit_hour(self, plantID, hour, duration, delay, reset):
         self.load_file()
+
+
         for g in self.dynamic["gardens"]:
             for p in g["plants"]:
                 if p["plantID"] == plantID:
@@ -250,7 +252,12 @@ class Catalog(object):
                             # Irrigation has be just programmed and data should
                             # be reset.
                             if reset == 1:
-                                h["mod"] = 120  # Reset value
+                                for g2 in self.static["gardens"]:
+                                    for p2 in g2["plants"]:
+                                        if p2["plantID"] == plantID:
+                                            reset_hour = p2["environment"]["water"]
+
+                                h["mod"] = reset_hour  # Reset value
                                 h["modh"] = 0
 
                             # No reset -> Update irrigation.
