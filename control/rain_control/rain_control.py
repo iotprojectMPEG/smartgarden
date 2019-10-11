@@ -13,14 +13,22 @@ FILE = "conf.json"
 FIELD = 5  # Da prendere altrove.
 
 
+# def read_file(filename):
+#     """Read json file to get catalogURL, port."""
+#     with open(filename, "r") as f:
+#         data = json.loads(f.read())
+#         url = data["catalogURL"]
+#         port = data["port"]
+#         return (url, port)
+
 def read_file(filename):
     """Read json file to get catalogURL, port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
-        url = data["catalogURL"]
-        port = data["port"]
+        url = "http://" + data["URL"]
+        port = data["thing_port"]
         return (url, port)
-
+        
 
 def get_api(plantID):
     """Asks catalog readAPI and channelID."""
