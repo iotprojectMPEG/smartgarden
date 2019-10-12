@@ -67,7 +67,9 @@ def rain(plantID, hour, devID):
 def light(plantID, hour, devID, type):
     """Type: morning/evening.
     Morning: anticipate irrigation if there is too much light.
+             posticipate irrigation if there is not enough light.
     Evening: posticipate irrigation if there is too much light.
+             anticipate irrigation if there is not enough light.
     """
     sec = light_control.get_result(plantID, devID, type)
     post_mod(plantID, hour, sec)
@@ -75,8 +77,6 @@ def light(plantID, hour, devID, type):
 def wind(plantID, hour, devID):
     sec = wind_control.get_result(plantID, devID)
     post_mod(plantID, hour, sec)
-
-
 
 def hum(plantID, hour, devID, env):
     sec = hum_control.get_result(plantID, devID, env)

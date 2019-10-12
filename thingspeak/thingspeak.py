@@ -31,7 +31,7 @@ def ts_publish(list, url):
 
 
 def read_file(filename):
-    """Read json file to get devID, catalogURL and port."""
+    """Read json file to get catalogURL, port, topic and ThingSpeak URL."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
         url = data["catalogURL"]
@@ -39,6 +39,15 @@ def read_file(filename):
         port = data["port"]
         ts_url = data["thingspeakURL"]
         return (url, port, topic, ts_url)
+
+
+def read_file_short(filename):
+    """Read json file to get catalogURL and port."""
+    with open(filename, "r") as f:
+        data = json.loads(f.read())
+        url = data["catalogURL"]
+        port = data["port"]
+        return (url, port)
 
 
 def broker_info(url, port):
@@ -204,6 +213,7 @@ class MySubscriber(object):
 class SubmitData(threading.Thread):
     """Main thread which calls MQTT subscriber, database and publishing classes
     and functions.
+    Data are collected for 15 seconds and then published.
     """
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
@@ -240,6 +250,7 @@ class SubmitData(threading.Thread):
 
 
 class CherryThread(threading.Thread):
+    """Thread to run CherryPy webserver."""
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
@@ -259,7 +270,15 @@ class CherryThread(threading.Thread):
             return
 
 class WebServer():
-    """CherryPy webserver."""
+    """CherryPy webserver. It works as an adaptor for strategies scripts.
+    It receives GETs from control strategies and send GETs to ThingSpeak in
+    order to get information and return them back to strategies.
+
+    For example: temp. strategy asks the adaptor data about temp values of
+    plant p_1001 over the last five hours. The adaptor asks ThingSpeak and
+    receives the data. The adaptor sends back a json with the list of temp.
+    values.
+    """
     exposed = True
 
     @cherrypy.tools.json_out()
@@ -295,7 +314,7 @@ class WebServer():
 
 def get_api(plantID):
     """Asks catalog readAPI and channelID."""
-    url, port = read_file2(FILE)
+    url, port = read_file_short(FILE)
     string = "http://" + url + ":" + port + "/info/" + plantID
     r = json.loads(requests.get(string).text)
     channel = r["thingspeakID"]
@@ -304,16 +323,13 @@ def get_api(plantID):
     readAPI = r["readAPI"]
     return readAPI, channel
 
-def read_file2(filename):
-    """Read json file to get catalogURL, port."""
-    with open(filename, "r") as f:
-        data = json.loads(f.read())
-        url = data["catalogURL"]
-        port = data["port"]
-        return (url, port)
 
 def get_field(resource, devID):
-    url, port = read_file2(FILE)
+    """Get field number for a specific resource. The number is used on TS to
+    identify a channel field. It is also stored in the catalog associated to
+    the sensor in the resource list.
+    """
+    url, port = read_file_short(FILE)
     string = "http://" + url + ":" + port + "/info/" + devID
     print("\n", string, "\n")
     r = json.loads(requests.get(string).text)
