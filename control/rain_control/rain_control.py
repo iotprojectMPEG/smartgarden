@@ -88,7 +88,7 @@ def get_result(plantID, devID):
 
     plantID = plantID
     devID = devID
-    resource = "Rain"
+    resource = "rain"
     time = "hours"
     tval = str(2)
     url, port = read_file(FILE)
@@ -96,7 +96,7 @@ def get_result(plantID, devID):
               + time + "&tval=" + tval + "&plantID=" + plantID + "&devID=" +
               devID)
 
-    #"http://127.0.0.1:8081/data/p_1002/temperature?time=hours&tval=11&plantID=p_1001&devID=d_1001"
+    #"http://127.0.0.1:8081/data/p_1002/rain?time=hours&tval=2&plantID=p_1002&devID=d_1006"
     data = json.loads(requests.get(string).text)
     data = data["data"]
     if data != []:
