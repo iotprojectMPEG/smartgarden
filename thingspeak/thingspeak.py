@@ -51,7 +51,7 @@ def read_file_short(filename):
 
 
 def broker_info(url, port):
-    """Send GET request to catalog in order to obrain MQTT broker info."""
+    """Send GET request to catalog in order to obtain MQTT broker info."""
     string = "http://" + url + ":" + port + "/broker"
     broker = requests.get(string)
     broker_ip = json.loads(broker.text)["IP"]
