@@ -26,7 +26,8 @@ def read_file(filename):
 
 def find_me(devID, url, port):
     """Send GET request to catalog with devID in order to obtain gardenID,
-    plantID, resources.
+    plantID, resources associated to the sensor.
+    Used by the sensors in order to build the MQTT topic.
     """
     string = "http://" + url + ":" + port + "/info/" + devID
     info = json.loads(requests.get(string).text)
@@ -37,7 +38,9 @@ def find_me(devID, url, port):
 
 
 def broker_info(url, port):
-    """Send GET request to catalog in order to obtain MQTT broker info."""
+    """Send GET request to catalog in order to obtain MQTT broker IP and
+    port.
+    """
     string = "http://"+ url + ":" + port + "/broker"
     broker = requests.get(string)
     broker_ip = json.loads(broker.text)["IP"]
@@ -47,7 +50,8 @@ def broker_info(url, port):
 
 class Alive(threading.Thread):
     """Thread which sends "alive" messages via MQTT to update devices timestamp
-    on dynamic catalog.
+    on dynamic catalog. Alive message contains also the sensor topic which
+    will be updated on dynamic part of the catalog.
     """
     def __init__(self, ThreadID, name):
         threading.Thread.__init__(self)

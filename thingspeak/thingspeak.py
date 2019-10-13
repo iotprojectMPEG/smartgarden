@@ -80,7 +80,21 @@ class Timer(threading.Thread):
 
 class Database(object):
     """Manage a database with info collected from sensors which have to be
-    published later on ThingSpeak.
+    published later on ThingSpeak. The database is filled with data and every
+    15 seconds it is emptied and these data are sent to ThingSpeak in a single
+    POST. It is to prevent sending too much messages to ThingSpeak which can
+    update a channel only every 15 seconds (free version).
+    Data are stored in a list of jsons. Every json contains an API_key which
+    refers to a specific channel, a creation time and field values of a plant.
+    Example:
+    [
+        {
+            "api_key": 00000,
+            "created_at": 18-23-43T43..
+            "field1": 50,
+            "field4": 30
+        },
+    ]
     """
     def __init__(self):
         self.list_ID = []
@@ -133,6 +147,7 @@ class Database(object):
 
 
 class MySubscriber(object):
+    """MQTT subscriber."""
     def __init__(self, clientID, topic, serverIP):
         self.clientID = clientID
         self.topic = topic
