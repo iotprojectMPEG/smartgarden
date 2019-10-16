@@ -100,7 +100,19 @@ class PubData(threading.Thread):
 
 
 def get_data(devID, res):
-    value = randint(0, 1)
+    with open("rain_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("rain_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i==0:
+                row=lines[0].split(',')
+                value=float(row[0])
+
+            else:
+                row=lines[i].split(',')[0]
+                f.write("%s,\n" % row)
+    f.close()
     status=None
     try:
         status = GPIO.input(DO)

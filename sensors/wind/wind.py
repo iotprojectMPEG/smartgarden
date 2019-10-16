@@ -89,7 +89,19 @@ class PubData(threading.Thread):
         pub.stop()
 
 def get_data(devID, res):
-    value = None
+    with open("wind_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("wind_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i==0:
+                row=lines[0].split(',')
+                value=float(row[0])
+
+            else:
+                row=lines[i].split(',')[0]
+                f.write("%s,\n" % row)
+    f.close()
     try:
         intensity = np.random.choice([0, 1, 2], p=[0.6, 0.38, 0.02])
         minimum = INTENSITY[intensity][0]

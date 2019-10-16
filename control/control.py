@@ -429,7 +429,7 @@ class UpdateList(threading.Thread):
                                     upd_string = "http://" + url + ":" + port + "/update/time"
                                     print("UPDATE:", update_time)
 
-                                    print (upd_string, update_time)
+                                    print(upd_string, update_time)
                                     r = requests.post(upd_string, data=json.dumps(update_time))
                                 except:
                                     print("No irrigation data")

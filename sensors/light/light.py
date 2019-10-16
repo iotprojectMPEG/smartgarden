@@ -101,7 +101,19 @@ class PubData(threading.Thread):
 
 
 def get_data(devID, res):
-    value = randint(0, 255)
+    with open("light_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("light_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i==0:
+                row=lines[0].split(',')
+                value=float(row[0])
+
+            else:
+                row=lines[i].split(',')[0]
+                f.write("%s,\n" % row)
+    f.close()
     try:
         value = ADC.read(0)
     except:

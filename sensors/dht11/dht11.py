@@ -27,8 +27,35 @@ BT = None  # Basetime
 def get_data(devID, res):
     """Get humidity and temperature from sensor. Return two jsons."""
     # Initialization.
-    humidity = randint(0, 100)
-    temperature = randint(0, 100)
+    with open("hum_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("hum_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i==0:
+                row=lines[0].split(',')
+                humidity=float(row[0])
+
+            else:
+                row=lines[i].split(',')[0]
+                f.write("%s,\n" % row)
+    f.close()
+
+    with open("temp_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("temp_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i==0:
+                row=lines[0].split(',')
+                temperature=float(row[0])
+
+            else:
+                row=lines[i].split(',')[0]
+                for j in row:
+                    f.write("%s,\n" % j)
+    f.close()
+    
 
     # Read data from sensor
     try:
