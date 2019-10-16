@@ -19,12 +19,10 @@ def read_file(filename):
         return (url, port)
 
 def get_result(plantID, devID):
-    """Get the last entries on humidity field and decides if it is necessary or not
-    to adjust
+    """Get the last entries on humidity field and decides if it is necessary or
+    not to modify duration of irrigation.
     """
 
-    plantID = plantID
-    devID = devID
     resource = "temperature"
     time = "days"
     tval = str(3)
@@ -33,7 +31,6 @@ def get_result(plantID, devID):
               + time + "&tval=" + tval + "&plantID=" + plantID + "&devID=" +
               devID)
 
-    #"http://127.0.0.1:8081/data/p_1001/temperature?time=hours&tval=11&plantID=p_1001&devID=d_1001"
     data = json.loads(requests.get(string).text)
     data = data["data"]
     if data != []:
@@ -45,7 +42,6 @@ def get_result(plantID, devID):
         return None
 
 def main():
-
     print(get_result("p_1001", "d_1001"))  # Example.
 
 if __name__ == '__main__':
