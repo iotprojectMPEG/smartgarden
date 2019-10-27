@@ -209,7 +209,8 @@ class Catalog(object):
                     info = {"gardenID": g["gardenID"], "plantID": ID,
                             "name": p["name"],
                             "thingspeakID": p["thingspeakID"],
-                            "devices": p["devices"]}
+                            "devices": p["devices"],
+                            "hours": p["hours"]}
                     return info
 
                 topic = None
