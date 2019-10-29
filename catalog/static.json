@@ -7,6 +7,7 @@
       "gardenID": "g_1001",
       "name": "Casa in montagna",
       "location": "Torino",
+      "users": ["edo_fax","paolograsso"],
       "plants": [{
           "plantID": "p_1001",
           "name": "Dionaea muscipula",
@@ -146,6 +147,7 @@
       "gardenID": "g_1002",
       "name": "Giardino al mare",
       "location": "Palermo",
+      "users": ["Marzia1326","GenRen"],
       "plants": [{
         "plantID": "p_1003",
         "name": "Aloe vera",
