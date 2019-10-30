@@ -250,16 +250,7 @@ class Catalog(object):
             if c["ID"] == id:
                 return c
 
-    def edit_hour(self, plantID, hour, duration, delay, reset):
-        """Modify irrigation parameter (duration and delay).
-
-        hour:     hour which has to be modified e.g. 19:00
-        duration: seconds to add or subtract from irrigation time e.g. +200
-        delay:    seconds of delay (anticipation or posticipation) e.g. +1800
-        reset:    boolean flag. reset=1 means to reset all data to default.
-                  It is used after the irrigation has started, in view of the
-                  next irrigation whose parameters are not defined yet.
-        """
+    def edit_hour(self, plantID, hour, duration, delay):
         self.load_file()
 
         for g in self.dynamic["gardens"]:
@@ -267,29 +258,58 @@ class Catalog(object):
                 if p["plantID"] == plantID:
                     for h in p["hours"]:
                         if h["time"] == hour:
+                            h["delay"] += delay
 
-                            # Irrigation has be just programmed and data should
-                            # be reset.
-                            if reset == 1:
-                                for g2 in self.static["gardens"]:
-                                    for p2 in g2["plants"]:
-                                        if p2["plantID"] == plantID:
-                                            reset_hour = p2["environment"]["water"]
+                            if duration == -1:  # Raining.
+                                h["duration"] = -1  # No irrigation.
 
-                                h["mod"] = reset_hour  # Reset value
-                                h["modh"] = 0
-
-                            # No reset -> Update irrigation.
-                            else:
-                                h["modh"] += delay
-
-                                if duration == -1:  # Raining.
-                                    h["mod"] = -1  # No irrigation.
-
-                                elif h["mod"] != -1:  # Not raining.
-                                    h["mod"] += duration  # Irrigation.
+                            elif h["duration"] != -1:  # Not raining.
+                                h["duration"] += duration  # Irrigation.
 
         self.write_dynamic()
+
+
+
+    # def edit_hour(self, plantID, hour, duration, delay, reset):
+    #     """Modify irrigation parameter (duration and delay).
+    #
+    #     hour:     hour which has to be modified e.g. 19:00
+    #     duration: seconds to add or subtract from irrigation time e.g. +200
+    #     delay:    seconds of delay (anticipation or posticipation) e.g. +1800
+    #     reset:    boolean flag. reset=1 means to reset all data to default.
+    #               It is used after the irrigation has started, in view of the
+    #               next irrigation whose parameters are not defined yet.
+    #     """
+    #     self.load_file()
+    #
+    #     for g in self.dynamic["gardens"]:
+    #         for p in g["plants"]:
+    #             if p["plantID"] == plantID:
+    #                 for h in p["hours"]:
+    #                     if h["time"] == hour:
+    #
+    #                         # Irrigation has be just programmed and data should
+    #                         # be reset.
+    #                         if reset == 1:
+    #                             for g2 in self.static["gardens"]:
+    #                                 for p2 in g2["plants"]:
+    #                                     if p2["plantID"] == plantID:
+    #                                         reset_hour = p2["environment"]["water"]
+    #
+    #                             h["mod"] = reset_hour  # Reset value
+    #                             h["modh"] = 0
+    #
+    #                         # No reset -> Update irrigation.
+    #                         else:
+    #                             h["modh"] += delay
+    #
+    #                             if duration == -1:  # Raining.
+    #                                 h["mod"] = -1  # No irrigation.
+    #
+    #                             elif h["mod"] != -1:  # Not raining.
+    #                                 h["mod"] += duration  # Irrigation.
+    #
+    #     self.write_dynamic()
 
 
     def edit_static_hour(self, plantID, hour, new_hour):
@@ -405,25 +425,34 @@ class Webserver(object):
             cat.add_device(body)
             return 200
 
+
         # Change irrigation parameters (duration and hours) on dynamic part.
-        # If static == 0 change duration and delay of irrigation on dynamic.
-        # if static == 1 change old to new hour in static and dynamic parts.
-        if uri[0] == 'hours':
+        if uri[0] == 'edit_hour':
             body = json.loads(cherrypy.request.body.read())
             cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
+            cat.edit_hour(body["plantID"], body["hour"],
+                                 body["duration"], body["delay"])
+            return 200
 
-            # Change duration and delay on dynamic part.
-            if body["static"] == 0:
-                cat.edit_hour(body["plantID"], body["hour"], body["mod"],
-                              body["modh"], body["reset"])
-
-                print(json.dumps(body))
-                return 200
-
-            elif body["static"] == 1:  # Change on static and dynamic.
-                cat.edit_static_hour(body["plantID"], body["hour"],
-                                     body["new_hour"])
-                return 200
+        # # Change irrigation parameters (duration and hours) on dynamic part.
+        # # If static == 0 change duration and delay of irrigation on dynamic.
+        # # if static == 1 change old to new hour in static and dynamic parts.
+        # if uri[0] == 'edit_hour':
+        #     body = json.loads(cherrypy.request.body.read())
+        #     cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
+        #
+        #     # Change duration and delay on dynamic part.
+        #     if body["static"] == 0:
+        #         cat.edit_hour(body["plantID"], body["hour"], body["mod"],
+        #                       body["modh"], body["reset"])
+        #
+        #         print(json.dumps(body))
+        #         return 200
+        #
+        #     elif body["static"] == 1:  # Change on static and dynamic.
+        #         cat.edit_static_hour(body["plantID"], body["hour"],
+        #                              body["new_hour"])
+        #         return 200
 
         # Change irrigation times (hours) e.g. 19:00 -> 18:55.
         if uri[0] == 'update':
