@@ -5,13 +5,13 @@
           "plantID": "p_1001",
           "hours": [{
               "time": "07:00",
-              "mod": 600,
-              "modh": 0
+              "duration": 600,
+              "delay": 0
             },
             {
               "time": "19:00",
-              "mod": 600,
-              "modh": 0
+              "duration": 600,
+              "delay": 0
             }
           ],
           "devices": [{
@@ -35,13 +35,13 @@
           "plantID": "p_1002",
           "hours": [{
               "time": "07:00",
-              "mod": 600,
-              "modh": 0
+              "duration": 600,
+              "delay": 0
             },
             {
               "time": "19:00",
-              "mod": 600,
-              "modh": 0
+              "duration": 600,
+              "delay": 0
             }
           ],
           "devices": [{
@@ -68,13 +68,13 @@
         "plantID": "p_1003",
         "hours": [{
             "time": "07:00",
-            "mod": 600,
-            "modh": 0
+            "duration": 600,
+            "delay": 0
           },
           {
             "time": "19:00",
-            "mod": 600,
-            "modh": 0
+            "duration": 600,
+            "delay": 0
           }
         ],
         "devices": [{
