@@ -7,32 +7,28 @@ import json
 import sys, os
 import numpy as np
 import requests
+import schedule
+import time
+import datetime
+import threading
+import functions
 
 FILE = "conf.json"
+TIME_LIST = []
 
 
-def read_file(filename):
-    """Read json file to get catalogURL, port."""
-    with open(filename, "r") as f:
-        data = json.loads(f.read())
-        url = "http://" + data["URL"]
-        port = data["thing_port"]
-        return (url, port)
-
-
-def get_result(plantID, devID, env):
+def get_result(env, hour):
     """Get the last entries on humidity field and decides if it is necessary or
     not to modify duration of irrigation.
     """
-
+    url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
     resource = "humidity"
-    time = "hours"
-    tval = str(2)
-    url, port = read_file(FILE)
-    string = (url + ":" + port + "/data/" + plantID + "/" + resource + "?time="
-              + time + "&tval=" + tval + "&plantID=" + plantID + "&devID=" +
-              devID)
-
+    time = "minutes"
+    tval = str(5*60)
+    string = ("http://" + ts_url + ":" + ts_port + "/data/" + plantID + "/" +
+              resource + "?time=" + time + "&tval=" + tval + "&plantID=" +
+              plantID + "&devID=" + devID)
+    print(string)
     data = json.loads(requests.get(string).text)
     data = data["data"]
 
@@ -42,22 +38,57 @@ def get_result(plantID, devID, env):
 
         diff = env["humidity"] - m
         v = 100 * np.arctan(0.05 * diff)  # Add 300 seconds.
-        return v
-
+        v = round(v)
     else:
-        return None
+        v = None
+
+    functions.post_mod(plantID, hour, v, 0, url, port)
 
 
 def main():
-    # Examples.
-    env = {"humidity": 10}
-    print("Ex.1: add ", get_result("p_1002","d_1004",env), "seconds")
-    env = {"humidity": 30}
-    print("Ex.2: add ", get_result("p_1002","d_1004",env), "seconds")
-    env = {"humidity": 70}
-    print("Ex.3: add ", get_result("p_1002","d_1004",env), "seconds")
-    env = {"humidity": 90}
-    print("Ex.4: add ", get_result("p_1002","d_1004",env), "seconds")
+    url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
+    thread1 = SchedulingThread(1, "thread1")
+    thread1.start()
+
+    while True:
+        url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
+        string = ("http://" + url + ":" + port + "/info/" + plantID)
+        data = json.loads(requests.get(string).text)
+        hours = data["hours"]
+        env = data["environment"]
+
+        global TIME_LIST
+        for h in hours:
+            t = h["time"]
+            delayed_hour = functions.delay_h(t, -300)
+            entry = {
+            "hour": t,
+            "schedule_time": delayed_hour,
+            # "schedule_time": "15:43",
+            "env": env
+            }
+            TIME_LIST.append(entry)
+            print("Schedule: %s - %s" % (delayed_hour, plantID))
+
+        time.sleep(50)
+        TIME_LIST = []
+
+
+class SchedulingThread(threading.Thread):
+    def __init__(self, ThreadID, name):
+        threading.Thread.__init__(self)
+        self.ThreadID = ThreadID
+        self.name = name
+
+    def run(self):
+        global TIME_LIST
+        while True:
+            for e in TIME_LIST:
+                if e["schedule_time"] == time.strftime("%H:%M"):
+                    get_result(e["env"], e["hour"])
+                    TIME_LIST.remove(e)
+            time.sleep(3)
+
 
 if __name__ == '__main__':
     main()
