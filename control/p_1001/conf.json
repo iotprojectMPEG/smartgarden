@@ -1,5 +1,8 @@
 {
   "catalogURL": "127.0.0.1",
-  "port": "8080",
-  "plantID": "p_1001"
+  "catalogport": "8080",
+  "ts_url": "127.0.0.1",
+  "ts_port": "8081",
+  "plantID": "p_1001",
+  "devID": "d_1001"
 }
