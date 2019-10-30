@@ -210,7 +210,7 @@ class Catalog(object):
                             "name": p["name"],
                             "thingspeakID": p["thingspeakID"],
                             "devices": p["devices"],
-                            "hours": p["hours"]}
+                            "hours": p["hours"], "environment": p["environment"]}
                     return info
 
                 topic = None
