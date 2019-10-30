@@ -269,7 +269,7 @@ def status(bot, update, args):
                         devices.append(d["devID"])
                 update.message.reply_text(status)
             else:
-                update.message.reply_text("Not your garden motherfucker")
+                update.message.reply_text("You are not a user of this garden")
 
 
     else:
