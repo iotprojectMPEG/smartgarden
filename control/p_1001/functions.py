@@ -29,6 +29,20 @@ def post_mod(plantID, hour, duration, delay, url, port):
     r = requests.post(string, data=json.dumps(data))
 
 
+def post_mod_static():
+    pass
+
+def reset_mod(plantID, hour, url, port):
+    data = {
+        "plantID": plantID,
+        "hour": hour
+    }
+
+    # POST on catalog.
+    string = "http://" + url + ":" +str(port) + "/reset_hour"
+    print(json.dumps(data, indent=1))
+    r = requests.post(string, data=json.dumps(data))
+
 def read_file(filename):
     """Read json file to get catalogURL, port."""
     with open(filename, "r") as f:
