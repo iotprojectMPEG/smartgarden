@@ -175,7 +175,7 @@ def values(bot, update, args):
         return
 
     for g in static["gardens"]:
-        if update.message.from_user.username in g["users"]:
+        if (update.message.from_user.username).lower() in g["users"]:
             flag=1
             for p in g["plants"]:
                 if p["plantID"] == plantID:
@@ -241,7 +241,7 @@ def status(bot, update, args):
     if param == 'id':
 
         for g in static["gardens"]:
-            if update.message.from_user.username in g["users"]:
+            if (update.message.from_user.username).lower() in g["users"]:
 
                 devices = []
                 status = '🏡 ' + g["gardenID"] + '   (' + g["name"] + ')'
