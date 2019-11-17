@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import numpy as np
+"""Resource catalog."""
 import json
 import cherrypy
 import time
-import datetime
 import requests
 import threading
 import paho.mqtt.client as PahoMQTT
 
-
-############################ Global variables ############################
+# Global variables
 JSON_STATIC = 'static.json'
 JSON_DYNAMIC = 'dynamic.json'
 APIFILE = 'api.json'
@@ -20,9 +18,11 @@ OLD_MAX = 300
 REMOVE_AFTER = 600
 
 
-############################ Functions ############################
+# Functions
 def read_config(filename):
-    """Read conf.json file and return URL of catalog, REST port and general
+    """Read config file.
+
+    Read conf.json file and return URL of catalog, REST port and general
     MQTT topic of the garden.
     """
     with open(filename, "r") as file:
@@ -33,14 +33,19 @@ def read_config(filename):
     return (url, port, topic)
 
 
-############################ Classes ############################
+# Classes
 class Catalog(object):
+    """Resource catalog class."""
+
     def __init__(self, filename_static, filename_dynamic):
+        """Set filename of static and dynamic jsons."""
         self.filename_s = filename_static
         self.filename_d = filename_dynamic
 
     def load_file(self):
-        """Load data (static, dynamic) from json files and get MQTT broker IP
+        """Load static and dynamic parts of catalog.
+
+        Load data (static, dynamic) from json files and get MQTT broker IP
         and MQTT broker port saved on static file.
         """
         with open(self.filename_s, "r") as fs:
@@ -64,7 +69,8 @@ class Catalog(object):
 
     def add_garden(self, garden_json):
         """Add a new garden in the static catalog.
-        Auto-generate a new gardenID.
+
+        The new gardenID is auto-generated.
         """
         self.load_file()
         list_id = []
@@ -90,7 +96,8 @@ class Catalog(object):
 
     def add_plant(self, plant_json):
         """Add a new plant in the static catalog.
-        Auto-generate a new plantID.
+
+        The new plantID is auto-generated.
         """
         self.load_file()
         list_id = []
@@ -118,7 +125,8 @@ class Catalog(object):
 
     def add_device(self, dev_json):
         """Add a new device in the static catalog.
-        Auto-generate a new deviceID.
+
+        The new deviceID is auto-generated.
         """
         self.load_file()
         list_id = []
@@ -147,8 +155,10 @@ class Catalog(object):
         self.write_static()
 
     def update_device(self, gardenID, plantID, devID, topic):
-        """Update timestamp of a device or insert it again in the dynamic
-        catalog if it has expired.
+        """Update timestamp of a device.
+
+        Update timestamp or insert it again in the dynamic catalog if it has
+        expired.
         """
         data = {'devID': devID, 'timestamp': time.time(), 'topic': topic}
         self.load_file()
@@ -177,7 +187,9 @@ class Catalog(object):
         self.write_dynamic()
 
     def remove_old_device(self):
-        """Check all the devices whose timestamps are old and remove them from
+        """Remove old devices whose timestamp is expired.
+
+        Check all the devices whose timestamps are old and remove them from
         the dynamic catalog.
         """
         self.load_file()
@@ -188,7 +200,7 @@ class Catalog(object):
                 for counter, d in enumerate(p['devices']):
                     print(counter, d)
                     if time.time() - d['timestamp'] > OLD_MAX:
-                        print("Removing... %s" %(d['devID']))
+                        print("Removing... %s" % (d['devID']))
                         removable.append(counter)
                 for index in sorted(removable, reverse=True):
                     del p['devices'][index]
@@ -201,7 +213,8 @@ class Catalog(object):
         self.load_file()
         for g in self.static["gardens"]:
             if g["gardenID"] == ID:
-                info = {"gardenID": ID, "plants": g["plants"], "name": g["name"]}
+                info = {"gardenID": ID, "plants": g["plants"],
+                        "name": g["name"]}
                 return info
 
             for p in g["plants"]:
@@ -210,7 +223,8 @@ class Catalog(object):
                             "name": p["name"],
                             "thingspeakID": p["thingspeakID"],
                             "devices": p["devices"],
-                            "hours": p["hours"], "environment": p["environment"]}
+                            "hours": p["hours"],
+                            "environment": p["environment"]}
                     return info
 
                 topic = None
@@ -222,7 +236,7 @@ class Catalog(object):
                                     for d2 in p2["devices"]:
                                         if d2["devID"] == ID:
                                             topic = d2["topic"]
-                        except:
+                        except Exception:
                             print("Something gone wrong")
 
                         info = {"gardenID": g["gardenID"],
@@ -234,7 +248,7 @@ class Catalog(object):
         return -1
 
     def get_token(self, filename):
-        """Reads api.json and returns Telegram token for Telegram bot."""
+        """Read api.json and returns Telegram token for Telegram bot."""
         with open(filename, "r") as f:
             api = json.loads(f.read())
 
@@ -242,7 +256,7 @@ class Catalog(object):
         return t
 
     def get_ts_api(self, filename, id):
-        """Reads api.json and returns ThingSpeak channel ID."""
+        """Read api.json and returns ThingSpeak channel ID."""
         with open(filename, "r") as f:
             api = json.loads(f.read())
 
@@ -251,6 +265,7 @@ class Catalog(object):
                 return c
 
     def edit_hour(self, plantID, hour, duration, delay):
+        """Edit irrigation parameters on dynamic part."""
         self.load_file()
 
         for g in self.dynamic["gardens"]:
@@ -268,9 +283,12 @@ class Catalog(object):
 
         self.write_dynamic()
 
-
-
     def reset_hour(self, plantID, hour):
+        """Reset irrigation parameters to default.
+
+        After every irrigation this function is called and irrigation
+        parameters for the given plantID/hour are resetted for the new day.
+        """
         self.load_file()
 
         for g in self.dynamic["gardens"]:
@@ -282,16 +300,17 @@ class Catalog(object):
                             for g2 in self.static["gardens"]:
                                 for p2 in g2["plants"]:
                                     if p2["plantID"] == plantID:
-                                        default_dur = p2["environment"]["water"]
+                                        dflt_dur = p2["environment"]["water"]
 
-                            h["duration"] = default_dur  # Reset value
+                            h["duration"] = dflt_dur  # Reset value
                             h["delay"] = 0
 
         self.write_dynamic()
 
-
     def edit_static_hour(self, plantID, hour, new_hour):
-        """Change irrigation hour to new hour e.g. 19:00->18:55 in static and
+        """Edit irrigation hour in static and dynamic catalog.
+
+        Change irrigation hour to new hour e.g. 19:00->18:55 in static and
         dynamic parts of catalog. It is used when an irrigation has to be
         anticipated and so the next day it will be sheduled to a different
         hour.
@@ -315,9 +334,10 @@ class Catalog(object):
 
         self.write_dynamic()
 
-
     def change_hour(self, plantID, vector):
-        """Change irrigation hour to new hour e.g. 19:00->18:45 in static and
+        """Edit irrigation hour in static and dynamic catalog.
+
+        Change irrigation hour to new hour e.g. 19:00->18:45 in static and
         dynamic parts of catalog. It is used by a strategy which analyze
         data of recent days and find if the irrigation times are always
         postponed or anticipated comparing to the one on the catalog.
@@ -341,13 +361,14 @@ class Catalog(object):
                         c = c + 1
         self.write_dynamic()
 
+
 class Webserver(object):
     """CherryPy webserver."""
-    exposed = True
 
+    exposed = True
     @cherrypy.tools.json_out()
     def GET(self, *uri, **params):
-
+        """Define GET HTTP method for RESTful webserver."""
         catalog = Catalog(JSON_STATIC, JSON_DYNAMIC)
         catalog.load_file()
 
@@ -378,7 +399,7 @@ class Webserver(object):
 
     @cherrypy.tools.json_out()
     def POST(self, *uri, **params):
-
+        """Define POST HTTP method for RESTful webserver."""
         # Add new garden.
         if uri[0] == 'addg':
             body = json.loads(cherrypy.request.body.read())  # Read body data
@@ -403,13 +424,12 @@ class Webserver(object):
             cat.add_device(body)
             return 200
 
-
         # Change irrigation parameters (duration and hours) on dynamic part.
         if uri[0] == 'edit_hour':  # post_mod
             body = json.loads(cherrypy.request.body.read())
             cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
             cat.edit_hour(body["plantID"], body["hour"],
-                                 body["duration"], body["delay"])
+                          body["duration"], body["delay"])
             return 200
 
         if uri[0] == 'reset_hour':  # reset_mod
@@ -441,7 +461,7 @@ class Webserver(object):
         # Change irrigation times (hours) e.g. 19:00 -> 18:55.
         if uri[0] == 'update':
             if uri[1] == 'time':
-                body = json.loads(cherrypy.request.body.read())  # Read body data
+                body = json.loads(cherrypy.request.body.read())  # Read body
                 cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
                 print(body)
                 cat.change_hour(body["plantID"], body["hours"])
@@ -449,10 +469,13 @@ class Webserver(object):
 
 class MySubscriber:
     """MQTT subscriber.
+
     It subscribes to all topics in order to receive alive messages from sensors
     and update their timestams in the dynamic part of the catalog.
     """
+
     def __init__(self, clientID, topic, serverIP):
+        """Initialise MQTT client."""
         self.clientID = clientID
         self.topic = topic
         self.messageBroker = serverIP
@@ -462,21 +485,26 @@ class MySubscriber:
         (self.url, self.port, self.smart_topic) = read_config(CONFIG)
 
     def start(self):
+        """Start subscriber."""
         self._paho_mqtt.connect(self.messageBroker, 1883)
         self._paho_mqtt.loop_start()
         self._paho_mqtt.subscribe(self.topic, 2)
 
     def stop(self):
+        """Stop subscriber."""
         self._paho_mqtt.unsubscribe(self.topic)
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
     def my_on_connect(self, client, userdata, flags, rc):
-        print ("Connected to %s - Result code: %d" % (self.messageBroker, rc))
+        """Define custom on_connect function."""
+        print("Connected to %s - Result code: %d" % (self.messageBroker, rc))
         self.loop_flag = 0
 
     def my_on_message_received(self, client, userdata, msg):
-        """Receives json messages from other devices and get info to update
+        """Define custom on_message function.
+
+        Receives json messages from other devices and get info to update
         old timestamps or insert expired devices.
         """
         msg.payload = msg.payload.decode("utf-8")
@@ -493,38 +521,48 @@ class MySubscriber:
                     gardenID = info["gardenID"]
                     plantID = info["plantID"]
                     catalog.update_device(gardenID, plantID, devID, topic)
-        except:
+        except Exception:
             pass
 
 
-############################ Threads ############################
+# Threads
 class First(threading.Thread):
     """Thread to run CherryPy webserver."""
-    def __init__(self,ThreadID,name):
+
+    def __init__(self, ThreadID, name):
+        """Initialise thread widh ID and name."""
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = self.name
+
     def run(self):
+        """Run thread."""
         try:
             cherrypy.tree.mount(Webserver(), '/', config=CHERRY_CONF)
             cherrypy.config.update(CHERRY_CONF)
             cherrypy.engine.start()
             cherrypy.engine.block()
+
         except KeyboardInterrupt:
-            print ("Stopping the engine")
+            print("Stopping the engine")
             return
 
 
 class Second(threading.Thread):
-    """Thread: Subscribe to MQTT in order to update timestamps of sensors in
-    the dynamic part of the catalog.
+    """MQTT Thread.
+
+    Subscribe to MQTT in order to update timestamps of sensors in the dynamic
+    part of the catalog.
     """
+
     def __init__(self, ThreadID, name):
+        """Initialise thread widh ID and name."""
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = self.name
 
     def run(self):
+        """Run thread."""
         cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
         cat.load_file()
         broker_ip = cat.broker_ip
@@ -544,15 +582,20 @@ class Second(threading.Thread):
 
 
 class Third(threading.Thread):
-    """Thread: Remove old devices which do not send alive messages anymore.
+    """Old device remover thread.
+
+    Remove old devices which do not send alive messages anymore.
     Devices are removed every five minutes.
     """
-    def __init__(self,ThreadID,name):
+
+    def __init__(self, ThreadID, name):
+        """Initialise thread widh ID and name."""
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = self.name
 
     def run(self):
+        """Run thread."""
         time.sleep(REMOVE_AFTER)
         while True:
             cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
@@ -560,9 +603,10 @@ class Third(threading.Thread):
             time.sleep(REMOVE_AFTER)
 
 
-#### Main ####
+# Main
 def main():
-    thread1 = First(1,"CherryPy")
+    """Start all threads."""
+    thread1 = First(1, "CherryPy")
     thread2 = Second(2, "Updater")
     thread3 = Third(3, "Remover")
 
