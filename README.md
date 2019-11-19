@@ -1,4 +1,7 @@
 # IoT for Smart Gardening
+![Python Version](https://img.shields.io/badge/Python-3-informational)
+![License](https://img.shields.io/badge/License-GPL--3-blue)
+
 Internet of Things project for smart gardening.
 ## Info
 ### University:
