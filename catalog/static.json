@@ -7,7 +7,7 @@
       "gardenID": "g_1001",
       "name": "Casa in montagna",
       "location": "Torino",
-      "users": ["edo_fax","paolograsso"],
+      "users": ["edo_fax","paolograsso","genren"],
       "plants": [{
           "plantID": "p_1001",
           "name": "Dionaea muscipula",
@@ -18,7 +18,7 @@
             "time": "19:00",
             "type": "evening"
           }],
-          "thingspeakID": 741610,
+          "thingspeakID": 789145,
           "environment": {
             "water": 600,
             "humidity": 90
@@ -78,7 +78,7 @@
             "time": "19:00",
             "type": "evening"
           }],
-          "thingspeakID": 822665,
+          "thingspeakID": 791968,
           "environment": {
             "water": 600,
             "humidity": 90
@@ -147,7 +147,7 @@
       "gardenID": "g_1002",
       "name": "Giardino al mare",
       "location": "Palermo",
-      "users": ["Marzia1326","GenRen"],
+      "users": ["marzia1326","genren"],
       "plants": [{
         "plantID": "p_1003",
         "name": "Aloe vera",
@@ -158,7 +158,7 @@
           "time": "19:00",
           "type": "evening"
         }],
-        "thingspeakID": 868854,
+        "thingspeakID": 791970,
         "environment": {
           "water": 600,
           "humidity": 90

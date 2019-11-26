@@ -187,11 +187,13 @@ def values(bot, update, args):
                     for d in r["devices"]:
                         for res in d["resources"]:
                             if res["n"] != 'irrigation':
-                                list.append((res["n"], res["u"], res["f"], None))
+                                list.append(res["n"])
+                                # (res["u"], res["f"], None)
 
 
-                    r = json.loads(requests.get(string + '/api/tschannel/' + thingspeakID).text)
-                    readAPI = r["readAPI"]
+                    # r = json.loads(requests.get(string + '/api/tschannel/' + thingspeakID).text)
+                    # readAPI = r["readAPI"]
+
 
                     now = datetime.datetime.now()
                     message = '🌱 ' + name
@@ -199,15 +201,23 @@ def values(bot, update, args):
 
                     for i in list:
 
-                        string = ("https://api.thingspeak.com/channels/" + thingspeakID +
-                                  "/fields/" + str(i[2]) + ".json?api_key=" + readAPI +
-                                  "&minutes=" + str(5))
-                        res = json.loads(requests.get(string).text)
-                        fi = 'field'+ str(i[2])
-                        data = []
-                        for f in res["feeds"]:
-                            if f[fi] != None:
-                                data.append(int(f[fi]))
+                        string = (url + ":" + port + "/data/" + plantID + "/" +
+                            resource + "?time=" + "minutes" + "&tval=" + str(5) +
+                            "&plantID=" + plantID + "&devID=" +devID)
+
+                        #string = ("https://api.thingspeak.com/channels/" + thingspeakID +
+                                 # "/fields/" + str(i[2]) + ".json?api_key=" + readAPI +
+                                 # "&minutes=" + str(5))
+
+                        result = json.loads(requests.get(string).text)
+                        
+                        # fi = 'field'+ str(i[2])
+                        # data = []
+                        # for f in res["feeds"]:
+                        #     if f[fi] != None:
+                        #         data.append(int(f[fi]))
+
+                        data = list(results.values())
                         if data == []:
                             message += '\n    🔺' + i[0].capitalize() + ': ' + str('n.a.')
                         else:
@@ -217,10 +227,11 @@ def values(bot, update, args):
 
                     message = message.replace('Celsius', '°C')
                     update.message.reply_text(message)
-    if flag==1:
-        msg = "Missing `plantID` in your garden"
-        bot.sendMessage(chat_id=update.message.chat_id, text=msg,
-                        parse_mode=ParseMode.MARKDOWN)
+
+        elif flag==0:
+            msg = "Missing `plantID` in your garden"
+            bot.sendMessage(chat_id=update.message.chat_id, text=msg,
+                            parse_mode=ParseMode.MARKDOWN)
 
 
 def status(bot, update, args):

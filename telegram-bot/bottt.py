@@ -159,6 +159,9 @@ def values(bot, update, args):
     url = config["catalogURL"]
     port = config["port"]
     string = "http://" + url + ":" + port
+    dynamic = json.loads(requests.get(string + '/dynamic').text)
+    static = json.loads(requests.get(string + '/static').text)
+    flag=0
 
     try:
         r = json.loads(requests.get(string + '/info/' + plantID).text)
@@ -171,40 +174,63 @@ def values(bot, update, args):
                         parse_mode=ParseMode.MARKDOWN)
         return
 
+    for g in static["gardens"]:
+        if (update.message.from_user.username).lower() in g["users"]:
+            flag=1
+            for p in g["plants"]:
+                if p["plantID"] == plantID:
 
-    list = []
-    for d in r["devices"]:
-        for res in d["resources"]:
-            if res["n"] != 'irrigation':
-                list.append((res["n"], res["u"], res["f"], None))
+                    flag=2
 
-    r = json.loads(requests.get(string + '/api/tschannel/' + thingspeakID).text)
-    readAPI = r["readAPI"]
+                    list = []
 
-    now = datetime.datetime.now()
-    message = '🌱 ' + name
-    message += '\n    🕒' + ' ' + str(now.hour) + ':' + str(now.minute)
-    for i in list:
+                    for d in r["devices"]:
+                        for res in d["resources"]:
+                            if res["n"] != 'irrigation':
+                                list.append(res["n"],res["u"], res["f"], None)
 
-        string = ("https://api.thingspeak.com/channels/" + thingspeakID +
-                  "/fields/" + str(i[2]) + ".json?api_key=" + readAPI +
-                  "&minutes=" + str(5))
-        res = json.loads(requests.get(string).text)
-        fi = 'field'+ str(i[2])
-        data = []
-        for f in res["feeds"]:
-            if f[fi] != None:
-                data.append(int(f[fi]))
 
-        if data == []:
-            message += '\n    🔺' + i[0].capitalize() + ': ' + str('n.a.')
-        else:
-            m = np.mean(data)
-            message += ('\n    🔸' + i[0].capitalize() + ': ' +
-                        str(m.round(2)) + ' ' + i[1])
+                    r = json.loads(requests.get(string + '/api/tschannel/' + thingspeakID).text)
+                    readAPI = r["readAPI"]
 
-    message = message.replace('Celsius', '°C')
-    update.message.reply_text(message)
+
+                    now = datetime.datetime.now()
+                    message = '🌱 ' + name
+                    message += '\n    🕒' + ' ' + str(now.hour) + ':' + str(now.minute)
+
+                    for i in list:
+                        #
+                        # string = (url + ":" + port + "/data/" + plantID + "/" +
+                        #     resource + "?time=" + "minutes" + "&tval=" + str(5) +
+                        #     "&plantID=" + plantID + "&devID=" +devID)
+
+                        string = ("https://api.thingspeak.com/channels/" + thingspeakID +
+                                 "/fields/" + str(i[2]) + ".json?api_key=" + readAPI +
+                                 "&minutes=" + str(5))
+
+                        res = json.loads(requests.get(string).text)
+
+                        fi = 'field'+ str(i[2])
+                        data = []
+                        for f in res["feeds"]:
+                            if f[fi] != None:
+                                data.append(int(f[fi]))
+
+                        # data = list(results.values())
+                        if data == []:
+                            message += '\n    🔺' + i[0].capitalize() + ': ' + str('n.a.')
+                        else:
+                            m = np.mean(data)
+                            message += ('\n    🔸' + i[0].capitalize() + ': ' +
+                                        str(m.round(2)) + ' ' + i[1])
+
+                    message = message.replace('Celsius', '°C')
+                    update.message.reply_text(message)
+
+        elif flag==0:
+            msg = "Missing `plantID` in your garden"
+            bot.sendMessage(chat_id=update.message.chat_id, text=msg,
+                            parse_mode=ParseMode.MARKDOWN)
 
 
 def status(bot, update, args):
@@ -223,58 +249,66 @@ def status(bot, update, args):
     static = json.loads(requests.get(string + '/static').text)
 
     if param == 'id':
+
         for g in static["gardens"]:
-            devices = []
-            status = '🏡 ' + g["gardenID"] + '   (' + g["name"] + ')'
-            for p in g["plants"]:
-                status = status + ('\n\n    🌱 ' + p["plantID"] +
-                                  '   (' + p["name"] + ')')
+            if (update.message.from_user.username).lower() in g["users"]:
 
-                for g2 in dynamic["gardens"]:
-                    if g2["gardenID"] == g["gardenID"]:
-                        break
-                for p2 in g2["plants"]:
-                    if p2["plantID"] == p["plantID"]:
-                        break
-                for d2 in p2["devices"]:
-                    devices.append(d2["devID"])
+                devices = []
+                status = '🏡 ' + g["gardenID"] + '   (' + g["name"] + ')'
+                for p in g["plants"]:
+                    status = status + ('\n\n    🌱 ' + p["plantID"] +
+                                      '   (' + p["name"] + ')')
 
-                for d in p["devices"]:
-                    if d["devID"] in devices:
-                        status = status + ('\n        ✅️ ' + d["devID"] +
-                                          '   (' + d["name"] + ')')
-                    else:
-                        status = status + ('\n        ❌ ' + d["devID"] +
-                                          '   (' + d["name"] + ')')
+                    for g2 in dynamic["gardens"]:
+                        if g2["gardenID"] == g["gardenID"]:
+                            break
+                    for p2 in g2["plants"]:
+                        if p2["plantID"] == p["plantID"]:
+                            break
+                    for d2 in p2["devices"]:
+                        devices.append(d2["devID"])
 
-                    devices.append(d["devID"])
-            update.message.reply_text(status)
+                    for d in p["devices"]:
+                        if d["devID"] in devices:
+                            status = status + ('\n        ✅️ ' + d["devID"] +
+                                              '   (' + d["name"] + ')')
+                        else:
+                            status = status + ('\n        ❌ ' + d["devID"] +
+                                              '   (' + d["name"] + ')')
+
+                        devices.append(d["devID"])
+                update.message.reply_text(status)
+            else:
+                update.message.reply_text("You are not a user of this garden")
+
 
     else:
         for g in static["gardens"]:
-            devices = []
-            status = '🏡 ' + g["name"]
-            for p in g["plants"]:
-                status = status + '\n\n    🌱 ' + p["name"]
+            if update.message.from_user.username in g["users"]:
+                devices = []
+                status = '🏡 ' + g["name"]
+                for p in g["plants"]:
+                    status = status + '\n\n    🌱 ' + p["name"]
 
-                for g2 in dynamic["gardens"]:
-                    if g2["gardenID"] == g["gardenID"]:
-                        break
-                for p2 in g2["plants"]:
-                    if p2["plantID"] == p["plantID"]:
-                        break
-                for d2 in p2["devices"]:
-                    devices.append(d2["devID"])
+                    for g2 in dynamic["gardens"]:
+                        if g2["gardenID"] == g["gardenID"]:
+                            break
+                    for p2 in g2["plants"]:
+                        if p2["plantID"] == p["plantID"]:
+                            break
+                    for d2 in p2["devices"]:
+                        devices.append(d2["devID"])
 
-                for d in p["devices"]:
-                    if d["devID"] in devices:
-                        status = status + '\n        ✅️ ' + d["name"]
-                    else:
-                        status = status + '\n        ❌ ' + d["name"]
+                    for d in p["devices"]:
+                        if d["devID"] in devices:
+                            status = status + '\n        ✅️ ' + d["name"]
+                        else:
+                            status = status + '\n        ❌ ' + d["name"]
 
-                    devices.append(d["devID"])
-            update.message.reply_text(status)
-
+                        devices.append(d["devID"])
+                update.message.reply_text(status)
+            else:
+                pass
 
 def chat(bot, update):
     global CHAT_ID
