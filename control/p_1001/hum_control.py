@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-This script...
+"""Humidity control strategy.
+
+This script takes hum. records on ThingSpeak channels and decide how to edit
+irrigation parameters.
 """
 import json
-import sys, os
 import numpy as np
 import requests
-import schedule
 import time
-import datetime
 import threading
 import functions
 
@@ -18,7 +17,9 @@ TIME_LIST = []
 
 
 def get_result(env, hour):
-    """Get the last entries on humidity field and decides if it is necessary or
+    """Get data from ThingSpeak and decide.
+
+    Get the last entries on humidity field and decides if it is necessary or
     not to modify duration of irrigation.
     """
     url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
@@ -31,7 +32,6 @@ def get_result(env, hour):
     print(string)
     data = json.loads(requests.get(string).text)
     data = data["data"]
-
 
     if data != []:
         m = np.mean(data)
@@ -46,6 +46,7 @@ def get_result(env, hour):
 
 
 def main():
+    """Schedule and run strategy."""
     url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
     thread1 = SchedulingThread(1, "thread1")
     thread1.start()
@@ -62,11 +63,11 @@ def main():
             t = h["time"]
             delayed_hour = functions.delay_h(t, -300)
             entry = {
-            "hour": t,
-            "schedule_time": delayed_hour,
-            # "schedule_time": "15:43",
-            "env": env
-            }
+                "hour": t,
+                "schedule_time": delayed_hour,
+                # "schedule_time": "15:43",
+                "env": env
+                }
             TIME_LIST.append(entry)
             print("Schedule: %s - %s" % (delayed_hour, plantID))
 
@@ -75,12 +76,16 @@ def main():
 
 
 class SchedulingThread(threading.Thread):
+    """Scheduling thread to call the strategy."""
+
     def __init__(self, ThreadID, name):
+        """Initialise thread."""
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
 
     def run(self):
+        """Run thread."""
         global TIME_LIST
         while True:
             for e in TIME_LIST:
