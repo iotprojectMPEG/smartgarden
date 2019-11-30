@@ -14,43 +14,43 @@ import threading
 
 FILE = "conf.json"
 TIME_LIST = []
+# def read_file(filename):
+#     """Read json file to get catalogURL, port."""
+#     with open(filename, "r") as f:
+#         data = json.loads(f.read())
+#         url = "http://" + data["URL"]
+#         port = data["thing_port"]
+#         return (url, port)
 
 
-def read_file(filename):
-    """Read json file to get catalogURL, port."""
-    with open(filename, "r") as f:
-        data = json.loads(f.read())
-        url = "http://" + data["URL"]
-        port = data["thing_port"]
-        return (url, port)
-
-
-def get_result(plantID, devID):
+def get_result(env, hour):
     """Get data from ThingSpeak and decide.
 
     Get the last entries on rain field and decides if it is necessary or not
     to irrigate.
     """
+    url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
     resource = "rain"
-    time = "hours"
-    tval = str(2)
-    url, port = read_file(FILE)
-    string = (url + ":" + port + "/data/" + plantID + "/" + resource + "?time="
-              + time + "&tval=" + tval + "&plantID=" + plantID + "&devID=" +
-              devID)
-
+    time = "minutes"
+    tval = str(2*60)
+    string = ("http://" + ts_url + ":" + ts_port + "/data/" + plantID + "/" +
+              resource + "?time=" + time + "&tval=" + tval + "&plantID=" +
+              plantID + "&devID=" + devID)
+    print(string)
     data = json.loads(requests.get(string).text)
     data = data["data"]
     if data != []:
         m = np.mean(data)
         if m >= 0.6:  # Rain for at least 60% of the time
-            return -1  # Do not irrigate
+            v = -1  # Do not irrigate
 
         elif (m >= 0.4) and (m < 0.6):  # Rain from 40-60% of the time
-            return -120  # Remove 120 seconds
+            v = -120  # Remove 120 seconds
 
         else:  # Almost no rain
-            return 0  # No modifications
+            v = 0  # No modifications
+
+    functions.post_mod(plantID, hour, v, 0, url, port)
 
 
 def main():
@@ -79,7 +79,7 @@ def main():
             TIME_LIST.append(entry)
             print("Schedule: %s - %s" % (delayed_hour, plantID))
 
-        time.sleep(50)
+        time.sleep(86400)
         TIME_LIST = []
 
 

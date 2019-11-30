@@ -71,7 +71,7 @@ def main():
             TIME_LIST.append(entry)
             print("Schedule: %s - %s" % (delayed_hour, plantID))
 
-        time.sleep(50)
+        time.sleep(86400)
         TIME_LIST = []
 
 
