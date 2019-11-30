@@ -8,8 +8,6 @@ Sono necessari i seguenti componenti:
 
 Istruzioni montaggio figura "light.jpg"
 """
-import PCF8591 as ADC
-import RPi.GPIO as GPIO
 import json
 import threading
 import paho.mqtt.client as PahoMQTT
@@ -25,15 +23,6 @@ import updater
 
 FILENAME = "conf.json"
 BT = None
-DO = 17
-
-GPIO.setmode(GPIO.BCM)
-
-
-def setup():
-    """Do setup GPIO pin on Raspberry Pi."""
-    ADC.setup(0x48)
-    GPIO.setup(DO, GPIO.IN)
 
 
 class MyPublisher(object):
@@ -112,7 +101,20 @@ class PubData(threading.Thread):
 
 def get_data(devID, res):
     """Get light data from sensor."""
-    value = ADC.read(0)
+    with open("light_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("light_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i == 0:
+                row = lines[0].split(',')
+                value = float(row[0])
+
+            else:
+                row = lines[i].split(',')[0]
+                f.write("%s,\n" % row)
+    f.close()
+
     timestamp = round(time.time()) - BT
     data = {
         "bn": devID,
@@ -132,7 +134,6 @@ def main():
     """Start all threads."""
     global BT
     BT = round(time.time())
-    setup()
 
     thread1 = updater.Alive(1, "Alive")
     thread2 = PubData(2, "PubData")
