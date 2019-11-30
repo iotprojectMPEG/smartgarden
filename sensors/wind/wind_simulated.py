@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Simulated wind sensor.
-"""
+"""Wind intensity sensor (simulated)."""
 
 import json
-import requests
 import threading
 import paho.mqtt.client as PahoMQTT
-import os, sys, inspect
+import os
+import sys
+import inspect
 import time
 import numpy as np
 
 
-current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+current_dir = os.path.dirname(os.path.abspath(
+                              inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 import updater
@@ -23,44 +23,52 @@ FILENAME = "conf.json"
 BT = None
 PREVIOUS_VALUE = 5  # To prevent wind changing drastically from previous value.
 
+
 class MyPublisher(object):
+    """MQTT publisher."""
+
     def __init__(self, clientID, topic, serverIP, port):
+        """Initialise MQTT publisher."""
         self.clientID = clientID
         self.topic = topic
         self.messageBroker = serverIP
         self.port = port
         self._paho_mqtt = PahoMQTT.Client(clientID, False)
         self._paho_mqtt.on_connect = self.my_on_connect
-        #self._paho_mqtt.on_message = self.my_on_message_received
         self.loop_flag = 1
 
     def start(self):
+        """Start publisher."""
         self._paho_mqtt.connect(self.messageBroker, self.port)
         self._paho_mqtt.loop_start()
-        #self._paho_mqtt.subscribe(self.topic, 2)
 
     def stop(self):
-        #self._paho_mqtt.unsubscribe(self.topic)
+        """Stop publisher."""
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
     def my_on_connect(self, client, userdata, flags, rc):
-        print ("Connected to %s - Result code: %d" % (self.messageBroker, rc))
+        """Define custom on_connect function."""
+        print("Connected to %s - Result code: %d" % (self.messageBroker, rc))
         self.loop_flag = 0
 
     def my_publish(self, message):
+        """Define custom publish function."""
         print("Publishing on %s:" % self.topic)
         print(json.dumps(json.loads(message), indent=2))
         self._paho_mqtt.publish(self.topic, message, 2)
 
 
 class PubData(threading.Thread):
+    """Publish sensor data with MQTT every minute."""
+
     def __init__(self, ThreadID, name):
+        """Initialise thread with MQTT data."""
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
         (self.devID, self.url, self.port) = updater.read_file(FILENAME)
-        print(">>> Wind %s <<<\n" %(self.devID))
+        print(">>> Wind %s <<<\n" % self.devID)
         (self.gardenID, self.plantID,
          self.resources) = updater.find_me(self.devID,
                                            self.url, self.port)
@@ -68,10 +76,11 @@ class PubData(threading.Thread):
         self.mqtt_port = int(mqtt_port)
 
         self.topic = []
-        self.topic.append('smartgarden/' + self.gardenID + '/'
-                              + self.plantID + '/' + self.devID)
+        self.topic.append('smartgarden/' + self.gardenID + '/' +
+                          self.plantID + '/' + self.devID)
 
     def run(self):
+        """Run thread."""
         print("Topics:", self.topic)
         pub = MyPublisher(self.devID + '_1', self.topic[0], self.broker_ip,
                           int(self.mqtt_port))
@@ -88,25 +97,27 @@ class PubData(threading.Thread):
 
         pub.stop()
 
+
 def get_data(devID, res):
+    """Get wind data from sensor."""
     with open("wind_demo.txt", "r") as f:
         lines = f.readlines()
     f.close()
     with open("wind_demo.txt", "w") as f:
         for i in range(len(lines)):
-            if i==0:
-                row=lines[0].split(',')
-                value=float(row[0])
+            if i == 0:
+                row = lines[0].split(',')
+                value = float(row[0])
 
             else:
-                row=lines[i].split(',')[0]
+                row = lines[i].split(',')[0]
                 f.write("%s,\n" % row)
     f.close()
     try:
         intensity = np.random.choice([0, 1, 2], p=[0.6, 0.38, 0.02])
         minimum = INTENSITY[intensity][0]
         maximum = INTENSITY[intensity][1]
-        value =  np.random.randint(minimum, maximum+1)
+        value = np.random.randint(minimum, maximum+1)
 
         # Maximum range of change: 5
         global PREVIOUS_VALUE
@@ -118,14 +129,14 @@ def get_data(devID, res):
 
         PREVIOUS_VALUE = value
 
-    except:
+    except Exception:
         pass
 
     timestamp = round(time.time()) - BT
-    data={
+    data = {
         "bn": devID,
         "bt": BT,
-        "e":[{
+        "e": [{
             "n": res[0]["n"],
             "u": res[0]["u"],
             "t": timestamp,
@@ -137,6 +148,7 @@ def get_data(devID, res):
 
 
 def main():
+    """Start all threads."""
     global BT
     BT = round(time.time())
 
@@ -146,7 +158,7 @@ def main():
         try:
             thread1 = updater.Alive(1, "Alive")
             connected = 1  # Catalog is available
-        except:
+        except Exception:
             print("Catalog is not reachable... retry in 5 seconds")
             time.sleep(5)
 
