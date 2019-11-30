@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Real humidity and temperature sensor."""
-import Adafruit_DHT
+"""Fake humidity and temperature sensor."""
 import json
 import time
 import paho.mqtt.client as PahoMQTT
@@ -15,7 +14,6 @@ current_dir = (os.path.dirname(os.path.abspath(
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-
 SENSOR = 11
 PIN = 17
 BT = None  # Basetime
@@ -23,10 +21,35 @@ BT = None  # Basetime
 
 def get_data(devID, res):
     """Get humidity and temperature from sensor. Return two jsons."""
-    # Read data from sensor
-    humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN,
-                                                    retries=3,
-                                                    delay_seconds=2)
+    # Initialization.
+    with open("hum_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("hum_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i == 0:
+                row = lines[0].split(',')
+                humidity = float(row[0])
+
+            else:
+                row = lines[i].split(',')[0]
+                f.write("%s,\n" % row)
+    f.close()
+
+    with open("temp_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("temp_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i == 0:
+                row = lines[0].split(',')
+                temperature = float(row[0])
+
+            else:
+                row = lines[i].split(',')[0]
+                for j in row:
+                    f.write("%s,\n" % j)
+    f.close()
 
     timestamp = round(time.time()) - BT
     data = {
