@@ -9,8 +9,6 @@ Sono necessari i seguenti componenti:
 
 Istruzioni montaggio figura "rain.jpg"
 """
-import PCF8591 as ADC
-import RPi.GPIO as GPIO
 import json
 import time
 import threading
@@ -18,24 +16,15 @@ import paho.mqtt.client as PahoMQTT
 import os
 import sys
 import inspect
-import updater
 current_dir = os.path.dirname(os.path.abspath(
                               inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-
+import updater
 
 TOPIC = 'smartgarden/+/+/rain'
 FILENAME = "conf.json"
 BT = None
-DO = 27
-GPIO.setmode(GPIO.BCM)
-
-
-def setup():
-    """Do setup GPIO pin."""
-    ADC.setup(0x48)
-    GPIO.setup(DO, GPIO.IN)
 
 
 class MyPublisher(object):
@@ -114,13 +103,21 @@ class PubData(threading.Thread):
 
 def get_data(devID, res):
     """Get data from sensor."""
-    status = GPIO.input(DO)
+    with open("rain_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("rain_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i == 0:
+                row = lines[0].split(',')
+                value = round(float(row[0]))
+
+            else:
+                row = lines[i].split(',')[0]
+                f.write("%s,\n" % row)
+    f.close()
 
     timestamp = round(time.time()) - BT
-    if status == 1:
-        value = 0
-    if status == 0:
-        value = 1
     data = {
         "bn": devID,
         "bt": BT,
@@ -136,11 +133,9 @@ def get_data(devID, res):
 
 
 def main():
-    """Do setup sensor and call threads."""
+    """Call threads."""
     global BT
     BT = round(time.time())
-
-    setup()
 
     thread1 = updater.Alive(1, "Alive")
     thread2 = PubData(2, "PubData")
