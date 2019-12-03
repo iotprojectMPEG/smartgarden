@@ -376,6 +376,9 @@ class Webserver(object):
         if uri[0] == 'broker':
             return catalog.static["broker"]
 
+        if uri[0] == 'ts':
+            return catalog.static["thingspeak"]
+
         # Get dynamic catalog json.
         if uri[0] == 'dynamic':
             return catalog.dynamic

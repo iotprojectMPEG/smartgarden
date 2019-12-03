@@ -3,11 +3,15 @@
     "IP": "127.0.0.1",
     "mqtt_port": "1883"
   },
+  "thingspeak": {
+    "IP": "127.0.0.1",
+    "port": "8081"
+  },
   "gardens": [{
       "gardenID": "g_1001",
       "name": "Casa in montagna",
       "location": "Torino",
-      "users": ["edo_fax","paolograsso","genren"],
+      "users": ["edo_fax","paolograsso"],
       "plants": [{
           "plantID": "p_1001",
           "name": "Dionaea muscipula",
@@ -18,7 +22,7 @@
             "time": "19:00",
             "type": "evening"
           }],
-          "thingspeakID": 789145,
+          "thingspeakID": 741610,
           "environment": {
             "water": 600,
             "humidity": 90
@@ -78,7 +82,7 @@
             "time": "19:00",
             "type": "evening"
           }],
-          "thingspeakID": 791968,
+          "thingspeakID": 822665,
           "environment": {
             "water": 600,
             "humidity": 90
@@ -147,7 +151,7 @@
       "gardenID": "g_1002",
       "name": "Giardino al mare",
       "location": "Palermo",
-      "users": ["marzia1326","genren"],
+      "users": ["Marzia1326","GenRen"],
       "plants": [{
         "plantID": "p_1003",
         "name": "Aloe vera",
@@ -158,7 +162,7 @@
           "time": "19:00",
           "type": "evening"
         }],
-        "thingspeakID": 791970,
+        "thingspeakID": 868854,
         "environment": {
           "water": 600,
           "humidity": 90
