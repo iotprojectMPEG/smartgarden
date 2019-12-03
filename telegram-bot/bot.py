@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-""" Telegram bot for smart gardening.
-    Use a file named "token" for the token.
-"""
+""" Telegram bot for smart gardening."""
 
 from telegram.ext import Updater, CommandHandler, MessageHandler
 from telegram.ext import Filters, CallbackQueryHandler
@@ -53,7 +50,6 @@ class MyPublisher(object):
         print("Publishing on %s:" % topic)
 
 
-
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
@@ -66,9 +62,10 @@ def start(bot, update):
 def help(bot, update):
     """Send a message when the command /help is issued."""
     help_message = ("*Welcome to your Smart Garden bot!*\n\n"
-    "You can perform the following actions:\n"
-    "- '/status': Get info about your gardens\n"
-    "- '/status id': Get ID info about your gardens\n")
+                    "You can perform the following actions:\n"
+                    "- '/status': Get info about your gardens\n"
+                    "- '/status id': Get ID info about your gardens\n"
+                    "- '/plant id': Get info about your plants")
 
     bot.sendMessage(chat_id=update.message.chat_id, text=help_message,
                     parse_mode=ParseMode.MARKDOWN)
@@ -141,8 +138,8 @@ def irrigation(bot, update):
 
 
 def values(bot, update, args):
-    """Gets information about all sensor values for every plant."""
-
+    """Get information about all sensor values for every plant."""
+    # Read input.
     try:
         plantID = " ".join(args)
         if plantID[0:2] != 'p_':
@@ -154,88 +151,70 @@ def values(bot, update, args):
                         parse_mode=ParseMode.MARKDOWN)
         return
 
+    # Read catalog URL and port from configuration file.
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
     url = config["catalogURL"]
     port = config["port"]
     string = "http://" + url + ":" + port
-    dynamic = json.loads(requests.get(string + '/dynamic').text)
+    # dynamic = json.loads(requests.get(string + '/dynamic').text)
     static = json.loads(requests.get(string + '/static').text)
-    flag=0
+    # flag = 0
 
-    try:
-        r = json.loads(requests.get(string + '/info/' + plantID).text)
-        thingspeakID = str(r["thingspeakID"])
-        name = str(r["name"])
+    ts = json.loads(requests.get(string + '/ts').text)
+    ts_url, ts_port = ["http://" + ts["IP"], ts["port"]]
+    # Find plantID on catalog.
+    # try:
+    #     r = json.loads(requests.get(string + '/info/' + plantID).text)
+    #     thingspeakID = str(r["thingspeakID"])
+    #     name = str(r["name"])
 
-    except:
-        msg = "You must provide a valid `plantID`"
-        bot.sendMessage(chat_id=update.message.chat_id, text=msg,
-                        parse_mode=ParseMode.MARKDOWN)
-        return
+    # except Exception:
+    #     msg = "You must provide a valid `plantID`"
+    #     bot.sendMessage(chat_id=update.message.chat_id, text=msg,
+    #                     parse_mode=ParseMode.MARKDOWN)
+    #     return
+
+    # Find resources associated to the plantID.
+    time = "minutes"
+    tval = "50"
 
     for g in static["gardens"]:
         if (update.message.from_user.username).lower() in g["users"]:
-            flag=1
+
             for p in g["plants"]:
                 if p["plantID"] == plantID:
-
-                    flag=2
-
-                    list = []
-
-                    for d in r["devices"]:
-                        for res in d["resources"]:
-                            if res["n"] != 'irrigation':
-                                list.append(res["n"])
-                                # (res["u"], res["f"], None)
-
-
-                    # r = json.loads(requests.get(string + '/api/tschannel/' + thingspeakID).text)
-                    # readAPI = r["readAPI"]
-
-
                     now = datetime.datetime.now()
-                    message = '🌱 ' + name
-                    message += '\n    🕒' + ' ' + str(now.hour) + ':' + str(now.minute)
+                    message = ('🌱 ' + p["name"] +
+                               '\n    🕒' + ' ' + str(now.hour) + ':' +
+                               str(now.minute))
 
-                    for i in list:
+                    for d in p["devices"]:
 
-                        string = (url + ":" + port + "/data/" + plantID + "/" +
-                            resource + "?time=" + "minutes" + "&tval=" + str(5) +
-                            "&plantID=" + plantID + "&devID=" +devID)
+                        for res in d["resources"]:
+                            string = (ts_url + ":" + ts_port + "/data/" +
+                                      plantID + "/" + res["n"] + "?time=" +
+                                      time + "&tval=" + tval + "&plantID=" +
+                                      plantID + "&devID=" + d["devID"])
+                            r = json.loads(requests.get(string).text)
+                            data = r["data"]
 
-                        #string = ("https://api.thingspeak.com/channels/" + thingspeakID +
-                                 # "/fields/" + str(i[2]) + ".json?api_key=" + readAPI +
-                                 # "&minutes=" + str(5))
+                            if data != []:
+                                m = np.mean(data)
+                                message += ('\n    🔸' + res["n"].capitalize()
+                                            + ': ' + str(m.round(2)) + ' ' +
+                                            res["u"])
 
-                        result = json.loads(requests.get(string).text)
-                        
-                        # fi = 'field'+ str(i[2])
-                        # data = []
-                        # for f in res["feeds"]:
-                        #     if f[fi] != None:
-                        #         data.append(int(f[fi]))
+                            else:
+                                message += ('\n    🔺' + res["n"].capitalize()
+                                            + ': ' + str('n.a.'))
 
-                        data = list(results.values())
-                        if data == []:
-                            message += '\n    🔺' + i[0].capitalize() + ': ' + str('n.a.')
-                        else:
-                            m = np.mean(data)
-                            message += ('\n    🔸' + i[0].capitalize() + ': ' +
-                                        str(m.round(2)) + ' ' + i[1])
-
-                    message = message.replace('Celsius', '°C')
-                    update.message.reply_text(message)
-
-        elif flag==0:
-            msg = "Missing `plantID` in your garden"
-            bot.sendMessage(chat_id=update.message.chat_id, text=msg,
-                            parse_mode=ParseMode.MARKDOWN)
+    message = message.replace('Celsius', '°C')
+    update.message.reply_text(message)
 
 
 def status(bot, update, args):
-    """Gets information about all the sensors n the gardens and their status
+    """Get information about all the sensors n the gardens and their status
     Connected/Disconnected, and sends a summary to the user.
     """
 
