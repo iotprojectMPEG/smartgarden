@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
+"""Wind control strategy.
+
 This script takes wind records on ThingSpeak channels and decide how much
 irrigation is needed.
 """
 import json
-import sys, os
 import requests
 import numpy as np
 
@@ -16,33 +16,36 @@ def read_file(filename):
     """Read json file to get catalogURL, port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
-        url = "http://" + data["URL"]
-        port = data["thing_port"]
+        url = "http://" + data["catalogURL"]
+        port = data["port"]
         return (url, port)
 
 
 def get_result(plantID, devID):
-    """Get the last entries on humidity field and decides if it is necessary or
+    """Get data from database and compute irrigation parameters.
+
+    Get the last entries on humidity field and decides if it is necessary or
     not to modify duration of irrigation.
     """
-
     resource = "wind"
     time1 = "minutes"
     time2 = "minutes"  # "hours" is not allowed
     tval1 = str(10)
     tval2 = str(12*60)  # 12 hours * 60 (in minutes)
-    url, port = read_file(FILE)
+    cat_url, cat_port = read_file(FILE)
+    string = "http://" + cat_url + ":" + cat_port
+    ts = json.loads(requests.get(string + '/ts').text)
+    url, port = ts["IP"], ts["port"]
     data_long = []
     data_short = []
 
-    string1 = (url + ":" + port + "/data/" + plantID + "/" + resource + "?time="
-              + time1 + "&tval=" + tval1 + "&plantID=" + plantID + "&devID=" +
-              devID)
+    string1 = (url + ":" + port + "/data/" + plantID + "/" + resource +
+               "?time=" + time1 + "&tval=" + tval1 + "&plantID=" + plantID +
+               "&devID=" + devID)
 
-    string2 = (url + ":" + port + "/data/" + plantID + "/" + resource + "?time="
-              + time2 + "&tval=" + tval2 + "&plantID=" + plantID + "&devID=" +
-              devID)
-
+    string2 = (url + ":" + port + "/data/" + plantID + "/" + resource +
+               "?time=" + time2 + "&tval=" + tval2 + "&plantID=" + plantID +
+               "&devID=" + devID)
 
     data_short = json.loads(requests.get(string1).text)
     data_short = data_short["data"]

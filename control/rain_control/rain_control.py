@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
+"""Rain control strategy.
+
 This script takes rain records on ThingSpeak channels and decide whether to
 irrigate or not.
 """
 import json
-import sys, os
 import requests
 import numpy as np
 
@@ -16,20 +16,24 @@ def read_file(filename):
     """Read json file to get catalogURL, port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
-        url = "http://" + data["URL"]
-        port = data["thing_port"]
+        url = "http://" + data["catalogURL"]
+        port = data["port"]
         return (url, port)
 
 
 def get_result(plantID, devID):
-    """Get the last entries on rain field and decides if it is necessary or not
+    """Get data from database and compute irrigation parameters.
+
+    Get the last entries on rain field and decides if it is necessary or not
     to irrigate.
     """
-
     resource = "rain"
     time = "hours"
     tval = str(2)
-    url, port = read_file(FILE)
+    cat_url, cat_port = read_file(FILE)
+    string = "http://" + cat_url + ":" + cat_port
+    ts = json.loads(requests.get(string + '/ts').text)
+    url, port = ts["IP"], ts["port"]
     string = (url + ":" + port + "/data/" + plantID + "/" + resource + "?time="
               + time + "&tval=" + tval + "&plantID=" + plantID + "&devID=" +
               devID)
@@ -49,6 +53,7 @@ def get_result(plantID, devID):
 
 
 def main():
+    """Run an example."""
     print("Ex.1: add", get_result("p_1002", "d_1006"), "seconds")  # Example.
 
 

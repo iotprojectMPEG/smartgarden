@@ -58,10 +58,11 @@ def read_file(filename):
     """Read json file to get catalogURL, port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
-        url = data["catalogURL"]
-        port = data["catalogport"]
-        ts_url = data["ts_url"]
-        ts_port = data["ts_port"]
+        cat_url = data["catalogURL"]
+        cat_port = data["port"]
+        string = "http://" + cat_url + ":" + cat_port
+        ts = json.loads(requests.get(string + '/ts').text)
+        ts_url, ts_port = ts["IP"], ts["port"]
         plantID = data["plantID"]
         devID = data["devID"]
-        return (url, port, plantID, devID, ts_url, ts_port)
+        return (cat_url, cat_port, plantID, devID, ts_url, ts_port)
