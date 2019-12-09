@@ -1,9 +1,12 @@
 {
-  "gardens": [{
+  "gardens": [
+    {
       "gardenID": "g_1001",
-      "plants": [{
+      "plants": [
+        {
           "plantID": "p_1001",
-          "hours": [{
+          "hours": [
+            {
               "time": "07:00",
               "duration": 600,
               "delay": 0
@@ -14,26 +17,12 @@
               "delay": 0
             }
           ],
-          "devices": [{
-              "devID": "d_1001",
-              "timestamp": 1563870919.6437185,
-              "topic": "smartgarden/g_1001/p_1001/d_1001"
-            },
-            {
-              "devID": "d_1002",
-              "timestamp": 1563870918.1243432,
-              "topic": "smartgarden/g_1001/p_1001/d_1002"
-            },
-            {
-              "devID": "d_1003",
-              "timestamp": 1562602011.602761,
-              "topic": "smartgarden/g_1001/p_1001/d_1003"
-            }
-          ]
+          "devices": []
         },
         {
           "plantID": "p_1002",
-          "hours": [{
+          "hours": [
+            {
               "time": "07:00",
               "duration": 600,
               "delay": 0
@@ -44,49 +33,30 @@
               "delay": 0
             }
           ],
-          "devices": [{
-              "devID": "d_1004",
-              "timestamp": 1556295309
-            },
-            {
-              "devID": "d_1005",
-              "timestamp": 1563870920.5016065,
-              "topic": "smartgarden/g_1001/p_1002/d_1005"
-            },
-            {
-              "devID": "d_1006",
-              "timestamp": 1563870917.8786385,
-              "topic": "smartgarden/g_1001/p_1002/d_1006"
-            }
-          ]
+          "devices": []
         }
       ]
     },
     {
       "gardenID": "g_1002",
-      "plants": [{
-        "plantID": "p_1003",
-        "hours": [{
-            "time": "07:00",
-            "duration": 600,
-            "delay": 0
-          },
-          {
-            "time": "19:00",
-            "duration": 600,
-            "delay": 0
-          }
-        ],
-        "devices": [{
-            "devID": "d_1009",
-            "timestamp": 1556295300
-          },
-          {
-            "devID": "d_1010",
-            "timestamp": 1556295300
-          }
-        ]
-      }]
+      "plants": [
+        {
+          "plantID": "p_1003",
+          "hours": [
+            {
+              "time": "07:00",
+              "duration": 600,
+              "delay": 0
+            },
+            {
+              "time": "19:00",
+              "duration": 600,
+              "delay": 0
+            }
+          ],
+          "devices": []
+        }
+      ]
     }
   ]
 }
