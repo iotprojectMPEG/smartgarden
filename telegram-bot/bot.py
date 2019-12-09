@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-""" Telegram bot for smart gardening."""
-
+"""Telegram bot for smart gardening."""
 from telegram.ext import Updater, CommandHandler, MessageHandler
 from telegram.ext import Filters, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -16,14 +15,17 @@ import numpy as np
 CHAT_ID = None  # For spot.
 
 # Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - '
+                           '"%(message)s', level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
 
 class MyPublisher(object):
+    """MQTT Publisher."""
+
     def __init__(self, clientID, serverIP, port):
+        """Initialise MQTT client."""
         self.clientID = clientID + '_pub'
         self.devID = clientID
         self.port = int(port)
@@ -33,18 +35,22 @@ class MyPublisher(object):
         self.loop_flag = 1
 
     def start(self):
+        """Start publisher."""
         self._paho_mqtt.connect(self.messageBroker, self.port)
         self._paho_mqtt.loop_start()
 
     def stop(self):
+        """Stop publisher."""
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
     def my_on_connect(self, client, userdata, flags, rc):
-        print ("P - Connected to %s - Res code: %d" % (self.messageBroker, rc))
+        """Define custom on_connect function."""
+        print("P - Connected to %s - Res code: %d" % (self.messageBroker, rc))
         self.loop_flag = 0
 
     def my_publish(self, message, topic):
+        """Define custom publish function."""
         print(json.dumps(json.loads(message), indent=2))
         self._paho_mqtt.publish(topic, message, 2)
         print("Publishing on %s:" % topic)
@@ -71,24 +77,18 @@ def help(bot, update):
                     parse_mode=ParseMode.MARKDOWN)
 
 
-def echo(bot, update):
-    """Echo the user message."""
-    #update.message.reply_text(update.message.text)
-    update.message.reply_text("Stai zitto!")
-
-
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
 
-def irrigation(bot, update):
 
+def irrigation(bot, update):
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
     url = config["catalogURL"]
     port = config["port"]
     string = "http://" + url + ":" + port
-    dynamic = json.loads(requests.get(string + '/dynamic').text)
+    # dynamic = json.loads(requests.get(string + '/dynamic').text)
     static = json.loads(requests.get(string + '/static').text)
     broker = json.loads(requests.get(string + '/broker').text)
     mqtt_port = broker["mqtt_port"]
@@ -117,7 +117,7 @@ def irrigation(bot, update):
             r = json.loads(requests.get(string).text)
             topic = r["topic"]
 
-            if topic == None:
+            if topic is not None:
                 update.message.reply_text("❌ Irrigation FAILED on %s" % d)
             else:
                 message = {
@@ -129,7 +129,7 @@ def irrigation(bot, update):
                 message = json.dumps(message)
                 pub.my_publish(message, topic)
                 update.message.reply_text("💧 Irrigation started on %s" % d)
-        except:
+        except Exception:
             print("Something gone wrong")
 
     pub.stop()
@@ -139,7 +139,6 @@ def irrigation(bot, update):
 
 def values(bot, update, args):
     """Get information about all sensor values for every plant."""
-    # Read input.
     try:
         plantID = " ".join(args)
         if plantID[0:2] != 'p_':
@@ -151,37 +150,21 @@ def values(bot, update, args):
                         parse_mode=ParseMode.MARKDOWN)
         return
 
-    # Read catalog URL and port from configuration file.
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
     url = config["catalogURL"]
     port = config["port"]
     string = "http://" + url + ":" + port
-    # dynamic = json.loads(requests.get(string + '/dynamic').text)
     static = json.loads(requests.get(string + '/static').text)
-    # flag = 0
-
     ts = json.loads(requests.get(string + '/ts').text)
-    ts_url, ts_port = ["http://" + ts["IP"], ts["port"]]
-    # Find plantID on catalog.
-    # try:
-    #     r = json.loads(requests.get(string + '/info/' + plantID).text)
-    #     thingspeakID = str(r["thingspeakID"])
-    #     name = str(r["name"])
+    ts_url, ts_port = ts["IP"], ts["port"]
 
-    # except Exception:
-    #     msg = "You must provide a valid `plantID`"
-    #     bot.sendMessage(chat_id=update.message.chat_id, text=msg,
-    #                     parse_mode=ParseMode.MARKDOWN)
-    #     return
-
-    # Find resources associated to the plantID.
     time = "minutes"
-    tval = "50"
+    tval = "5"
 
     for g in static["gardens"]:
-        if (update.message.from_user.username).lower() in g["users"]:
-
+        users = [u.lower() for u in g["users"]]
+        if (update.message.from_user.username).lower() in users:
             for p in g["plants"]:
                 if p["plantID"] == plantID:
                     now = datetime.datetime.now()
@@ -192,7 +175,8 @@ def values(bot, update, args):
                     for d in p["devices"]:
 
                         for res in d["resources"]:
-                            string = (ts_url + ":" + ts_port + "/data/" +
+                            string = ("http://" + ts_url + ":" + ts_port +
+                                      "/data/" +
                                       plantID + "/" + res["n"] + "?time=" +
                                       time + "&tval=" + tval + "&plantID=" +
                                       plantID + "&devID=" + d["devID"])
@@ -208,16 +192,19 @@ def values(bot, update, args):
                             else:
                                 message += ('\n    🔺' + res["n"].capitalize()
                                             + ': ' + str('n.a.'))
+        else:
+            message = "This plant does not belong to you!"
 
     message = message.replace('Celsius', '°C')
     update.message.reply_text(message)
 
 
 def status(bot, update, args):
-    """Get information about all the sensors n the gardens and their status
+    """Get a summary of all gardens.
+
+    Get information about all the sensors in the gardens and their status
     Connected/Disconnected, and sends a summary to the user.
     """
-
     param = " ".join(args)
 
     with open('conf.json', "r") as f:
@@ -237,7 +224,7 @@ def status(bot, update, args):
                 status = '🏡 ' + g["gardenID"] + '   (' + g["name"] + ')'
                 for p in g["plants"]:
                     status = status + ('\n\n    🌱 ' + p["plantID"] +
-                                      '   (' + p["name"] + ')')
+                                       '   (' + p["name"] + ')')
 
                     for g2 in dynamic["gardens"]:
                         if g2["gardenID"] == g["gardenID"]:
@@ -251,16 +238,15 @@ def status(bot, update, args):
                     for d in p["devices"]:
                         if d["devID"] in devices:
                             status = status + ('\n        ✅️ ' + d["devID"] +
-                                              '   (' + d["name"] + ')')
+                                               '   (' + d["name"] + ')')
                         else:
                             status = status + ('\n        ❌ ' + d["devID"] +
-                                              '   (' + d["name"] + ')')
+                                               '   (' + d["name"] + ')')
 
                         devices.append(d["devID"])
                 update.message.reply_text(status)
             else:
                 update.message.reply_text("You are not a user of this garden")
-
 
     else:
         for g in static["gardens"]:
@@ -290,22 +276,7 @@ def status(bot, update, args):
             else:
                 pass
 
-def chat(bot, update):
-    global CHAT_ID
-    CHAT_ID = update.message.chat_id
 
-def spot(bot, update):
-    msg = ("*Irrigation has started now!*\n"
-            "⏱ 10 minutes\n"
-            "🔸 Wind: 12 kn\n"
-            "🔸 Humidity: 36 %\n"
-            "🔸 Temperature: 24 ºC\n"
-            "🔸 Rain: No")
-
-    bot.sendMessage(chat_id=CHAT_ID,
-                    text=msg, parse_mode=ParseMode.MARKDOWN)
-
-############################ Main ##############################################
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
@@ -329,11 +300,6 @@ def main():
     dp.add_handler(CommandHandler("status", status, pass_args=True))
     dp.add_handler(CommandHandler("values", values, pass_args=True))
     dp.add_handler(CommandHandler("irrigate", irrigation))
-    dp.add_handler(CommandHandler("spot", spot))
-    dp.add_handler(CommandHandler("chat", chat))
-
-    # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, echo))
 
     # log all errors
     dp.add_error_handler(error)
@@ -349,4 +315,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    spot()
