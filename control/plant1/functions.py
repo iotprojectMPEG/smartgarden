@@ -29,7 +29,7 @@ def post_mod(plantID, hour, duration, delay, url, port):
 
     # POST on catalog.
     string = "http://" + url + ":" + str(port) + "/edit_hour"
-    print(json.dumps(data, indent=1))
+    print("Publishing:\n", json.dumps(data, indent=1))
     requests.post(string, data=json.dumps(data))
 
 
