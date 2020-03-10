@@ -57,27 +57,33 @@ def main():
     ip3 = input("Type the Telegram token followed by [Enter]:\n")
 
     print("Changing files:")
+    # Base files.
+    update_json("./catalog/conf.json", "catalogURL", ip)
     update_json("./thingspeak/conf.json", "catalogURL", ip)
     update_json("./telegram-bot/conf.json", "catalogURL", ip)
+    update_json("./catalog/api.json", "telegramtoken", ip3)
+
+    # Sensors.
     update_json("./sensors/conf.json", "catalogURL", ip)
     update_json("./sensors/dht11/conf.json", "catalogURL", ip)
-    update_json("./sensors/dht11_2/conf.json", "catalogURL", ip)
-    update_json("./sensors/irrigator/conf.json", "catalogURL", ip)
-    update_json("./sensors/irrigator_2/conf.json", "catalogURL", ip)
-    update_json("./sensors/light/conf.json", "catalogURL", ip)
-    update_json("./sensors/rain/conf.json", "catalogURL", ip)
-    update_json("./sensors/wind/conf.json", "catalogURL", ip)
-    update_json("./catalog/conf.json", "catalogURL", ip)
-    update_json("./control/conf.json", "catalogURL", ip)
-    update_json("./control/rain_control/conf.json", "catalogURL", ip)
-    update_json("./control/wind_control/conf.json", "catalogURL", ip)
-    update_json("./control/temp_control/conf.json", "catalogURL", ip)
-    update_json("./control/hum_control/conf.json", "catalogURL", ip)
-    update_json("./control/light_control/conf.json", "catalogURL", ip)
+    update_json("./sensors/dht11-sim/conf.json", "catalogURL", ip)
+    update_json("./sensors/irrigator-sim/conf.json", "catalogURL", ip)
+    update_json("./sensors/light-sim/conf.json", "catalogURL", ip)
+    update_json("./sensors/rain-sim/conf.json", "catalogURL", ip)
+    update_json("./sensors/wind-sim/conf.json", "catalogURL", ip)
 
+    # Control strategies.
+    update_json("./control/plant1/hum.json", "catalogURL", ip)
+    update_json("./control/plant1/temp.json", "catalogURL", ip)
+    update_json("./control/plant1/wind.json", "catalogURL", ip)
+    update_json("./control/plant2/hum.json", "catalogURL", ip)
+    update_json("./control/plant2/temp.json", "catalogURL", ip)
+    update_json("./control/plant2/light.json", "catalogURL", ip)
+
+    # CherryPi
     update_cherrypy("./catalog/cherrypyconf", "server.socket_host", ip)
     update_cherrypy("./freeboard/conf", "server.socket_host", ip)
-    update_json("./catalog/api.json", "telegramtoken", ip3)
+
 
 
     update_broker("./catalog/static.json", "IP", ip2)
