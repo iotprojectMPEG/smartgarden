@@ -12,7 +12,7 @@ import time
 import threading
 import functions
 
-FILE = "conf.json"
+FILE = "light.json"
 TIME_LIST = []
 
 
