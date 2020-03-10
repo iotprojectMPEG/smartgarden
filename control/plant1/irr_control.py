@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 import json
-import sys, os
-import numpy as np
 import requests
-import schedule
 import time
-import datetime
 import threading
 import functions
 import paho.mqtt.client as PahoMQTT
@@ -31,11 +26,11 @@ class SchedulingThread(threading.Thread):
         broker_ip = broker_info["IP"]
         mqtt_port = broker_info["mqtt_port"]
 
-        sch = Actuator('my_ID', broker_ip, mqtt_port)
+        act = Actuator('my_ID', broker_ip, mqtt_port)
         while True:
             for e in TIME_LIST:
                 if e["schedule_time"] == time.strftime("%H:%M"):
-                    sch.irr(e["plantID"], e["hour"], e["devID"], url, port)
+                    act.irr(e["plantID"], e["hour"], e["devID"], url, port)
                     TIME_LIST.remove(e)
             time.sleep(3)
 
@@ -53,12 +48,13 @@ class Actuator(object):
     def publish(self, duration, topic):
         message = {
                    "e": [{
-                     "n": "irrigate", "d": duration
+                            "n": "irrigate",
+                            "d": duration
                         }]
                    }
         self.pub.my_publish(json.dumps(message), topic)
 
-    def irr(self, plantID, h, devID, url, port):
+    def irr(self, plantID, hour, devID, url, port):
 
         # Get dynamic catalog.
         string = "http://" + url + ":" + port + "/dynamic"
@@ -73,39 +69,40 @@ class Actuator(object):
         for g in data["gardens"]:
             for p in g["plants"]:
                 if p["plantID"] == plantID:
-                    for ho in p["hours"]:
-                        if ho["time"] == h:
-                            mod = ho["duration"]
-                            modh = ho["delay"]
+                    for h in p["hours"]:
+                        if h["time"] == hour:
+                            duration = h["duration"]
+                            delay = h["delay"]
                             break
-
 
         # Reset data about duration and delay on catalog. Next day it will be
         # generated again.
         functions.reset_mod(plantID, h, url, port)
 
         # If there is no delay: publish via MQTT irrigation and duration.
-        if modh == 0:
-            if topic != None:
-                self.publish(mod, topic)
+        if delay == 0:
+            if topic is not None:
+                self.publish(duration, topic)
 
         # If the irrigation has to be anticipated do the same as before but
         # write on catalog that the next day it has to be anticipated.
-        elif modh < 0:
-            if topic != None:
-                self.publish(mod, topic)
+        elif delay < 0:
+            if topic is not None:
+                self.publish(duration, topic)
 
-            new_h = delay_h(h, modh)
-            functions.post_mod_static()
+            new_h = functions.delay_h(h, delay)
+            functions.post_delay(plantID, h, new_h, url, port)
 
         # If there is a delay: start thread with a countdown and then publish.
-        elif modh > 0:
-            thr = ThreadScheduler(devID.replace('d_', ''), devID + "_sch",
-                                  modh, self.pub, mod, topic)
-            thr.start()
+        elif delay > 0:
+            delayed_irrigation = DelayedIrrigation(devID.replace('d_', ''),
+                                                   devID + "_sch",
+                                                   delay, self.pub, duration,
+                                                   topic)
+            delayed_irrigation.start()
 
 
-class ThreadScheduler(threading.Thread):
+class DelayedIrrigation(threading.Thread):
     """Thread to schedule posticipated irrigations. It has a countdown to do
     that.
     """
@@ -153,7 +150,7 @@ class MyPublisher(object):
         self._paho_mqtt.disconnect()
 
     def my_on_connect(self, client, userdata, flags, rc):
-        print ("P - Connected to %s - Res code: %d" % (self.messageBroker, rc))
+        print("P - Connected to %s - Res code: %d" % (self.messageBroker, rc))
         self.loop_flag = 0
 
     def my_publish(self, message, topic):
@@ -172,18 +169,17 @@ def main():
         string = ("http://" + url + ":" + port + "/info/" + plantID)
         data = json.loads(requests.get(string).text)
         hours = data["hours"]
-        env = data["environment"]
 
         global TIME_LIST
         for h in hours:
             t = h["time"]
             s_t = h["time"]
-            s_t = "15:39"
+            # s_t = "15:39"
             entry = {
-            "hour": t,
-            "schedule_time": s_t,
-            "plantID": plantID,
-            "devID": devID
+                "hour": t,
+                "schedule_time": s_t,
+                "plantID": plantID,
+                "devID": devID
             }
             TIME_LIST.append(entry)
             print("Schedule: %s - %s" % (t, plantID))

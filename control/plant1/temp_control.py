@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Humidity control strategy.
+"""Temperature control strategy.
 
-This script takes hum. records on ThingSpeak channels and decide how to edit
-irrigation parameters.
+This script takes temperature records on ThingSpeak channels and decide how to
+edit irrigation parameters.
 """
 import json
-import numpy as np
 import requests
+import numpy as np
 import time
 import threading
 import functions
@@ -17,15 +17,15 @@ TIME_LIST = []
 
 
 def get_result(env, hour):
-    """Get data from ThingSpeak and decide.
+    """Get data from ThingSpeak adaptor and decide.
 
-    Get the last entries on humidity field and decides if it is necessary or
+    Get the last entries on temperature field and decides if it is necessary or
     not to modify duration of irrigation.
     """
     url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
-    resource = "humidity"
+    resource = "temperature"
     time = "minutes"
-    tval = str(5*60)
+    tval = str(2*60)  # Check temperature trending in previous hours
     string = ("http://" + ts_url + ":" + ts_port + "/data/" + plantID + "/" +
               resource + "?time=" + time + "&tval=" + tval + "&plantID=" +
               plantID + "&devID=" + devID)
@@ -33,16 +33,16 @@ def get_result(env, hour):
     data = json.loads(requests.get(string).text)
     data = data["data"]
 
+    # Temperature strategy.
     if data != []:
         m = np.mean(data)
-
-        diff = env["humidity"] - m
-        v = 100 * np.arctan(0.05 * diff)  # Add 300 seconds.
-        v = round(v)
+        duration = 80 * np.arctan(0.05 * m)
+        duration = round(duration)
     else:
-        v = None
+        duration = None
 
-    functions.post_mod(plantID, hour, v, 0, url, port)
+    if duration is not None:
+        functions.post_mod(plantID, hour, duration, 0, url, port)
 
 
 def main():
@@ -68,15 +68,15 @@ def main():
                 # "schedule_time": "15:43",
                 "env": env
                 }
-            TIME_LIST.append(entry)
-            print("Schedule: %s - %s" % (delayed_hour, plantID))
+            TIME_LIST.append(entry)  # Fill timetable.
+            print("Temperature check at: %s - %s" % (delayed_hour, plantID))
 
-        time.sleep(86400)
-        TIME_LIST = []
+        time.sleep(86400)  # One day
+        TIME_LIST = []  # Reset timetable
 
 
 class SchedulingThread(threading.Thread):
-    """Scheduling thread to call the strategy."""
+    """Scheduling thread to call strategy."""
 
     def __init__(self, ThreadID, name):
         """Initialise thread."""
@@ -85,7 +85,10 @@ class SchedulingThread(threading.Thread):
         self.name = name
 
     def run(self):
-        """Run thread."""
+        """Run thread.
+        Check if current hour correspond to one entry in the timetable, if so
+        call the strategy and remove the current hour from the timetable.
+        """
         global TIME_LIST
         while True:
             for e in TIME_LIST:

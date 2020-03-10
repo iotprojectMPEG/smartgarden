@@ -33,12 +33,21 @@ def post_mod(plantID, hour, duration, delay, url, port):
     requests.post(string, data=json.dumps(data))
 
 
-def post_mod_static():
+def post_delay(plantID, hour, new_hour, url, port):
     """Send POST to catalog to change irrigation parameters.
 
     (Different from post_mod)
     """
-    pass
+    data = {
+        "plantID": plantID,
+        "hour": hour,
+        "new_hour": new_hour
+    }
+
+    # POST on catalog.
+    string = "http://" + url + ":" + str(port) + "/edit_hour_delay"
+    print(json.dumps(data, indent=1))
+    requests.post(string, data=json.dumps(data))
 
 
 def reset_mod(plantID, hour, url, port):

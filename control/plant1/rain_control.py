@@ -14,17 +14,10 @@ import threading
 
 FILE = "conf.json"
 TIME_LIST = []
-# def read_file(filename):
-#     """Read json file to get catalogURL, port."""
-#     with open(filename, "r") as f:
-#         data = json.loads(f.read())
-#         url = "http://" + data["URL"]
-#         port = data["thing_port"]
-#         return (url, port)
 
 
 def get_result(env, hour):
-    """Get data from ThingSpeak and decide.
+    """Get data from ThingSpeak adaptor and decide.
 
     Get the last entries on rain field and decides if it is necessary or not
     to irrigate.
@@ -32,25 +25,28 @@ def get_result(env, hour):
     url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
     resource = "rain"
     time = "minutes"
-    tval = str(2*60)
+    tval = str(5*60)  # Check if it has rained in previous hours
     string = ("http://" + ts_url + ":" + ts_port + "/data/" + plantID + "/" +
               resource + "?time=" + time + "&tval=" + tval + "&plantID=" +
               plantID + "&devID=" + devID)
     print(string)
     data = json.loads(requests.get(string).text)
     data = data["data"]
+
+    # Rain strategy.
     if data != []:
         m = np.mean(data)
         if m >= 0.6:  # Rain for at least 60% of the time
-            v = -1  # Do not irrigate
+            duration = -900000  # Do not irrigate
 
         elif (m >= 0.4) and (m < 0.6):  # Rain from 40-60% of the time
-            v = -120  # Remove 120 seconds
+            duration = -200  # Remove 200 seconds
 
         else:  # Almost no rain
-            v = 0  # No modifications
+            duration = None  # No modifications
 
-    functions.post_mod(plantID, hour, v, 0, url, port)
+    if duration is not None:
+        functions.post_mod(plantID, hour, duration, 0, url, port)
 
 
 def main():
@@ -76,11 +72,11 @@ def main():
                 # "schedule_time": "15:43",
                 "env": env
                 }
-            TIME_LIST.append(entry)
-            print("Schedule: %s - %s" % (delayed_hour, plantID))
+            TIME_LIST.append(entry)  # Fill timetable.
+            print("Rain check at: %s - %s" % (delayed_hour, plantID))
 
-        time.sleep(86400)
-        TIME_LIST = []
+        time.sleep(86400)  # One day
+        TIME_LIST = []  # Reset timetable
 
 
 class SchedulingThread(threading.Thread):
@@ -93,7 +89,10 @@ class SchedulingThread(threading.Thread):
         self.name = name
 
     def run(self):
-        """Run thread."""
+        """Run thread.
+        Check if current hour correspond to one entry in the timetable, if so
+        call the strategy and remove the current hour from the timetable.
+        """
         global TIME_LIST
         while True:
             for e in TIME_LIST:
