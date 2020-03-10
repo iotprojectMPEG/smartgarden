@@ -274,13 +274,7 @@ class Catalog(object):
                     for h in p["hours"]:
                         if h["time"] == hour:
                             h["delay"] += delay
-
-                            if duration == -1:  # Raining.
-                                h["duration"] = -1  # No irrigation.
-
-                            elif h["duration"] != -1:  # Not raining.
-                                h["duration"] += duration  # Irrigation.
-
+                            h["duration"] += duration
         self.write_dynamic()
 
     def reset_hour(self, plantID, hour):
@@ -296,21 +290,15 @@ class Catalog(object):
                 if p["plantID"] == plantID:
                     for h in p["hours"]:
                         if h["time"] == hour:
-
-                            for g2 in self.static["gardens"]:
-                                for p2 in g2["plants"]:
-                                    if p2["plantID"] == plantID:
-                                        dflt_dur = p2["environment"]["water"]
-
-                            h["duration"] = dflt_dur  # Reset value
+                            h["duration"] = 0  # Reset value
                             h["delay"] = 0
 
         self.write_dynamic()
 
-    def edit_static_hour(self, plantID, hour, new_hour):
+    def edit_hour_delay(self, plantID, hour, new_hour):
         """Edit irrigation hour in static and dynamic catalog.
 
-        Change irrigation hour to new hour e.g. 19:00->18:55 in static and
+        Change irrigation hour to new hour e.g. 19:00->18:20 in static and
         dynamic parts of catalog. It is used when an irrigation has to be
         anticipated and so the next day it will be sheduled to a different
         hour.
@@ -441,6 +429,12 @@ class Webserver(object):
             cat.reset_hour(body["plantID"], body["hour"])
             return 200
 
+        if uri[0] == 'edit_hour_delay':  # reset_mod
+            body = json.loads(cherrypy.request.body.read())
+            cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
+            cat.edit_hour_delay(body["plantID"], body["hour"],
+                                body["new_hour"])
+            return 200
         # # Change irrigation parameters (duration and hours) on dynamic part.
         # # If static == 0 change duration and delay of irrigation on dynamic.
         # # if static == 1 change old to new hour in static and dynamic parts.
@@ -461,7 +455,7 @@ class Webserver(object):
         #                              body["new_hour"])
         #         return 200
 
-        # Change irrigation times (hours) e.g. 19:00 -> 18:55.
+        # Change irrigation times (hours) e.g. 19:00 -> 18:20.
         if uri[0] == 'update':
             if uri[1] == 'time':
                 body = json.loads(cherrypy.request.body.read())  # Read body
