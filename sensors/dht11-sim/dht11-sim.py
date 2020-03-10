@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Real humidity and temperature sensor.
-"""
-
-try:
-    import Adafruit_DHT
-except:
-    pass
-
+"""Simulated humidity and temperature sensor."""
 import json
 import time
 import paho.mqtt.client as PahoMQTT
 import threading
-from random import randint
-import os, sys, inspect
-current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+import os
+import sys
+import inspect
+current_dir = (os.path.dirname(os.path.abspath(
+                               inspect.getfile(inspect.currentframe()))))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 import updater
@@ -27,56 +22,76 @@ BT = None  # Basetime
 def get_data(devID, res):
     """Get humidity and temperature from sensor. Return two jsons."""
     # Initialization.
-    humidity = randint(0, 100)
-    temperature = randint(0, 100)
+    with open("hum_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("hum_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i == 0:
+                row = lines[0].split(',')
+                humidity = float(row[0])
 
-    # Read data from sensor
-    try:
-        humidity, temperature = Adafruit_DHT.read_retry(SENSOR, PIN,
-                                                        retries=3,
-                                                        delay_seconds=2)
-    except:
-        pass
+            else:
+                row = lines[i].split(',')[0]
+                f.write("%s,\n" % row)
+    f.close()
+
+    with open("temp_demo.txt", "r") as f:
+        lines = f.readlines()
+    f.close()
+    with open("temp_demo.txt", "w") as f:
+        for i in range(len(lines)):
+            if i == 0:
+                row = lines[0].split(',')
+                temperature = float(row[0])
+
+            else:
+                row = lines[i].split(',')[0]
+                for j in row:
+                    f.write("%s,\n" % j)
+    f.close()
 
     timestamp = round(time.time()) - BT
     data = {
-    "bn": devID,
-    "bt": BT,
-    "e":
-       [{"n": res[0]["n"],
-        "u": res[0]["u"],
-        "t": timestamp,
-        "v": humidity
-        },{
-        "n": res[1]["n"],
-        "u": res[1]["u"],
-        "t": timestamp,
-        "v": temperature
-        }]
-    }
+        "bn": devID,
+        "bt": BT,
+        "e":
+            [{"n": res[0]["n"],
+              "u": res[0]["u"],
+              "t": timestamp,
+              "v": humidity
+              },
+             {
+              "n": res[1]["n"],
+              "u": res[1]["u"],
+              "t": timestamp,
+              "v": temperature
+              }]
+             }
 
     return data
 
 
 class PubData(threading.Thread):
     """Publish sensor data with MQTT every minute."""
+
     def __init__(self, ThreadID, name):
+        """Initialise thread with MQTT data."""
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
         (self.devID, self.url, self.port) = updater.read_file("conf.json")
         (self.gardenID, self.plantID,
-                        self.resources) = updater.find_me(self.devID,
-                        self.url, self.port)
+         self.resources) = updater.find_me(self.devID, self.url, self.port)
         (self.broker_ip, mqtt_port) = updater.broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
 
         self.topic = []
-        self.topic.append('smartgarden/' + self.gardenID + '/'
-                              + self.plantID + '/' + self.devID)
+        self.topic.append('smartgarden/' + self.gardenID + '/' +
+                          self.plantID + '/' + self.devID)
 
     def run(self):
-
+        """Run thread."""
         pub = MyPublisher(self.devID + '_1', self.topic[0], self.broker_ip,
                           int(self.mqtt_port))
         pub.start()
@@ -91,11 +106,14 @@ class PubData(threading.Thread):
             # pub2.my_publish(json.dumps(temp))
             time.sleep(60)
 
-        sub.stop()
+        pub.stop()
 
 
 class MyPublisher(object):
+    """MQTT publisher."""
+
     def __init__(self, clientID, topic, serverIP, port):
+        """Initialise MQTT client."""
         self.clientID = clientID + '_pub'
         self.devID = clientID
         self.topic = topic
@@ -106,24 +124,29 @@ class MyPublisher(object):
         self.loop_flag = 1
 
     def start(self):
+        """Start publisher."""
         self._paho_mqtt.connect(self.messageBroker, self.port)
         self._paho_mqtt.loop_start()
 
     def stop(self):
+        """Start subscriber."""
         self._paho_mqtt.loop_stop()
         self._paho_mqtt.disconnect()
 
     def my_on_connect(self, client, userdata, flags, rc):
-        print ("Connected to %s - Res code: %d" % (self.messageBroker, rc))
+        """Define custom on_connect function."""
+        print("Connected to %s - Res code: %d" % (self.messageBroker, rc))
         self.loop_flag = 0
 
     def my_publish(self, message):
+        """Define custom publish function."""
         print("Publishing on %s:" % self.topic)
         print(json.dumps(json.loads(message), indent=2))
         self._paho_mqtt.publish(self.topic, message, 2)
 
 
 def main():
+    """Start all threads."""
     global BT
     BT = round(time.time())
 
@@ -133,7 +156,7 @@ def main():
         try:
             thread1 = updater.Alive(1, "Alive")
             connected = 1  # Catalog is available
-        except:
+        except Exception:
             print("Catalog is not reachable... retry in 5 seconds")
             time.sleep(5)
 

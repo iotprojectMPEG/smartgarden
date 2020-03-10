@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """Light intensity sensor.
 
-Sono necessari i seguenti componenti:
+Following components are required:
 1. Photoresistor module
-2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
+2. Un Analog to Digital Converter PCF 8591 (with library)
 
-Istruzioni montaggio figura "light.jpg"
+Instructions on "light.jpg"
 """
 import PCF8591 as ADC
 import RPi.GPIO as GPIO

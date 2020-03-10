@@ -1,13 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Light intensity sensor.
-
-Sono necessari i seguenti componenti:
-1. Photoresistor module
-2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
-
-Istruzioni montaggio figura "light.jpg"
-"""
+"""Simulated wind intensity sensor."""
 import json
 import threading
 import paho.mqtt.client as PahoMQTT
@@ -15,21 +8,26 @@ import os
 import sys
 import inspect
 import time
+import numpy as np
+
+
 current_dir = os.path.dirname(os.path.abspath(
                               inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 import updater
 
+INTENSITY = [(0, 10), (11, 33), (34, 64)]  # Knots.
 FILENAME = "conf.json"
 BT = None
+PREVIOUS_VALUE = 5  # To prevent wind changing drastically from previous value.
 
 
 class MyPublisher(object):
-    """MQTT Publisher."""
+    """MQTT publisher."""
 
     def __init__(self, clientID, topic, serverIP, port):
-        """Initialise MQTT client."""
+        """Initialise MQTT publisher."""
         self.clientID = clientID
         self.topic = topic
         self.messageBroker = serverIP
@@ -69,7 +67,7 @@ class PubData(threading.Thread):
         self.ThreadID = ThreadID
         self.name = name
         (self.devID, self.url, self.port) = updater.read_file(FILENAME)
-        print(">>> Light %s <<<\n" % (self.devID))
+        print(">>> Wind %s <<<\n" % self.devID)
         (self.gardenID, self.plantID,
          self.resources) = updater.find_me(self.devID,
                                            self.url, self.port)
@@ -100,11 +98,11 @@ class PubData(threading.Thread):
 
 
 def get_data(devID, res):
-    """Get light data from sensor."""
-    with open("light_demo.txt", "r") as f:
+    """Get wind data from sensor."""
+    with open("wind_demo.txt", "r") as f:
         lines = f.readlines()
     f.close()
-    with open("light_demo.txt", "w") as f:
+    with open("wind_demo.txt", "w") as f:
         for i in range(len(lines)):
             if i == 0:
                 row = lines[0].split(',')
@@ -114,6 +112,24 @@ def get_data(devID, res):
                 row = lines[i].split(',')[0]
                 f.write("%s,\n" % row)
     f.close()
+    try:
+        intensity = np.random.choice([0, 1, 2], p=[0.6, 0.38, 0.02])
+        minimum = INTENSITY[intensity][0]
+        maximum = INTENSITY[intensity][1]
+        value = np.random.randint(minimum, maximum+1)
+
+        # Maximum range of change: 5
+        global PREVIOUS_VALUE
+        if (value > PREVIOUS_VALUE + 5):
+            value = PREVIOUS_VALUE + 5
+
+        elif (value < PREVIOUS_VALUE - 5):
+            value = PREVIOUS_VALUE - 5
+
+        PREVIOUS_VALUE = value
+
+    except Exception:
+        pass
 
     timestamp = round(time.time()) - BT
     data = {
@@ -135,9 +151,19 @@ def main():
     global BT
     BT = round(time.time())
 
-    thread1 = updater.Alive(1, "Alive")
+    # Try to connect to catalog by starting Alive process.
+    connected = 0
+    while connected == 0:
+        try:
+            thread1 = updater.Alive(1, "Alive")
+            connected = 1  # Catalog is available
+        except Exception:
+            print("Catalog is not reachable... retry in 5 seconds")
+            time.sleep(5)
+
     thread2 = PubData(2, "PubData")
 
+    # Start threads.
     thread1.start()
     time.sleep(1)
     thread2.start()

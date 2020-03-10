@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """Rain detection sensor.
 
-Sono necessari i seguenti componenti:
+Following components are required:
 1. Rain detection module
-2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
+2. Un Analog to Digital Converter PCF 8591 (with library)
 3. Un modulo amplificatore LM 393
 
-Istruzioni montaggio figura "rain.jpg"
+Instructions on "rain.jpg"
 """
 import PCF8591 as ADC
 import RPi.GPIO as GPIO

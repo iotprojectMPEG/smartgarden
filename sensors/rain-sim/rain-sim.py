@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Rain detection sensor.
-
-Sono necessari i seguenti componenti:
-1. Rain detection module
-2. Un Analog to Digital Converter PCF 8591 (e installare la libreria)
-3. Un modulo amplificatore LM 393
-
-Istruzioni montaggio figura "rain.jpg"
-"""
+"""Simulated rain detection sensor."""
 import json
 import time
 import threading
