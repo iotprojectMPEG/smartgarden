@@ -246,11 +246,11 @@ def status(bot, update, args):
                         devices.append(d["devID"])
                 update.message.reply_text(status)
             else:
-                update.message.reply_text("You are not a user of this garden")
+                pass
 
     else:
         for g in static["gardens"]:
-            if update.message.from_user.username in g["users"]:
+            if (update.message.from_user.username).lower() in g["users"]:
                 devices = []
                 status = '🏡 ' + g["name"]
                 for p in g["plants"]:
