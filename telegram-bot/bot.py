@@ -158,7 +158,6 @@ def values(bot, update, args):
     static = json.loads(requests.get(string + '/static').text)
     ts = json.loads(requests.get(string + '/ts').text)
     ts_url, ts_port = ts["IP"], ts["port"]
-    ts_url = '192.168.1.200'
 
     time = "minutes"
     tval = "5"
