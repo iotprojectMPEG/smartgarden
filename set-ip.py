@@ -67,6 +67,7 @@ def main():
     update_json("./sensors/conf.json", "catalogURL", ip)
     update_json("./sensors/dht11/conf.json", "catalogURL", ip)
     update_json("./sensors/dht11-sim/conf.json", "catalogURL", ip)
+    update_json("./sensors/dht11-sim2/conf.json", "catalogURL", ip)
     update_json("./sensors/irrigator-sim/conf.json", "catalogURL", ip)
     update_json("./sensors/light-sim/conf.json", "catalogURL", ip)
     update_json("./sensors/rain-sim/conf.json", "catalogURL", ip)
