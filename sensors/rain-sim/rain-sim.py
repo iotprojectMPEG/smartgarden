@@ -8,6 +8,7 @@ import paho.mqtt.client as PahoMQTT
 import os
 import sys
 import inspect
+import datetime
 current_dir = os.path.dirname(os.path.abspath(
                               inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
@@ -95,19 +96,12 @@ class PubData(threading.Thread):
 
 def get_data(devID, res):
     """Get data from sensor."""
+    now = datetime.datetime.now()
+    line_number = now.hour*60 + now.minute
     with open("rain_demo.txt", "r") as f:
         lines = f.readlines()
     f.close()
-    with open("rain_demo.txt", "w") as f:
-        for i in range(len(lines)):
-            if i == 0:
-                row = lines[0].split(',')
-                value = round(float(row[0]))
-
-            else:
-                row = lines[i].split(',')[0]
-                f.write("%s,\n" % row)
-    f.close()
+    value = int(lines[line_number].replace('\n', ''))
 
     timestamp = round(time.time()) - BT
     data = {
