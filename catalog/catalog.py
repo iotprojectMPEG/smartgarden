@@ -27,10 +27,10 @@ def read_config(filename):
     """
     with open(filename, "r") as file:
         f = json.loads(file.read())
-        url = f["catalogURL"]
-        port = f["port"]
+        cat_ip = f["cat_ip"]
+        cat_port = f["cat_port"]
         topic = f["topic"]
-    return (url, port, topic)
+    return (cat_ip, cat_port, topic)
 
 
 # Classes

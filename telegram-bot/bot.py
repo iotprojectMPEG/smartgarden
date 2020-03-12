@@ -85,8 +85,8 @@ def error(bot, update, error):
 def irrigation(bot, update):
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
-    url = config["catalogURL"]
-    port = config["port"]
+    url = config["cat_ip"]
+    port = config["cat_port"]
     string = "http://" + url + ":" + port
     # dynamic = json.loads(requests.get(string + '/dynamic').text)
     static = json.loads(requests.get(string + '/static').text)
@@ -152,12 +152,13 @@ def values(bot, update, args):
 
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
-    url = config["catalogURL"]
-    port = config["port"]
+    url = config["cat_ip"]
+    port = config["cat_port"]
     string = "http://" + url + ":" + port
     static = json.loads(requests.get(string + '/static').text)
     ts = json.loads(requests.get(string + '/ts').text)
     ts_url, ts_port = ts["IP"], ts["port"]
+    ts_url = '192.168.1.200'
 
     time = "minutes"
     tval = "5"
@@ -209,8 +210,8 @@ def status(bot, update, args):
 
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
-    url = config["catalogURL"]
-    port = config["port"]
+    url = config["cat_ip"]
+    port = config["cat_port"]
     string = "http://" + url + ":" + port
     dynamic = json.loads(requests.get(string + '/dynamic').text)
     static = json.loads(requests.get(string + '/static').text)
@@ -283,8 +284,8 @@ def main():
 
     with open('conf.json', "r") as f:
         config = json.loads(f.read())
-    url = config["catalogURL"]
-    port = config["port"]
+    url = config["cat_ip"]
+    port = config["cat_port"]
     string = "http://" + url + ":" + port + "/" + "api/telegramtoken"
     token = json.loads(requests.get(string).text)
     token = token["token"]

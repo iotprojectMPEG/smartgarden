@@ -17,9 +17,9 @@ def read_file(filename):
     """Read json file to get devID, catalogURL and port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
-        url = data["catalogURL"]
+        url = data["cat_ip"]
         devID = data["devID"]
-        port = data["port"]
+        port = data["cat_port"]
         return (devID, url, port)
 
 

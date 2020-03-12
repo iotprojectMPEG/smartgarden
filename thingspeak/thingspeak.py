@@ -32,9 +32,9 @@ def read_file(filename):
     """Read json file to get catalogURL, port, topic and ThingSpeak URL."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
-        url = data["catalogURL"]
+        url = data["cat_ip"]
         topic = data["topic"]
-        port = data["port"]
+        port = data["cat_port"]
         ts_url = data["thingspeakURL"]
         return (url, port, topic, ts_url)
 
@@ -43,8 +43,8 @@ def read_file_short(filename):
     """Read json file to get catalogURL and port."""
     with open(filename, "r") as f:
         data = json.loads(f.read())
-        url = data["catalogURL"]
-        port = data["port"]
+        url = data["cat_ip"]
+        port = data["cat_port"]
         return (url, port)
 
 

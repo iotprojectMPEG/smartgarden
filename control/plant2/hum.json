@@ -1,6 +1,6 @@
 {
-  "catalogURL": "127.0.0.1",
-  "port": "8080",
+  "cat_ip": "127.0.0.1",
+  "cat_port": "8080",
   "plantID": "p_1002",
   "devID": "d_1004"
 }
