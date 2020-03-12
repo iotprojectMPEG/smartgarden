@@ -118,6 +118,10 @@ def main():
     # CherryPi
     update_cherrypy("./catalog/cherrypyconf", "server.socket_host", cat_ip)
     update_cherrypy("./freeboard/conf", "server.socket_host", cat_ip)
+    update_cherrypy("./thingspeak/cherrypyconf", "server.socket_host", ts_ip)
+    update_cherrypy("./catalog/cherrypyconf", "server.socket_port", cat_port)
+    update_cherrypy("./freeboard/conf", "server.socket_port", cat_port)
+    update_cherrypy("./thingspeak/cherrypyconf", "server.socket_port", ts_port)
     print("Success!")
 
 
