@@ -15,7 +15,7 @@ def update_cherrypy(filename, key, value):
     with open(filename, 'r') as fr:
         data = fr.readlines()
 
-    string = str(key) + ": '" + str(value) + "'\n"
+    string = str(key) + ": '" + value + "'\n"
 
     for cnt, line in enumerate(data):
         if line.find(key) != -1:
@@ -119,9 +119,11 @@ def main():
     update_cherrypy("./catalog/cherrypyconf", "server.socket_host", cat_ip)
     update_cherrypy("./freeboard/conf", "server.socket_host", cat_ip)
     update_cherrypy("./thingspeak/cherrypyconf", "server.socket_host", ts_ip)
-    update_cherrypy("./catalog/cherrypyconf", "server.socket_port", cat_port)
-    update_cherrypy("./freeboard/conf", "server.socket_port", cat_port)
-    update_cherrypy("./thingspeak/cherrypyconf", "server.socket_port", ts_port)
+    update_cherrypy("./catalog/cherrypyconf", "server.socket_port",
+                    int(cat_port))
+    update_cherrypy("./freeboard/conf", "server.socket_port", int(cat_port))
+    update_cherrypy("./thingspeak/cherrypyconf", "server.socket_port",
+                    int(ts_port))
     print("Success!")
 
 
