@@ -15,7 +15,10 @@ def update_cherrypy(filename, key, value):
     with open(filename, 'r') as fr:
         data = fr.readlines()
 
-    string = str(key) + ": '" + value + "'\n"
+    if isinstance(value, int):
+        string = str(key) + ": " + str(value) + "\n"
+    else:
+        string = str(key) + ": '" + str(value) + "'\n"
 
     for cnt, line in enumerate(data):
         if line.find(key) != -1:
