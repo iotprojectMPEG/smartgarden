@@ -192,11 +192,12 @@ def values(bot, update, args):
                             else:
                                 message += ('\n    🔺' + res["n"].capitalize()
                                             + ': ' + str('n.a.'))
+            message = message.replace('Celsius', '°C')
+            update.message.reply_text(message)
+            return
         else:
             message = "This plant does not belong to you!"
-
-    message = message.replace('Celsius', '°C')
-    update.message.reply_text(message)
+            update.message.reply_text(message)
 
 
 def status(bot, update, args):
