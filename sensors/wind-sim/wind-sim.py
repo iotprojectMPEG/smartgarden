@@ -14,6 +14,7 @@ current_dir = os.path.dirname(os.path.abspath(
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 import updater
+import random
 
 INTENSITY = [(0, 10), (11, 33), (34, 64)]  # Knots.
 FILENAME = "conf.json"
@@ -134,6 +135,9 @@ def get_data(devID, res):
         lines = f.readlines()
     f.close()
     value = int(lines[line_number].replace('\n', ''))
+    value += random.randint(-1, 1)
+    if value <= 0:
+        value = 1
 
     timestamp = round(time.time()) - BT
     data = {

@@ -14,6 +14,7 @@ current_dir = (os.path.dirname(os.path.abspath(
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 import updater
+import random
 
 SENSOR = 11
 PIN = 17
@@ -35,6 +36,13 @@ def get_data(devID, res):
         lines = f.readlines()
     f.close()
     temperature = int(lines[line_number].replace('\n', ''))
+
+    temperature += random.randint(-1, 1)
+    if temperature <= 0:
+        temperature = 1
+    humidity += random.randint(-1, 1)
+    if humidity <= 0:
+        humidity = 1
 
     timestamp = round(time.time()) - BT
     data = {
