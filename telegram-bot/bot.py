@@ -161,16 +161,20 @@ def values(bot, update, args):
 
     time = "minutes"
     tval = "5"
+    flag = 0
 
     for g in static["gardens"]:
         users = [u.lower() for u in g["users"]]
         if (update.message.from_user.username).lower() in users:
             for p in g["plants"]:
+
                 if p["plantID"] == plantID:
+                    flag = 1
+                    print("ciao stronzi")
                     now = datetime.datetime.now()
                     message = ('🌱 ' + p["name"] +
-                               '\n    🕒' + ' ' + str(now.hour) + ':' +
-                               str(now.minute))
+                               '\n    🕒' + ' ' + str(now.hour).zfill(2) + ':' +
+                               str(now.minute).zfill(2))
 
                     for d in p["devices"]:
 
@@ -192,12 +196,18 @@ def values(bot, update, args):
                             else:
                                 message += ('\n    🔺' + res["n"].capitalize()
                                             + ': ' + str('n.a.'))
-            message = message.replace('Celsius', '°C')
-            update.message.reply_text(message)
-            return
-        else:
-            message = "This plant does not belong to you!"
-            update.message.reply_text(message)
+
+                    message = message.replace('Celsius', '°C')
+                    update.message.reply_text(message)
+                    return
+
+                else:
+                    message = "This plant does not belong to you!"
+                    update.message.reply_text(message)
+
+
+
+
 
 
 def status(bot, update, args):
