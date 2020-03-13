@@ -161,16 +161,12 @@ def values(bot, update, args):
 
     time = "minutes"
     tval = "5"
-    flag = 0
 
     for g in static["gardens"]:
         users = [u.lower() for u in g["users"]]
         if (update.message.from_user.username).lower() in users:
             for p in g["plants"]:
-
                 if p["plantID"] == plantID:
-                    flag = 1
-                    print("ciao stronzi")
                     now = datetime.datetime.now()
                     message = ('🌱 ' + p["name"] +
                                '\n    🕒' + ' ' + str(now.hour).zfill(2) + ':' +
