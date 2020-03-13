@@ -68,10 +68,12 @@ def update_ts(filename, key, value):
 def main():
     cat_ip = input("Type catalog IP followed by [Enter]:\n")
     cat_port = input("Type catalog port followed by [Enter]:\n")
-    mqtt_ip = input("Type MQTT broker IP followed by [Enter]:\n")
-    telegram_token = input("Type the Telegram token followed by [Enter]:\n")
     ts_ip = input("Type ThingSpeak adaptor IP followed by [Enter]:\n")
     ts_port = input("Type ThingSpeak adaptor port followed by [Enter]:\n")
+    fre_ip = input("Type freeboard IP followed by [Enter]:\n")
+    fre_port = input("Type freeboard port followed by [Enter]:\n")
+    mqtt_ip = input("Type MQTT broker IP followed by [Enter]:\n")
+    telegram_token = input("Type the Telegram token followed by [Enter]:\n")
 
     print("Changing files:")
     # Base files.
@@ -103,6 +105,8 @@ def main():
                                                 [cat_ip, cat_port])
     update_json("./sensors/wind-sim/conf.json", ["cat_ip", "cat_port"],
                                                 [cat_ip, cat_port])
+    update_json("./control/plant1/irr.json", ["cat_ip", "cat_port"],
+                                             [cat_ip, cat_port])
 
     # Control strategies.
     update_json("./control/plant1/hum.json", ["cat_ip", "cat_port"],
@@ -120,11 +124,11 @@ def main():
 
     # CherryPi
     update_cherrypy("./catalog/cherrypyconf", "server.socket_host", cat_ip)
-    update_cherrypy("./freeboard/conf", "server.socket_host", cat_ip)
+    update_cherrypy("./freeboard/conf", "server.socket_host", fre_ip)
     update_cherrypy("./thingspeak/cherrypyconf", "server.socket_host", ts_ip)
     update_cherrypy("./catalog/cherrypyconf", "server.socket_port",
                     int(cat_port))
-    update_cherrypy("./freeboard/conf", "server.socket_port", int(cat_port))
+    update_cherrypy("./freeboard/conf", "server.socket_port", int(fre_port))
     update_cherrypy("./thingspeak/cherrypyconf", "server.socket_port",
                     int(ts_port))
     print("Success!")

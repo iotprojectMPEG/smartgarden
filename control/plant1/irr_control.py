@@ -7,7 +7,7 @@ import threading
 import functions
 import paho.mqtt.client as PahoMQTT
 
-FILE = "conf.json"
+FILE = "irr.json"
 TIME_LIST = []
 
 
@@ -75,6 +75,10 @@ class Actuator(object):
                             delay = h["delay"]
                             break
 
+        string = "http://" + url + ":" + port + "/info/" + plantID
+        data = json.loads(requests.get(string).text)
+        water = data["environment"]["water"]
+        duration = duration + water
         # Reset data about duration and delay on catalog. Next day it will be
         # generated again.
         functions.reset_mod(plantID, h, url, port)
@@ -184,7 +188,7 @@ def main():
             TIME_LIST.append(entry)
             print("Schedule: %s - %s" % (t, plantID))
 
-        time.sleep(50)
+        time.sleep(86400)
         TIME_LIST = []
 
 
