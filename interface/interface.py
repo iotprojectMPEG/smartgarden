@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Smart Garden")
-        self.central_widget = QStackedWidget() 
+        self.central_widget = QStackedWidget()
         self.setCentralWidget(self.central_widget)
         self.setFixedSize(400,175)
         self.start_window()
@@ -96,12 +96,16 @@ class AddGarden(QWidget):
         self.grid_layout = QGridLayout(self)
         self.garden_label = QLabel("Garden name: ")
         self.garden_box = QLineEdit(self)
+        self.location_label = QLabel("Garden location: ")
+        self.location_box = QLineEdit(self)
         self.add_button = QPushButton("Add")
         self.back_button = QPushButton("Back")
         self.grid_layout.addWidget(self.garden_label, 1, 0)
         self.grid_layout.addWidget(self.garden_box, 1, 1)
-        self.grid_layout.addWidget(self.add_button, 1, 2)
-        self.grid_layout.addWidget(self.back_button, 2, 1)
+        self.grid_layout.addWidget(self.location_label, 2, 0)
+        self.grid_layout.addWidget(self.location_box, 2, 1)
+        self.grid_layout.addWidget(self.add_button, 2, 2)
+        self.grid_layout.addWidget(self.back_button, 3, 1)
         self.add_button.clicked.connect(self.posting_garden)
 
     def added_garden(self):
@@ -112,13 +116,20 @@ class AddGarden(QWidget):
         self.grid_layout.removeWidget(self.garden_box)
         self.garden_box.deleteLater()
         self.garden_box = None
+        self.grid_layout.removeWidget(self.location_label)
+        self.location_label.deleteLater()
+        self.location_label = None
+        self.grid_layout.removeWidget(self.location_box)
+        self.location_box.deleteLater()
+        self.location_box = None
         self.grid_layout.removeWidget(self.add_button)
         self.add_button.deleteLater()
         self.add_button = None
         self.grid_layout.addWidget(added_garden_label, 1, 0)
 
     def posting_garden(self):
-        new_garden = {"name": self.garden_box.text()}
+        new_garden = {"name": self.garden_box.text(),
+                    "location": self.location_box.text()}
         file = open(CONFIG, 'r')
         config = json.load(file)
         file.close()
