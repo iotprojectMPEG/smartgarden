@@ -6,6 +6,37 @@ import json
 import requests
 
 
+def get_result(env, hour):
+    """Get data from ThingSpeak adaptor and decide.
+
+    Get the last entries on humidity field and decides if it is necessary or
+    not to modify duration of irrigation.
+    """
+    url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
+    resource = "irrigation"
+    time = "minutes"
+    tval = str(5*60)  # Check humidity trending in previous hours
+    string = ("http://" + ts_url + ":" + ts_port + "/data/" + plantID + "/" +
+              resource + "?time=" + time + "&tval=" + tval + "&plantID=" +
+              plantID + "&devID=" + devID)
+    print(string)
+    data = json.loads(requests.get(string).text)
+    data = data["data"]
+
+    # Humidity strategy.
+    if data != []:
+        m = np.mean(data)
+
+        diff = env["irrigation"] - m
+        duration = 100 * np.arctan(0.05 * diff)  # Add 300 seconds.
+        duration = round(duration)
+    else:
+        duration = None
+
+    if duration is not None:
+        functions.post_mod(plantID, hour, duration, 0, url, port)
+
+
 def main():
     """Schedule and run strategy."""
     url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
