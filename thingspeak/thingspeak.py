@@ -341,10 +341,12 @@ class WebServer():
         res = json.loads(requests.get(string2).text)
 
         try:
-            wanttime = params["wanttime"]
+            wanttime = int(params["wanttime"])
+            print("OK")
         except Exception:
             wanttime = 0
 
+        print(wanttime)
         data = []
         if wanttime == 0:
             for r in res["feeds"]:
@@ -356,7 +358,7 @@ class WebServer():
         elif wanttime == 1:
             for r in res["feeds"]:
                 if r["field"+str(fieldID)] is not None:
-                    data.append("created_at")
+                    data.append(r["created_at"])
                 else:
                     pass
 
