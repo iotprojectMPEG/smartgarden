@@ -25,8 +25,7 @@ def main():
             delayed_hour = functions.delay_h(t, -300)
             entry = {
                 "hour": t,
-                "schedule_time": delayed_hour,
-                # "schedule_time": "15:43",
+                "schedule_time": 12:00,
                 "env": env
                 }
             TIME_LIST.append(entry)  # Fill timetable.
