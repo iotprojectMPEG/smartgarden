@@ -7,12 +7,16 @@ import time
 import threading
 import functions
 import paho.mqtt.client as PahoMQTT
+import datetime
+
+FILE = "time.json"
+TIME_LIST = []
 
 
-def get_result(env, hour):
+def get_result():
     """Get data from ThingSpeak adaptor and decide.
 
-    Get the last entries on humidity field and decides if it is necessary or
+    Get the last entries on irrigation field and decides if it is necessary or
     not to modify duration of irrigation.
     """
     url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
@@ -21,23 +25,62 @@ def get_result(env, hour):
     tval = str(7)  # Check irrigation trending in previous days
     string = ("http://" + ts_url + ":" + ts_port + "/data/" + plantID + "/" +
               resource + "?time=" + time + "&tval=" + tval + "&plantID=" +
-              plantID + "&devID=" + devID)
-    print(string)
+              plantID + "&devID=" + devID + "&wanttime=1")
     data = json.loads(requests.get(string).text)
     data = data["data"]
 
-    # Humidity strategy.
+
+    # Time strategy.
+    start = '23:59:59'
+    end = '12:00:00'
+
     if data != []:
-        m = np.mean(data)
+        morning = []
+        evening = []
 
-        diff = env["irrigation"] - m
-        duration = 100 * np.arctan(0.05 * diff)  # Add 300 seconds.
-        duration = round(duration)
+        #for k in data:
+        for k in data:
+            datetime_object = datetime.datetime.strptime(k, '%Y-%m-%dT%H:%M:%SZ')
+            time = datetime_object.strftime("%H:%M:%S")#---> "hh:mm:ss"
+
+            if time > start and time < end: #if is in the morning
+                morning.append(time)
+            else: #if is in the evening
+                evening.append(time)
+
+        if morning == []:
+            mean_evening = functions.mean_time(evening)
+            info = json.loads(requests.get("http://" + url + ":" + port + "/info/"+ plantID).text)
+            print(info)
+            vector = [{"time": info["hours"][0]["time"], "type": "morning"},{"time": mean_evening, "type": "evening"}]
+
+        elif evening == []:
+            mean_morning = functions.mean_time(morning)
+            info = json.loads(requests.get("http://" + url + ":" + port + "/info/"+ plantID).text)
+            vector = [{"time": mean_morning, "type": "morning"},{"time": info["hours"][1]["time"], "type": "evening"}]
+
+        else:
+            mean_evening = functions.mean_time(evening)
+            mean_morning = functions.mean_time(morning)
+            vector = [{"time": mean_morning, "type": "morning"},{"time": mean_evening, "type": "evening"}]
     else:
-        duration = None
+        return
 
-    if duration is not None:
-        functions.post_mod(plantID, hour, duration, 0, url, port)
+    functions.post_mod_hour(plantID, vector, url, port) #post to catalog
+
+
+
+    # if data != []:
+    #     m = np.mean(data)
+    #
+    #     diff = env["irrigation"] - m
+    #     duration = 100 * np.arctan(0.05 * diff)  # Add 300 seconds.
+    #     duration = round(duration)
+    # else:
+    #     duration = None
+    #
+    # if duration is not None:
+    #     functions.post_mod(plantID, hour, duration, 0, url, port)
 
 
 def main():
@@ -54,16 +97,12 @@ def main():
         env = data["environment"]
 
         global TIME_LIST
-        for h in hours:
-            t = h["time"]
-            delayed_hour = functions.delay_h(t, -300)
-            entry = {
-                "hour": t,
-                "schedule_time": 12:00,
-                "env": env
-                }
-            TIME_LIST.append(entry)  # Fill timetable.
-            print("Humidity check at: %s - %s" % (delayed_hour, plantID))
+        entry = {
+            "schedule_time": "18:47",
+            "env": env
+            }
+        TIME_LIST.append(entry)  # Fill timetable.
+        print("Time check at: 12:00 - %s" % (plantID))
 
         time.sleep(86400)  # One day
         TIME_LIST = []  # Reset timetable
@@ -87,7 +126,7 @@ class SchedulingThread(threading.Thread):
         while True:
             for e in TIME_LIST:
                 if e["schedule_time"] == time.strftime("%H:%M"):
-                    get_result(e["env"], e["hour"])
+                    get_result()
                     TIME_LIST.remove(e)
             time.sleep(3)
 
