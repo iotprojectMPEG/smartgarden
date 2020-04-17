@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Common functions to control strategies."""
-import datetime
 import json
 import requests
+import time
+import threading
+import functions
+import paho.mqtt.client as PahoMQTT
 
 
 def get_result(env, hour):
@@ -14,8 +17,8 @@ def get_result(env, hour):
     """
     url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
     resource = "irrigation"
-    time = "minutes"
-    tval = str(5*60)  # Check humidity trending in previous hours
+    time = "days"
+    tval = str(7)  # Check irrigation trending in previous days
     string = ("http://" + ts_url + ":" + ts_port + "/data/" + plantID + "/" +
               resource + "?time=" + time + "&tval=" + tval + "&plantID=" +
               plantID + "&devID=" + devID)
