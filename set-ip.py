@@ -4,7 +4,6 @@
 This script lets you change all IPs in json files.
 """
 import json
-import sys, os
 
 
 def update_cherrypy(filename, key, value):
@@ -27,11 +26,11 @@ def update_cherrypy(filename, key, value):
     data[cnt] = string
 
     with open(filename, 'w') as fw:
-         fw.writelines(data)
+        fw.writelines(data)
 
 
 def update_json(filename, keys, values):
-    """Update json files with new value."""
+    """Update json files with new values."""
     print(filename)
 
     with open(filename, 'r') as fr:
@@ -43,7 +42,9 @@ def update_json(filename, keys, values):
     with open(filename, 'w') as fw:
         json.dump(data, fw, indent=2)
 
+
 def update_broker(filename, key, value):
+    """Update json files with new broker values."""
     print(filename)
 
     with open(filename, 'r') as fr:
@@ -54,7 +55,9 @@ def update_broker(filename, key, value):
     with open(filename, 'w') as fw:
         json.dump(data, fw, indent=2)
 
+
 def update_ts(filename, key, value):
+    """Update json files with new TS values."""
     print(filename)
 
     with open(filename, 'r') as fr:
@@ -65,7 +68,9 @@ def update_ts(filename, key, value):
     with open(filename, 'w') as fw:
         json.dump(data, fw, indent=2)
 
+
 def main():
+    """Update all configuration files."""
     cat_ip = input("Type catalog IP followed by [Enter]:\n")
     cat_port = input("Type catalog port followed by [Enter]:\n")
     ts_ip = input("Type ThingSpeak adaptor IP followed by [Enter]:\n")
@@ -107,6 +112,8 @@ def main():
                                                 [cat_ip, cat_port])
     update_json("./control/plant1/irr.json", ["cat_ip", "cat_port"],
                                              [cat_ip, cat_port])
+    update_json("./control/plant1/time.json", ["cat_ip", "cat_port"],
+                                              [cat_ip, cat_port])
 
     # Control strategies.
     update_json("./control/plant1/hum.json", ["cat_ip", "cat_port"],
