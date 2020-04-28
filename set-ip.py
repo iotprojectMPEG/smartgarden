@@ -92,6 +92,8 @@ def main():
     update_json("./telegram-bot/conf.json", ["cat_ip", "cat_port"],
                                             [cat_ip, cat_port])
     update_json("./catalog/api.json", ["telegramtoken"], [telegram_token])
+    update_json("./interface/conf.json", ["cat_ip", "cat_port"],
+                                         [cat_ip, cat_port])
 
     # Sensors.
     update_json("./sensors/conf.json", ["cat_ip", "cat_port"],
