@@ -7,13 +7,15 @@ import time
 import requests
 import threading
 import paho.mqtt.client as PahoMQTT
+from pathlib import Path
 
 # Global variables
-JSON_STATIC = 'static.json'
-JSON_DYNAMIC = 'dynamic.json'
-APIFILE = 'api.json'
-CHERRY_CONF = 'cherrypyconf'
-CONFIG = 'conf.json'
+P = Path(__file__).parent.absolute()
+JSON_STATIC = P / 'static.json'
+JSON_DYNAMIC = P / 'dynamic.json'
+APIFILE = P / 'api.json'
+CHERRY_CONF = str(P / 'cherrypyconf')
+CONFIG = P / 'conf.json'
 OLD_MAX = 300
 REMOVE_AFTER = 600
 
@@ -72,6 +74,7 @@ class Catalog(object):
 
         The new gardenID is auto-generated.
         """
+        # Look at the existing garden IDs.
         self.load_file()
         list_id = []
 
@@ -80,7 +83,7 @@ class Catalog(object):
 
         # Generate a new gardenID starting from 1000 and taking the first free
         # number which is available.
-        numID = 1000
+        numID = 1001
         new_id = 'g_' + str(numID)
 
         while new_id in list_id:
@@ -88,11 +91,18 @@ class Catalog(object):
             new_id = 'g_' + str(numID)
 
         garden_json["plants"] = []
+        garden_json["users"] = []
         garden_json["gardenID"] = new_id
         print(garden_json)
 
         self.static["gardens"].append(garden_json)
+        garden_dyn_json = {
+            "gardenID": garden_json["gardenID"],
+            "plants": []
+        }
+        self.dynamic["gardens"].append(garden_dyn_json)
         self.write_static()
+        self.write_dynamic()
 
     def add_plant(self, plant_json):
         """Add a new plant in the static catalog.
@@ -102,14 +112,22 @@ class Catalog(object):
         self.load_file()
         list_id = []
 
+        # Generate list of all plantIDs
         for g in self.static["gardens"]:
-            if g["gardenID"] == plant_json["gardenID"]:
-                break
             for p in g["plants"]:
                 list_id.append(p["plantID"])
 
+        # Find specific garden element in static and dynamic jsons.
+        for g in self.static["gardens"]:
+            if g["gardenID"] == plant_json["gardenID"]:
+                break
+
+        for gd in self.dynamic["gardens"]:
+            if gd["gardenID"] == plant_json["gardenID"]:
+                break
+
         # Generate a new plantID.
-        numID = 1000
+        numID = 1001
         new_id = 'p_' + str(numID)
 
         while new_id in list_id:
@@ -121,7 +139,23 @@ class Catalog(object):
         plant_json["devices"] = []
 
         g["plants"].append(plant_json)
+        plant_dyn_json = {
+            "plantID": plant_json["plantID"],
+            "devices": [],
+            "hours": []
+        }
+        for h in plant_json["hours"]:
+            entry = {
+                "time": h["time"],
+                "duration": 0,
+                "delay": 0
+            }
+            plant_dyn_json["hours"].append(entry)
+
+        gd["plants"].append(plant_dyn_json)
+
         self.write_static()
+        self.write_dynamic()
 
     def add_device(self, dev_json):
         """Add a new device in the static catalog.
@@ -129,18 +163,22 @@ class Catalog(object):
         The new deviceID is auto-generated.
         """
         self.load_file()
+
         list_id = []
+        for g in self.static["gardens"]:
+            for p in g["plants"]:
+                for d in p["devices"]:
+                    list_id.append(d["devID"])
+
         for g in self.static["gardens"]:
             if g["gardenID"] == dev_json["gardenID"]:
                 break
         for p in g["plants"]:
             if p["plantID"] == dev_json["plantID"]:
                 break
-            for d in p["devices"]:
-                list_id.append(d["devID"])
 
         # Generate a new devID.
-        numID = 1000
+        numID = 1001
         new_id = 'd_' + str(numID)
 
         while new_id in list_id:
