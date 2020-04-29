@@ -322,12 +322,11 @@ class Catalog(object):
         parameters for the given plantID/hour are resetted for the new day.
         """
         self.load_file()
-
         for g in self.dynamic["gardens"]:
             for p in g["plants"]:
                 if p["plantID"] == plantID:
                     for h in p["hours"]:
-                        if h["time"] == hour:
+                        if h["time"] == hour["time"]:
                             h["duration"] = 0  # Reset value
                             h["delay"] = 0
 
