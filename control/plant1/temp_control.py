@@ -11,8 +11,10 @@ import numpy as np
 import time
 import threading
 import functions
+from pathlib import Path
 
-FILE = "temp.json"
+P = Path(__file__).parent.absolute()
+FILE = P / "temp.json"
 TIME_LIST = []
 
 
@@ -86,6 +88,7 @@ class SchedulingThread(threading.Thread):
 
     def run(self):
         """Run thread.
+
         Check if current hour correspond to one entry in the timetable, if so
         call the strategy and remove the current hour from the timetable.
         """

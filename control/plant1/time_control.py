@@ -6,10 +6,11 @@ import requests
 import time
 import threading
 import functions
-import paho.mqtt.client as PahoMQTT
 import datetime
+from pathlib import Path
 
-FILE = "time.json"
+P = Path(__file__).parent.absolute()
+FILE = P / "time.json"
 TIME_LIST = []
 
 
@@ -29,7 +30,6 @@ def get_result():
     data = json.loads(requests.get(string).text)
     data = data["data"]
 
-
     # Time strategy.
     start = '23:59:59'
     end = '12:00:00'
@@ -38,49 +38,40 @@ def get_result():
         morning = []
         evening = []
 
-        #for k in data:
         for k in data:
-            datetime_object = datetime.datetime.strptime(k, '%Y-%m-%dT%H:%M:%SZ')
-            time = datetime_object.strftime("%H:%M:%S")#---> "hh:mm:ss"
+            datetime_object = datetime.datetime.strptime(k,
+                                                         '%Y-%m-%dT%H:%M:%SZ')
+            time = datetime_object.strftime("%H:%M:%S")  # -> "hh:mm:ss"
 
-            if time > start and time < end: #if is in the morning
+            if time > start and time < end:  # if is in the morning
                 morning.append(time)
-            else: #if is in the evening
+            else:  # if is in the evening
                 evening.append(time)
 
         if morning == []:
             mean_evening = functions.mean_time(evening)
-            info = json.loads(requests.get("http://" + url + ":" + port + "/info/"+ plantID).text)
+            info = json.loads(requests.get("http://" + url + ":" + port +
+                                           "/info/" + plantID).text)
             print(info)
-            vector = [{"time": info["hours"][0]["time"], "type": "morning"},{"time": mean_evening, "type": "evening"}]
+            vector = [{"time": info["hours"][0]["time"], "type": "morning"},
+                      {"time": mean_evening, "type": "evening"}]
 
         elif evening == []:
             mean_morning = functions.mean_time(morning)
-            info = json.loads(requests.get("http://" + url + ":" + port + "/info/"+ plantID).text)
-            vector = [{"time": mean_morning, "type": "morning"},{"time": info["hours"][1]["time"], "type": "evening"}]
+            info = json.loads(requests.get("http://" + url + ":" + port +
+                                           "/info/" + plantID).text)
+            vector = [{"time": mean_morning, "type": "morning"},
+                      {"time": info["hours"][1]["time"], "type": "evening"}]
 
         else:
             mean_evening = functions.mean_time(evening)
             mean_morning = functions.mean_time(morning)
-            vector = [{"time": mean_morning, "type": "morning"},{"time": mean_evening, "type": "evening"}]
+            vector = [{"time": mean_morning, "type": "morning"},
+                      {"time": mean_evening, "type": "evening"}]
     else:
         return
 
-    functions.post_mod_hour(plantID, vector, url, port) #post to catalog
-
-
-
-    # if data != []:
-    #     m = np.mean(data)
-    #
-    #     diff = env["irrigation"] - m
-    #     duration = 100 * np.arctan(0.05 * diff)  # Add 300 seconds.
-    #     duration = round(duration)
-    # else:
-    #     duration = None
-    #
-    # if duration is not None:
-    #     functions.post_mod(plantID, hour, duration, 0, url, port)
+    functions.post_mod_hour(plantID, vector, url, port)  # POST to catalog
 
 
 def main():
@@ -93,7 +84,6 @@ def main():
         url, port, plantID, devID, ts_url, ts_port = functions.read_file(FILE)
         string = ("http://" + url + ":" + port + "/info/" + plantID)
         data = json.loads(requests.get(string).text)
-        hours = data["hours"]
         env = data["environment"]
 
         global TIME_LIST
@@ -119,6 +109,7 @@ class SchedulingThread(threading.Thread):
 
     def run(self):
         """Run thread.
+
         Check if current hour correspond to one entry in the timetable, if so
         call the strategy and remove the current hour from the timetable.
         """
