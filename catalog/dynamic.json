@@ -79,11 +79,13 @@
         ],
         "devices": [{
             "devID": "d_1009",
-            "timestamp": 1556295300
+            "timestamp": 1556295300,
+            "topic": "smartgarden/g_1002/p_1003/d_1009"
           },
           {
             "devID": "d_1010",
-            "timestamp": 1556295300
+            "timestamp": 1556295300,
+            "topic": "smartgarden/g_1002/p_1003/d_1010"
           }
         ]
       }]
