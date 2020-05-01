@@ -394,36 +394,36 @@ class Webserver(object):
     @cherrypy.tools.json_out()
     def GET(self, *uri, **params):
         """Define GET HTTP method for RESTful webserver."""
-        catalog = Catalog(JSON_STATIC, JSON_DYNAMIC)
-        catalog.load_file()
+        cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
+        cat.load_file()
 
         # Get broker info (url, port).
         if uri[0] == 'broker':
-            return catalog.static["broker"]
+            return cat.static["broker"]
 
         if uri[0] == 'ts':
-            return catalog.static["thingspeak"]
+            return cat.static["thingspeak"]
 
         # Get dynamic catalog json.
         if uri[0] == 'dynamic':
-            return catalog.dynamic
+            return cat.dynamic
 
         # Get static catalog json.
         if uri[0] == 'static':
-            return catalog.static
+            return cat.static
 
         # Get all information about a garden/plant/device.
         if uri[0] == 'info':
             ID = uri[1]
-            return catalog.info(ID)
+            return cat.info(ID)
 
         # Get reserved information (telegram token or ThingSpeak channel APIs).
         if uri[0] == 'api':
             if uri[1] == 'telegramtoken':
-                return catalog.get_token(APIFILE)
+                return cat.get_token(APIFILE)
 
             if uri[1] == 'tschannel':
-                return catalog.get_ts_api(APIFILE, uri[2])
+                return cat.get_ts_api(APIFILE, uri[2])
 
     @cherrypy.tools.json_out()
     def POST(self, *uri, **params):
