@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """Freeboard on CherryPy.
-
-@author = Paolo Grasso
-
-- Set 'freeboard' folder path in the conf file
-- Visit '0.0.0.0:8080'
 - Edit freeboard configuration
 - Save the configuration
 - Reload the page
 """
 import json
 import cherrypy
-import os
+from pathlib import Path
+
+P = Path(__file__).parent.absolute()
 
 
 class Index(object):
@@ -21,7 +18,7 @@ class Index(object):
 
     def GET(self):
         """Return index page in HTML."""
-        return open("./freeboard/index.html", "r").read()
+        return open(P / "freeboard/index.html", "r").read()
 
 
 class SaveDashboard(object):
@@ -32,7 +29,7 @@ class SaveDashboard(object):
     def POST(self, *uri, **params):
         """Save dashboard configuration on json."""
         dash_json = json.loads(params["json_string"])  # Load json object
-        with open("./freeboard/dashboard/dashboard.json", "w") as f:
+        with open(P / "freeboard/dashboard/dashboard.json", "w") as f:
             json.dump(dash_json, f)  # Write json to file
 
 
@@ -41,55 +38,36 @@ if __name__ == '__main__':
     conf = {'/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.staticdir.on': True,
-            'tools.staticdir.dir':
-                os.path.abspath(os.path.join(os.path.dirname(__file__), '/'))
+            'tools.staticdir.dir': P / '/'
             },
-            '/css':
-            {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir':
-                os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                './freeboard/css'))
+            '/css': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': P / 'freeboard/css'
             },
-            '/dashboard':
-            {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir':
-                os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             './freeboard/dashboard'))
+            '/dashboard': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': P / 'freeboard/dashboard'
             },
-            '/img':
-            {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir':
-                os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             './freeboard/img'))
+            '/img': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': P / 'freeboard/img'
             },
-            '/js':
-            {
-            'tools.staticdir.on': True,
-            'tools.staticdir.dir':
-                os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             './freeboard/js'))
+            '/js': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': P / 'freeboard/js'
             },
-            '/plugins':
-            {
+            '/plugins': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir':
-                os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             './freeboard/plugins'))
+            'tools.staticdir.dir': P / 'freeboard/plugins'
             },
-            '/static':
-            {
+            '/static': {
             'tools.staticdir.on': True,
-            'tools.staticdir.dir':
-                os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                './freeboard'))
+            'tools.staticdir.dir': P / 'freeboard'
             }
             }
 
     cherrypy.tree.mount(Index(), '/', config=conf)
     cherrypy.tree.mount(SaveDashboard(), '/saveDashboard', config=conf)
-    cherrypy.config.update('conf')
+    cherrypy.config.update(str(P / 'conf'))
     cherrypy.engine.start()
     cherrypy.engine.block()

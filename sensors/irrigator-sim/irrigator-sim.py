@@ -6,16 +6,14 @@ import json
 import threading
 import paho.mqtt.client as PahoMQTT
 import time
-import os
 import sys
-import inspect
-current_dir = os.path.dirname(os.path.abspath(
-                              inspect.getfile(inspect.currentframe())))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
+from pathlib import Path
+parent_dir = Path(__file__).parent.parent.absolute()
+sys.path.insert(0, str(parent_dir))
 import updater
 
-FILENAME = "conf.json"
+P = Path(__file__).parent.absolute()
+CONF_FILE = P / "conf.json"
 BT = None
 
 
@@ -107,7 +105,7 @@ class PubData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.devID, self.url, self.port) = updater.read_file(FILENAME)
+        (self.devID, self.url, self.port) = updater.read_file(CONF_FILE)
         print(">>> Irrigator %s <<<\n" % self.devID)
         (self.gardenID, self.plantID, self.resources) = updater.find_me(
                                             self.devID, self.url, self.port)
@@ -140,7 +138,7 @@ def main():
     global BT
     BT = round(time.time())
 
-    thread1 = updater.Alive(1, "Alive")
+    thread1 = updater.Alive(1, "Alive", CONF_FILE)
     thread2 = PubData(2, "PubData")
 
     thread1.start()

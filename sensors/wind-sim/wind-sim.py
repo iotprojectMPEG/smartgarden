@@ -4,20 +4,18 @@
 import json
 import threading
 import paho.mqtt.client as PahoMQTT
-import os
 import sys
-import inspect
 import time
 import datetime
-current_dir = os.path.dirname(os.path.abspath(
-                              inspect.getfile(inspect.currentframe())))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
-import updater
 import random
+from pathlib import Path
+parent_dir = Path(__file__).parent.parent.absolute()
+sys.path.insert(0, str(parent_dir))
+import updater
 
+P = Path(__file__).parent.absolute()
 INTENSITY = [(0, 10), (11, 33), (34, 64)]  # Knots.
-FILENAME = "conf.json"
+CONF_FILE = P / "conf.json"
 BT = None
 PREVIOUS_VALUE = 5  # To prevent wind changing drastically from previous value.
 
@@ -65,7 +63,7 @@ class PubData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.devID, self.url, self.port) = updater.read_file(FILENAME)
+        (self.devID, self.url, self.port) = updater.read_file(CONF_FILE)
         print(">>> Wind %s <<<\n" % self.devID)
         (self.gardenID, self.plantID,
          self.resources) = updater.find_me(self.devID,
@@ -98,40 +96,9 @@ class PubData(threading.Thread):
 
 def get_data(devID, res):
     """Get wind data from sensor."""
-    # with open("wind_demo.txt", "r") as f:
-    #     lines = f.readlines()
-    # f.close()
-    # with open("wind_demo.txt", "w") as f:
-    #     for i in range(len(lines)):
-    #         if i == 0:
-    #             row = lines[0].split(',')
-    #             value = float(row[0])
-    #
-    #         else:
-    #             row = lines[i].split(',')[0]
-    #             f.write("%s,\n" % row)
-    # f.close()
-    # try:
-    #     intensity = np.random.choice([0, 1, 2], p=[0.6, 0.38, 0.02])
-    #     minimum = INTENSITY[intensity][0]
-    #     maximum = INTENSITY[intensity][1]
-    #     value = np.random.randint(minimum, maximum+1)
-    #
-    #     # Maximum range of change: 5
-    #     global PREVIOUS_VALUE
-    #     if (value > PREVIOUS_VALUE + 5):
-    #         value = PREVIOUS_VALUE + 5
-    #
-    #     elif (value < PREVIOUS_VALUE - 5):
-    #         value = PREVIOUS_VALUE - 5
-    #
-    #     PREVIOUS_VALUE = value
-    #
-    # except Exception:
-    #     pass
     now = datetime.datetime.now()
     line_number = now.hour*60 + now.minute
-    with open("wind_demo.txt", "r") as f:
+    with open(P / "wind_demo.txt", "r") as f:
         lines = f.readlines()
     f.close()
     value = int(lines[line_number].replace('\n', ''))
@@ -163,7 +130,7 @@ def main():
     connected = 0
     while connected == 0:
         try:
-            thread1 = updater.Alive(1, "Alive")
+            thread1 = updater.Alive(1, "Alive", CONF_FILE)
             connected = 1  # Catalog is available
         except Exception:
             print("Catalog is not reachable... retry in 5 seconds")

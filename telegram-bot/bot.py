@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Telegram bot for smart gardening."""
-from telegram.ext import Updater, CommandHandler, MessageHandler
-from telegram.ext import Filters, CallbackQueryHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram.ext import Updater, CommandHandler
+from telegram import ParseMode
 import logging
 import json
 import requests
@@ -11,7 +10,10 @@ import time
 import datetime
 import paho.mqtt.client as PahoMQTT
 import numpy as np
+from pathlib import Path
 
+P = Path(__file__).parent.absolute()
+CONF = P / 'conf.json'
 CHAT_ID = None  # For spot.
 
 # Enable logging
@@ -83,7 +85,8 @@ def error(bot, update, error):
 
 
 def irrigation(bot, update):
-    with open('conf.json', "r") as f:
+    """Send irrigation command."""
+    with open(CONF, "r") as f:
         config = json.loads(f.read())
     url = config["cat_ip"]
     port = config["cat_port"]
@@ -150,7 +153,7 @@ def values(bot, update, args):
                         parse_mode=ParseMode.MARKDOWN)
         return
 
-    with open('conf.json', "r") as f:
+    with open(CONF, "r") as f:
         config = json.loads(f.read())
     url = config["cat_ip"]
     port = config["cat_port"]
@@ -202,10 +205,6 @@ def values(bot, update, args):
                     update.message.reply_text(message)
 
 
-
-
-
-
 def status(bot, update, args):
     """Get a summary of all gardens.
 
@@ -214,7 +213,7 @@ def status(bot, update, args):
     """
     param = " ".join(args)
 
-    with open('conf.json', "r") as f:
+    with open(CONF, "r") as f:
         config = json.loads(f.read())
     url = config["cat_ip"]
     port = config["cat_port"]
@@ -288,7 +287,7 @@ def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
 
-    with open('conf.json', "r") as f:
+    with open(CONF, "r") as f:
         config = json.loads(f.read())
     url = config["cat_ip"]
     port = config["cat_port"]
