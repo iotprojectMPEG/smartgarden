@@ -96,7 +96,7 @@ def get_data(devID, res):
     """Get data from sensor."""
     now = datetime.datetime.now()
     line_number = now.hour*60 + now.minute
-    with open("rain_demo.txt", "r") as f:
+    with open(P / "rain_demo.txt", "r") as f:
         lines = f.readlines()
     f.close()
     value = int(lines[line_number].replace('\n', ''))
