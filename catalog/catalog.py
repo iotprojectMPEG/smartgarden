@@ -50,11 +50,17 @@ class Catalog(object):
         Load data (static, dynamic) from json files and get MQTT broker IP
         and MQTT broker port saved on static file.
         """
-        with open(self.filename_s, "r") as fs:
-            self.static = json.loads(fs.read())
-
-        with open(self.filename_d, "r") as fd:
-            self.dynamic = json.loads(fd.read())
+        loaded = 0
+        while not loaded:
+            try:
+                with open(self.filename_s, "r") as fs:
+                    self.static = json.loads(fs.read())
+                with open(self.filename_d, "r") as fd:
+                    self.dynamic = json.loads(fd.read())
+                loaded = 1
+            except Exception:
+                print("Problem in loading catalog, retrying...")
+                time.sleep(.5)
 
         self.broker_ip = self.static["broker"]["IP"]
         self.mqtt_port = self.static["broker"]["mqtt_port"]
