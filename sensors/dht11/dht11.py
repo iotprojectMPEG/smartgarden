@@ -6,15 +6,14 @@ import json
 import time
 import paho.mqtt.client as PahoMQTT
 import threading
-import os
 import sys
-import inspect
-current_dir = (os.path.dirname(os.path.abspath(
-                               inspect.getfile(inspect.currentframe()))))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
+from pathlib import Path
+parent_dir = Path(__file__).parent.parent.absolute()
+sys.path.insert(0, str(parent_dir))
 import updater
 
+P = Path(__file__).parent.absolute()
+CONF_FILE = P / 'conf.json'
 SENSOR = 11
 PIN = 17
 BT = None  # Basetime
@@ -56,7 +55,7 @@ class PubData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.devID, self.url, self.port) = updater.read_file("conf.json")
+        (self.devID, self.url, self.port) = updater.read_file(CONF_FILE)
         (self.gardenID, self.plantID,
          self.resources) = updater.find_me(self.devID, self.url, self.port)
         (self.broker_ip, mqtt_port) = updater.broker_info(self.url, self.port)
@@ -130,7 +129,7 @@ def main():
     connected = 0
     while connected == 0:
         try:
-            thread1 = updater.Alive(1, "Alive")
+            thread1 = updater.Alive(1, "Alive", CONF_FILE)
             connected = 1  # Catalog is available
         except Exception:
             print("Catalog is not reachable... retry in 5 seconds")

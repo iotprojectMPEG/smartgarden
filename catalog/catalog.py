@@ -50,11 +50,17 @@ class Catalog(object):
         Load data (static, dynamic) from json files and get MQTT broker IP
         and MQTT broker port saved on static file.
         """
-        with open(self.filename_s, "r") as fs:
-            self.static = json.loads(fs.read())
-
-        with open(self.filename_d, "r") as fd:
-            self.dynamic = json.loads(fd.read())
+        loaded = 0
+        while not loaded:
+            try:
+                with open(self.filename_s, "r") as fs:
+                    self.static = json.loads(fs.read())
+                with open(self.filename_d, "r") as fd:
+                    self.dynamic = json.loads(fd.read())
+                loaded = 1
+            except Exception:
+                print("Problem in loading catalog, retrying...")
+                time.sleep(.5)
 
         self.broker_ip = self.static["broker"]["IP"]
         self.mqtt_port = self.static["broker"]["mqtt_port"]
@@ -322,12 +328,11 @@ class Catalog(object):
         parameters for the given plantID/hour are resetted for the new day.
         """
         self.load_file()
-
         for g in self.dynamic["gardens"]:
             for p in g["plants"]:
                 if p["plantID"] == plantID:
                     for h in p["hours"]:
-                        if h["time"] == hour:
+                        if h["time"] == hour["time"]:
                             h["duration"] = 0  # Reset value
                             h["delay"] = 0
 
@@ -395,36 +400,36 @@ class Webserver(object):
     @cherrypy.tools.json_out()
     def GET(self, *uri, **params):
         """Define GET HTTP method for RESTful webserver."""
-        catalog = Catalog(JSON_STATIC, JSON_DYNAMIC)
-        catalog.load_file()
+        cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
+        cat.load_file()
 
         # Get broker info (url, port).
         if uri[0] == 'broker':
-            return catalog.static["broker"]
+            return cat.static["broker"]
 
         if uri[0] == 'ts':
-            return catalog.static["thingspeak"]
+            return cat.static["thingspeak"]
 
         # Get dynamic catalog json.
         if uri[0] == 'dynamic':
-            return catalog.dynamic
+            return cat.dynamic
 
         # Get static catalog json.
         if uri[0] == 'static':
-            return catalog.static
+            return cat.static
 
         # Get all information about a garden/plant/device.
         if uri[0] == 'info':
             ID = uri[1]
-            return catalog.info(ID)
+            return cat.info(ID)
 
         # Get reserved information (telegram token or ThingSpeak channel APIs).
         if uri[0] == 'api':
             if uri[1] == 'telegramtoken':
-                return catalog.get_token(APIFILE)
+                return cat.get_token(APIFILE)
 
             if uri[1] == 'tschannel':
-                return catalog.get_ts_api(APIFILE, uri[2])
+                return cat.get_ts_api(APIFILE, uri[2])
 
     @cherrypy.tools.json_out()
     def POST(self, *uri, **params):

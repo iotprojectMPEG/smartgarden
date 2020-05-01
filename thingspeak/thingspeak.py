@@ -12,11 +12,13 @@ import datetime
 import threading
 import requests
 import cherrypy
+from pathlib import Path
 
+P = Path(__file__).parent.absolute()
 loop_flag = 1
 time_flag = 1
-CHERRY_CONF = "cherrypyconf"
-FILE = "conf.json"
+CHERRY_CONF = str(P / "cherrypyconf")
+FILE = P / "conf.json"
 
 
 # Functions
@@ -195,7 +197,7 @@ class MySubscriber(object):
         """Define custom on_message function."""
         # try:
         # Read conf.json file
-        (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
+        (self.url, self.port, self.topic, self.ts_url) = read_file(FILE)
 
         # Decode received message and find devID
         msg.payload = msg.payload.decode("utf-8")
@@ -251,7 +253,7 @@ class SubmitData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
+        (self.url, self.port, self.topic, self.ts_url) = read_file(FILE)
         (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
 
@@ -290,7 +292,7 @@ class CherryThread(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.url, self.port, self.topic, self.ts_url) = read_file("conf.json")
+        (self.url, self.port, self.topic, self.ts_url) = read_file(FILE)
         (self.broker_ip, mqtt_port) = broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
 
@@ -404,5 +406,3 @@ if __name__ == "__main__":
     thread2.start()
     thread3 = CherryThread(3, "CherryServer")
     thread3.start()
-
-#ciao ragazzi

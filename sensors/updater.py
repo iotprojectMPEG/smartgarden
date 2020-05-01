@@ -11,6 +11,10 @@ import time
 import json
 import requests
 import threading
+from pathlib import Path
+
+P = Path(__file__).parent.absolute()
+CONF = P / 'conf.json'
 
 
 def read_file(filename):
@@ -59,12 +63,12 @@ class Alive(threading.Thread):
     will be updated on dynamic part of the catalog.
     """
 
-    def __init__(self, ThreadID, name):
+    def __init__(self, ThreadID, name, filename):
         """Initialise thread with MQTT data."""
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.devID, self.url, self.port) = read_file("conf.json")
+        (self.devID, self.url, self.port) = read_file(filename)
         (self.gardenID, self.plantID, self.resources) = find_me(self.devID,
                                                                 self.url,
                                                                 self.port)
