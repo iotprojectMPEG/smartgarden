@@ -36,6 +36,7 @@ def get_result(env, hour):
     data = data["data"]
 
     # Light strategy.
+    delay = 0
     if data != []:
         m = np.mean(data)
     if type == 'evening':
