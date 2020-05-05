@@ -151,7 +151,7 @@
       "gardenID": "g_1002",
       "name": "Giardino al mare",
       "location": "Palermo",
-      "users": ["Marzia1326","GenRen"],
+      "users": ["marzia1326","genren"],
       "plants": [{
         "plantID": "p_1003",
         "name": "Aloe vera",
