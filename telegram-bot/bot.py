@@ -200,9 +200,9 @@ def values(bot, update, args):
                     update.message.reply_text(message)
                     return
 
-                else:
-                    message = "This plant does not belong to you!"
-                    update.message.reply_text(message)
+        else:
+            message = "This plant does not belong to you!"
+            update.message.reply_text(message)
 
 
 def status(bot, update, args):
