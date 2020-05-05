@@ -167,9 +167,9 @@ def values(bot, update, args):
 
     for g in static["gardens"]:
         users = [u.lower() for u in g["users"]]
-        if (update.message.from_user.username).lower() in users:
-            for p in g["plants"]:
-                if p["plantID"] == plantID:
+        for p in g["plants"]:
+            if p["plantID"] == plantID:
+                if (update.message.from_user.username).lower() in users:
                     now = datetime.datetime.now()
                     message = ('🌱 ' + p["name"] +
                                '\n    🕒' + ' ' + str(now.hour).zfill(2) + ':' +
@@ -200,9 +200,9 @@ def values(bot, update, args):
                     update.message.reply_text(message)
                     return
 
-        else:
-            message = "This plant does not belong to you!"
-            update.message.reply_text(message)
+                else:
+                    message = "This plant does not belong to you!"
+                    update.message.reply_text(message)
 
 
 def status(bot, update, args):
