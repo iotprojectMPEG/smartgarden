@@ -69,11 +69,13 @@ class Catalog(object):
         """Write data on static json file."""
         with open(self.filename_s, "w") as fs:
             json.dump(self.static, fs, ensure_ascii=False, indent=2)
+            fs.write("\n")
 
     def write_dynamic(self):
         """Write data on dynamic json file."""
         with open(self.filename_d, "w") as fd:
             json.dump(self.dynamic, fd, ensure_ascii=False, indent=2)
+            fd.write("\n")
 
     def add_garden(self, garden_json):
         """Add a new garden in the static catalog.

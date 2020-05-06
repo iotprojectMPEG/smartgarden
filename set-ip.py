@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-This script lets you change all IPs in json files.
-"""
+"""This script lets you change all IPs in json files."""
 import json
 from pathlib import Path
+import os
 
 P = Path(__file__).parent.absolute()
 
@@ -12,7 +11,7 @@ P = Path(__file__).parent.absolute()
 def update_cherrypy(filename, key, value):
     """Update cherrypy config file with new value."""
     print(filename)
-    filename = str(P / filename)
+    filename = str(filename)
     with open(filename, 'r') as fr:
         data = fr.readlines()
 
@@ -35,40 +34,43 @@ def update_json(filename, keys, values):
     """Update json files with new values."""
     print(filename)
 
-    with open(P / filename, 'r') as fr:
+    with open(filename, 'r') as fr:
         data = json.loads(fr.read())
 
     for c, key in enumerate(keys):
         data[key] = values[c]
 
-    with open(P / filename, 'w') as fw:
+    with open(filename, 'w') as fw:
         json.dump(data, fw, indent=2)
+        fw.write("\n")
 
 
 def update_broker(filename, key, value):
     """Update json files with new broker values."""
     print(filename)
 
-    with open(P / filename, 'r') as fr:
+    with open(filename, 'r') as fr:
         data = json.loads(fr.read())
 
     data["broker"][key] = value
 
-    with open(P / filename, 'w') as fw:
+    with open(filename, 'w') as fw:
         json.dump(data, fw, indent=2)
+        fw.write("\n")
 
 
 def update_ts(filename, key, value):
     """Update json files with new TS values."""
     print(filename)
 
-    with open(P / filename, 'r') as fr:
+    with open(filename, 'r') as fr:
         data = json.loads(fr.read())
 
     data["thingspeak"][key] = value
 
-    with open(P / filename, 'w') as fw:
+    with open(filename, 'w') as fw:
         json.dump(data, fw, indent=2)
+        fw.write("\n")
 
 
 def main():
@@ -84,63 +86,41 @@ def main():
 
     print("Changing files:")
     # Base files.
-    update_json("catalog/conf.json", ["cat_ip", "cat_port"],
-                                     [cat_ip, cat_port])
-    update_ts("catalog/static.json", "IP", ts_ip)
-    update_ts("catalog/static.json", "port", ts_port)
-    update_broker("catalog/static.json", "IP", mqtt_ip)
-    update_json("thingspeak/conf.json", ["cat_ip", "cat_port"],
-                                        [cat_ip, cat_port])
-    update_json("telegram-bot/conf.json", ["cat_ip", "cat_port"],
-                                          [cat_ip, cat_port])
-    update_json("catalog/api.json", ["telegramtoken"], [telegram_token])
-    update_json("interface/conf.json", ["cat_ip", "cat_port"],
-                                       [cat_ip, cat_port])
+    update_json(P / "catalog/conf.json", ["cat_ip", "cat_port"],
+                                         [cat_ip, cat_port])
+    update_ts(P / "catalog/static.json", "IP", ts_ip)
+    update_ts(P / "catalog/static.json", "port", ts_port)
+    update_broker(P / "catalog/static.json", "IP", mqtt_ip)
+    update_json(P / "thingspeak/conf.json", ["cat_ip", "cat_port"],
+                                            [cat_ip, cat_port])
+    update_json(P / "telegram-bot/conf.json", ["cat_ip", "cat_port"],
+                                              [cat_ip, cat_port])
+    update_json(P / "catalog/api.json", ["telegramtoken"], [telegram_token])
+    update_json(P / "interface/conf.json", ["cat_ip", "cat_port"],
+                                           [cat_ip, cat_port])
 
     # Sensors.
-    update_json("sensors/conf.json", ["cat_ip", "cat_port"],
-                                     [cat_ip, cat_port])
-    update_json("sensors/dht11/conf.json", ["cat_ip", "cat_port"],
-                                           [cat_ip, cat_port])
-    update_json("sensors/dht11-sim/conf.json", ["cat_ip", "cat_port"],
-                                               [cat_ip, cat_port])
-    update_json("sensors/dht11-sim2/conf.json", ["cat_ip", "cat_port"],
-                                                [cat_ip, cat_port])
-    update_json("sensors/irrigator-sim/conf.json", ["cat_ip", "cat_port"],
-                                                   [cat_ip, cat_port])
-    update_json("sensors/light-sim/conf.json", ["cat_ip", "cat_port"],
-                                               [cat_ip, cat_port])
-    update_json("sensors/rain-sim/conf.json", ["cat_ip", "cat_port"],
-                                              [cat_ip, cat_port])
-    update_json("sensors/wind-sim/conf.json", ["cat_ip", "cat_port"],
-                                              [cat_ip, cat_port])
-    update_json("control/plant1/irr.json", ["cat_ip", "cat_port"],
-                                           [cat_ip, cat_port])
-    update_json("control/plant1/time.json", ["cat_ip", "cat_port"],
-                                            [cat_ip, cat_port])
+    for sub in os.walk(P / 'sensors'):
+        for f in sub[2]:
+            if f.endswith('.json'):
+                j = Path(sub[0]) / f
+                update_json(j, ["cat_ip", "cat_port"], [cat_ip, cat_port])
 
     # Control strategies.
-    update_json("control/plant1/hum.json", ["cat_ip", "cat_port"],
-                                           [cat_ip, cat_port])
-    update_json("control/plant1/temp.json", ["cat_ip", "cat_port"],
-                                            [cat_ip, cat_port])
-    update_json("control/plant1/wind.json", ["cat_ip", "cat_port"],
-                                            [cat_ip, cat_port])
-    update_json("control/plant2/hum.json", ["cat_ip", "cat_port"],
-                                           [cat_ip, cat_port])
-    update_json("control/plant2/temp.json", ["cat_ip", "cat_port"],
-                                            [cat_ip, cat_port])
-    update_json("control/plant2/light.json", ["cat_ip", "cat_port"],
-                                             [cat_ip, cat_port])
+    for sub in os.walk(P / 'control'):
+        for f in sub[2]:
+            if f.endswith('.json'):
+                j = Path(sub[0]) / f
+                update_json(j, ["cat_ip", "cat_port"], [cat_ip, cat_port])
 
     # CherryPi
-    update_cherrypy("catalog/cherrypyconf", "server.socket_host", cat_ip)
-    update_cherrypy("freeboard/conf", "server.socket_host", fre_ip)
-    update_cherrypy("thingspeak/cherrypyconf", "server.socket_host", ts_ip)
-    update_cherrypy("catalog/cherrypyconf", "server.socket_port",
+    update_cherrypy(P / "catalog/cherrypyconf", "server.socket_host", cat_ip)
+    update_cherrypy(P / "freeboard/conf", "server.socket_host", fre_ip)
+    update_cherrypy(P / "thingspeak/cherrypyconf", "server.socket_host", ts_ip)
+    update_cherrypy(P / "catalog/cherrypyconf", "server.socket_port",
                     int(cat_port))
-    update_cherrypy("freeboard/conf", "server.socket_port", int(fre_port))
-    update_cherrypy("thingspeak/cherrypyconf", "server.socket_port",
+    update_cherrypy(P / "freeboard/conf", "server.socket_port", int(fre_port))
+    update_cherrypy(P / "thingspeak/cherrypyconf", "server.socket_port",
                     int(ts_port))
     print("Success!")
 
