@@ -14,7 +14,7 @@ import threading
 from pathlib import Path
 
 P = Path(__file__).parent.absolute()
-FILE = P / "conf.json"
+FILE = P / "rain.json"
 TIME_LIST = []
 
 

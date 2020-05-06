@@ -48,7 +48,7 @@ class SchedulingThread(threading.Thread):
                 if e["schedule_time"] == time.strftime("%H:%M"):
                     act.irr(e["plantID"], e["hour"], e["devID"], url, port)
                     TIME_LIST.remove(e)
-            time.sleep(3)
+            time.sleep(10)
 
 
 class Actuator(object):
@@ -218,7 +218,6 @@ def main():
         for h in hours:
             t = h["time"]
             s_t = h["time"]
-            # s_t = "15:39"
             entry = {
                 "hour": t,
                 "schedule_time": s_t,
