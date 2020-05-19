@@ -32,6 +32,18 @@ def post_mod(plantID, hour, duration, delay, url, port):
     print("Publishing:\n", json.dumps(data, indent=1))
     requests.post(string, data=json.dumps(data))
 
+def post_mod_hour(plantID, vector, url, port):
+    """Send POST to catalog to change irrigation parameters."""
+    data = {
+        "plantID": plantID,
+        "hours": vector
+    }
+
+    # POST on catalog.
+    string = "http://" + url + ":" + str(port) + "/update/time"
+    print("Publishing:\n", json.dumps(data, indent=1))
+    requests.post(string, data=json.dumps(data))
+
 
 def post_delay(plantID, hour, new_hour, url, port):
     """Send POST to catalog to change irrigation parameters.
@@ -75,3 +87,20 @@ def read_file(filename):
         plantID = data["plantID"]
         devID = data["devID"]
         return (cat_url, cat_port, plantID, devID, ts_url, ts_port)
+
+def mean_angle(deg):
+    return degrees(phase(sum(rect(1, radians(d)) for d in deg)/len(deg)))
+
+def mean_time(times):
+    t = (time.split(':') for time in times)
+    seconds = ((float(s) + int(m) * 60 + int(h) * 3600)
+               for h, m, s in t)
+    day = 24 * 60 * 60
+    to_angles = [s * 360. / day for s in seconds]
+    mean_as_angle = mean_angle(to_angles)
+    mean_seconds = mean_as_angle * day / 360.
+    if mean_seconds < 0:
+        mean_seconds += day
+    h, m = divmod(mean_seconds, 3600)
+    m, s = divmod(m, 60)
+    return '%02i:%02i' % (h, m)
