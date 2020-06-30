@@ -18,7 +18,7 @@ FILE = P / "light.json"
 TIME_LIST = []
 
 
-def get_result(env, hour):
+def get_result(env, hour, type):
     """Get data from ThingSpeak adaptor and decide.
 
     Get the last entries on light field and decides if it is necessary or
@@ -39,7 +39,10 @@ def get_result(env, hour):
     delay = 0
     if data != []:
         m = np.mean(data)
+        print("Resistance: %d" % m)
+
     if type == 'evening':
+        print("Checking evening light condition...")
         if (m >= 140) and (m < 160):  # Very dark
             delay = -1800  # Anticipation of 30 minutes
 
@@ -56,7 +59,7 @@ def get_result(env, hour):
             delay = 3600  # Posticipation of 60 minutes
 
     elif type == 'morning':
-
+        print("Checking morning light condition...")
         if (m >= 140) and (m < 160):  # Very dark
             delay = 3600  # Posticipation of 60 minutes
 
@@ -95,8 +98,8 @@ def main():
             delayed_hour = functions.delay_h(t, -300)
             entry = {
                 "hour": t,
+                "type": h["type"],
                 "schedule_time": delayed_hour,
-                # "schedule_time": "15:43",
                 "env": env
                 }
             TIME_LIST.append(entry)  # Fill timetable.
@@ -125,7 +128,7 @@ class SchedulingThread(threading.Thread):
         while True:
             for e in TIME_LIST:
                 if e["schedule_time"] == time.strftime("%H:%M"):
-                    get_result(e["env"], e["hour"])
+                    get_result(e["env"], e["hour"], e["type"])
                     TIME_LIST.remove(e)
             time.sleep(3)
 
