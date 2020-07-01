@@ -86,13 +86,14 @@ def main():
         data = json.loads(requests.get(string).text)
         env = data["environment"]
 
+        schedule_time = "12:00"
         global TIME_LIST
         entry = {
-            "schedule_time": "18:47",
+            "schedule_time": schedule_time,
             "env": env
             }
         TIME_LIST.append(entry)  # Fill timetable.
-        print("Time check at: 12:00 - %s" % (plantID))
+        print("Time check at: %s - %s" % (schedule_time, plantID))
 
         time.sleep(86400)  # One day
         TIME_LIST = []  # Reset timetable

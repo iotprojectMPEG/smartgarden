@@ -4,6 +4,8 @@
 import datetime
 import json
 import requests
+from math import degrees, radians
+from cmath import phase, rect
 
 
 def delay_h(h, delta):
@@ -31,6 +33,7 @@ def post_mod(plantID, hour, duration, delay, url, port):
     string = "http://" + url + ":" + str(port) + "/edit_hour"
     print("Publishing:\n", json.dumps(data, indent=1))
     requests.post(string, data=json.dumps(data))
+
 
 def post_mod_hour(plantID, vector, url, port):
     """Send POST to catalog to change irrigation parameters."""
@@ -88,10 +91,16 @@ def read_file(filename):
         devID = data["devID"]
         return (cat_url, cat_port, plantID, devID, ts_url, ts_port)
 
+
 def mean_angle(deg):
-    return degrees(phase(sum(rect(1, radians(d)) for d in deg)/len(deg)))
+    """Compute mean angle."""
+    res = degrees(phase(sum(rect(1, radians(d))
+                            for d in deg)/len(deg)))
+    return res
+
 
 def mean_time(times):
+    """Compute mean time."""
     t = (time.split(':') for time in times)
     seconds = ((float(s) + int(m) * 60 + int(h) * 3600)
                for h, m, s in t)

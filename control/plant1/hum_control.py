@@ -39,7 +39,7 @@ def get_result(env, hour):
     if data != []:
         m = np.mean(data)
 
-        diff = env["humidity"] - m
+        diff = np.abs(env["humidity"] - m)
         duration = 100 * np.arctan(0.05 * diff)  # Add 300 seconds.
         duration = round(duration)
     else:
