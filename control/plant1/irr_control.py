@@ -73,7 +73,11 @@ class Actuator(object):
                             "d": duration
                         }]
                    }
-        self.pub.my_publish(json.dumps(message), topic)
+
+        if duration > 0:
+            self.pub.my_publish(json.dumps(message), topic)
+        else:
+            print("No irrigation due to rainy day.")
 
     def irr(self, plantID, hour, devID, url, port):
         """Compute irrigation  delay and duration.
@@ -164,7 +168,11 @@ class DelayedIrrigation(threading.Thread):
                      "n": "irrigate", "d": duration
                         }]
                    }
-        self.pub.my_publish(json.dumps(message), topic)
+
+        if duration > 0:
+            self.pub.my_publish(json.dumps(message), topic)
+        else:
+            print("No irrigation due to rainy day.")
 
 
 class MyPublisher(object):
