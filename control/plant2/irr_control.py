@@ -42,7 +42,7 @@ class SchedulingThread(threading.Thread):
         broker_ip = broker_info["IP"]
         mqtt_port = broker_info["mqtt_port"]
 
-        act = Actuator('my_ID', broker_ip, mqtt_port)
+        act = Actuator(devID + '_', broker_ip, mqtt_port)
         while True:
             for e in TIME_LIST:
                 if e["schedule_time"] == time.strftime("%H:%M"):
