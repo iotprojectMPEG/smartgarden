@@ -41,42 +41,42 @@ def get_result(env, hour, type):
         m = np.mean(data)
         print("Resistance: %d" % m)
 
-    if type == 'evening':
-        print("Checking evening light condition...")
-        if (m >= 140) and (m < 160):  # Very dark
-            delay = -1800  # Anticipation of 30 minutes
+        if type == 'evening':
+            print("Checking evening light condition...")
+            if (m >= 140) and (m < 160):  # Very dark
+                delay = -1800  # Anticipation of 30 minutes
 
-        elif (m >= 110) and (m < 140):  # Dark
-            delay = -900  # Anticipation of 15 minutes
+            elif (m >= 110) and (m < 140):  # Dark
+                delay = -900  # Anticipation of 15 minutes
 
-        elif (m >= 90 and m < 110):  # Ideal
-            delay = 0  # Ideal time, no delay
+            elif (m >= 90 and m < 110):  # Ideal
+                delay = 0  # Ideal time, no delay
 
-        elif (m >= 70 and m < 90):  # Bright
-            delay = 1800  # Posticipation of 30 minutes
+            elif (m >= 70 and m < 90):  # Bright
+                delay = 1800  # Posticipation of 30 minutes
 
-        elif (m < 70):  # Very bright
-            delay = 3600  # Posticipation of 60 minutes
+            elif (m < 70):  # Very bright
+                delay = 3600  # Posticipation of 60 minutes
 
-    elif type == 'morning':
-        print("Checking morning light condition...")
-        if (m >= 140) and (m < 160):  # Very dark
-            delay = 3600  # Posticipation of 60 minutes
+        elif type == 'morning':
+            print("Checking morning light condition...")
+            if (m >= 140) and (m < 160):  # Very dark
+                delay = 3600  # Posticipation of 60 minutes
 
-        elif (m >= 110) and (m < 140):  # Dark
-            delay = 1800  # Posticipation of 30 minutes
+            elif (m >= 110) and (m < 140):  # Dark
+                delay = 1800  # Posticipation of 30 minutes
 
-        elif (m >= 90 and m < 110):  # Ideal
-            delay = 0  # Ideal time, no delay
+            elif (m >= 90 and m < 110):  # Ideal
+                delay = 0  # Ideal time, no delay
 
-        elif (m >= 70 and m < 90):  # Bright
-            delay = -900  # Anticipation of 15 minutes
+            elif (m >= 70 and m < 90):  # Bright
+                delay = -900  # Anticipation of 15 minutes
 
-        elif (m < 70):  # Very bright
-            delay = -1800  # Anticipation of 30 minutes
+            elif (m < 70):  # Very bright
+                delay = -1800  # Anticipation of 30 minutes
 
-    if delay is not None:
-        functions.post_mod(plantID, hour, 0, delay, url, port)
+        if delay != 0:
+            functions.post_mod(plantID, hour, 0, delay, url, port)
 
 
 def main():

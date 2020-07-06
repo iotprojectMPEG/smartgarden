@@ -47,8 +47,8 @@ def get_result(env, hour):
         else:  # Almost no rain
             duration = None  # No modifications
 
-    if duration is not None:
-        functions.post_mod(plantID, hour, duration, 0, url, port)
+        if duration is not None:
+            functions.post_mod(plantID, hour, duration, 0, url, port)
 
 
 def main():
