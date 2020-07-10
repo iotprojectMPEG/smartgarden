@@ -1,19 +1,18 @@
 [tool.poetry]
-name = "mainproject"
+name = "temp"
 version = "0.1.0"
 description = ""
-authors = []
+authors = ["paolo-26 <paolo.1995@ymail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-cherrypy = "^18.6.0"
-pandas = "^1.0.5"
+cherrypy = "18.6.0"
+paho-mqtt = "1.5.0"
+pyqt5 = "5.14"
+matplotlib = "3.2.1"
+python-telegram-bot = "11.1.0"
+requests = "2.23.0"
 numpy = "^1.19.0"
-paho-mqtt = "^1.5.0"
-requests = "^2.24.0"
-matplotlib = "^3.2.2"
-python-telegram-bot = "^12.8"
-PyQt5 = "^5.15.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
