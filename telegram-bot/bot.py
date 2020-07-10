@@ -116,11 +116,11 @@ def irrigation(bot, update):
     for d in irrigation_list:
         try:
             string = "http://" + url + ":" + port + "/info/" + d
-            # print(string)
+            print(string)
             r = json.loads(requests.get(string).text)
             topic = r["topic"]
 
-            if topic is not None:
+            if topic is None:
                 update.message.reply_text("❌ Irrigation FAILED on %s" % d)
             else:
                 message = {
