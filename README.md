@@ -1,5 +1,5 @@
 # IoT for Smart Gardening
-![Python Version](https://img.shields.io/badge/python-3-informational?style=flat-square) 
+![Python Version](https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8-informational?style=flat-square) 
 ![GitHub](https://img.shields.io/github/contributors/iotprojectMPEG/mainproject?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/iotprojectMPEG/mainproject?style=flat-square)
 
@@ -17,17 +17,31 @@ Internet of Things project for smart gardening.
 
 ## Getting started
 ### Tools
-- Python 3 environment
+- Python 3.6 or higher
 - MQTT message broker
 ### Configuration
-* Install required python packages in you virtual environment:
-``` sh
-pip3 install -r requirements.txt
+It is recommended to setup a virtual environment in order to use specific versions of Python packages. The following instructions will help you in setting up the virtual environment with the help of [Poetry](https://python-poetry.org/). If you want to use a different software you can find the required packages in [pyproject.toml](https://github.com/iotprojectMPEG/mainproject/blob/master/pyproject.toml) under ```[tool.poetry.dependencies]```.
+#### Virtual environment with Poetry
+* Install [Poetry](https://github.com/python-poetry/poetry#Installation).
+* Configure it in order to create a .venv inside the project folder:
+```sh
+poetry config virtualenvs.in-project true
 ```
+* cd in project director.
+* Create and install the virtual environment:
+``` sh
+poetry install
+```
+* Activate the virtual environment:
+```
+source .venv/bin/activate
+```
+#### JSON configuration
 * Rename the [api.json.example](https://github.com/iotprojectMPEG/mainproject/blob/master/catalog/api.json.example) in api.json:
 ``` sh
 mv catalog/api.json.example catalog/api.json
 ```
+Then you can type in this file all secret information like channel IDs of ThingSpeak.
 * You can set all IP addresses, ports and Telegram token by running [set-ip.py](https://github.com/iotprojectMPEG/mainproject/blob/master/set-ip.py) and following the instructions on screen:
 ``` sh
 ./set-ip-py
@@ -37,7 +51,7 @@ mv catalog/api.json.example catalog/api.json
 ./interface/interface.py
 ```
 * Go to [Sensors installation](https://github.com/iotprojectMPEG/mainproject/blob/master/README.md#sensors-installation) in order to setup your sensors.
-### Run
+### Run the system
 #### Catalog
 ``` sh
 ./catalog/catalog.py
@@ -62,6 +76,11 @@ mv catalog/api.json.example catalog/api.json
 #### Freeboard
 ``` sh
 ./freeboard/freeboard.py
+```
+
+#### QT Interface
+``` sh
+./interface/interface.py
 ```
 
 ## Sensors installation
