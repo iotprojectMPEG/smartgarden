@@ -95,7 +95,7 @@ def main():
         TIME_LIST.append(entry)  # Fill timetable.
         print("Time check at: %s - %s" % (schedule_time, plantID))
 
-        time.sleep(86400)  # One day
+        time.sleep(604800)  # One week
         TIME_LIST = []  # Reset timetable
 
 
