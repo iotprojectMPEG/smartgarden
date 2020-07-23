@@ -15,6 +15,9 @@ Internet of Things project for smart gardening.
 
 <img src="https://didattica.polito.it/zxd/cms_data/image/6/ICT4SS_AzarSHABANI_Matr204782.jpg" width="200" />
 
+## Documentation
+[SmartGarden Wiki](https://github.com/iotprojectMPEG/mainproject/wiki)
+
 ## Getting started
 ### Tools
 - Python 3.6 or higher
