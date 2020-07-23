@@ -73,7 +73,8 @@ def help(bot, update):
                     "You can perform the following actions:\n"
                     "- '/status': Get info about your gardens\n"
                     "- '/status id': Get ID info about your gardens\n"
-                    "- '/plant id': Get info about your plants")
+                    "- '/plant id': Get info about your plants\n"
+                    "- '/Irrigate': To irrigate \n")
 
     bot.sendMessage(chat_id=update.message.chat_id, text=help_message,
                     parse_mode=ParseMode.MARKDOWN)
@@ -98,46 +99,54 @@ def irrigation(bot, update):
     IP = broker["IP"]
 
     irrigation_list = []
+
     for g in static["gardens"]:
-        for p in g["plants"]:
-            for d in p["devices"]:
-                for r in d["resources"]:
-                    if r["n"].lower() == 'irrigation':
-                        irrigation_list.append(d["devID"])
+        users = [u.lower() for u in g["users"]]
+        if (update.message.from_user.username).lower() in users:
+            for p in g["plants"]:
+                for d in p["devices"]:
+                    for r in d["resources"]:
+                        if r["n"].lower() == 'irrigation':
+                            irrigation_list.append(d["devID"])
+        else:
+            continue
 
-    pub = MyPublisher('bot', IP, mqtt_port)
-    pub.start()
+    if irrigation_list:
+        pub = MyPublisher('bot', IP, mqtt_port)
+        pub.start()
 
-    while pub.loop_flag:
-        print("Waiting for connection...")
-        time.sleep(.01)
+        while pub.loop_flag:
+            print("Waiting for connection...")
+            time.sleep(.01)
 
-    print(irrigation_list)
-    for d in irrigation_list:
-        try:
-            string = "http://" + url + ":" + port + "/info/" + d
-            print(string)
-            r = json.loads(requests.get(string).text)
-            topic = r["topic"]
+        print(irrigation_list)
+        for d in irrigation_list:
+            try:
+                string = "http://" + url + ":" + port + "/info/" + d
+                print(string)
+                r = json.loads(requests.get(string).text)
+                topic = r["topic"]
 
-            if topic is None:
-                update.message.reply_text("❌ Irrigation FAILED on %s" % d)
-            else:
-                message = {
-                           "e": [{
-                             "n": "irrigate", "d": 120
-                                }]
-                           }
+                if topic is None:
+                    update.message.reply_text("❌ Irrigation FAILED on %s" % d)
+                else:
+                    message = {
+                               "e": [{
+                                 "n": "irrigate", "d": 120
+                                    }]
+                               }
 
-                message = json.dumps(message)
-                pub.my_publish(message, topic)
-                update.message.reply_text("💧 Irrigation started on %s" % d)
-        except Exception:
-            print("Something gone wrong")
+                    message = json.dumps(message)
+                    pub.my_publish(message, topic)
+                    update.message.reply_text("💧 Irrigation started on %s" % d)
+            except Exception:
+                print("Something gone wrong")
 
-    pub.stop()
+        pub.stop()
 
-    # funzione...
+        # funzione...
+    else:
+        print("You don't have any garden")
 
 
 def values(bot, update, args):
@@ -203,6 +212,7 @@ def values(bot, update, args):
                 else:
                     message = "This plant does not belong to you!"
                     update.message.reply_text(message)
+
 
 
 def status(bot, update, args):
