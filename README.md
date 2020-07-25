@@ -1,7 +1,8 @@
 # IoT for Smart Gardening
-![Python Version](https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8-informational?style=flat-square) 
-![GitHub](https://img.shields.io/github/contributors/iotprojectMPEG/mainproject?style=flat-square)
-![GitHub](https://img.shields.io/github/license/iotprojectMPEG/mainproject?style=flat-square)
+![Python Version](https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8-informational?style=flat&logo=python&logoColor=white) 
+![GitHub](https://img.shields.io/github/contributors/iotprojectMPEG/mainproject?style=flat&logo=github)
+![GitHub](https://img.shields.io/github/license/iotprojectMPEG/mainproject?style=flat)
+![Poetry](https://img.shields.io/badge/Poetry-2f2f55?style=flat&link=https://python-poetry.org)
 
 Internet of Things project for smart gardening.
 ## Info
