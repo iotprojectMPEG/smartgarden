@@ -9,8 +9,10 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtWidgets import QWidget, QStackedWidget, QGridLayout
 from PyQt5.QtWidgets import QComboBox, QLineEdit, QPushButton, QLabel
 from PyQt5 import QtCore
+from pathlib import Path
+P = Path(__file__).parent.absolute()
 
-CONFIG = 'conf.json'
+CONFIG = P / 'conf.json'  # Config file with absolute path
 
 class Data(object):
     """ Get data from catalog """
