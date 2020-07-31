@@ -221,15 +221,31 @@ class Catalog(object):
         for d in p['devices']:
             if d['devID'] == devID:
                 found = 1
+                print("Updating %s timestamp." % devID)
                 d['timestamp'] = time.time()
                 d['topic'] = topic
 
-        # Insert again the device
-        if not found:
-            # TO DO: Check if device is allowed from the static catalog.
-            p['devices'].append(data)
+        if not found:  # Insert again the device
 
-        print("Updating", devID)
+            # But first check if device is allowed from the static catalog.
+            for g2 in self.static["gardens"]:
+                if g2['gardenID'] == gardenID:
+                    break
+
+            for p2 in g2['plants']:
+                if p2['plantID'] == plantID:
+                    break
+
+            for d2 in p2['devices']:
+                if d2['devID'] == devID:  # In static JSON
+                    allowed = 1
+                    print("%s reconnected!" % devID)
+                    p['devices'].append(data)  # In dynamic JSON
+
+            if not allowed:
+                print("Device %s wants to be updated but it seems to be not', \
+                      'present in the catalog, please check." % devID)
+
         self.write_dynamic()
 
     def remove_old_device(self):
@@ -283,7 +299,7 @@ class Catalog(object):
                                         if d2["devID"] == ID:
                                             topic = d2["topic"]
                         except Exception:
-                            print("Something gone wrong")
+                            print("%s topic was not registered!" % ID)
 
                         info = {"gardenID": g["gardenID"],
                                 "plantID": p["plantID"],
@@ -399,6 +415,7 @@ class Webserver(object):
     """CherryPy webserver."""
 
     exposed = True
+
     @cherrypy.tools.json_out()
     def GET(self, *uri, **params):
         """Define GET HTTP method for RESTful webserver."""
