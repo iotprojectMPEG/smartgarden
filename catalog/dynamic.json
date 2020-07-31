@@ -46,7 +46,8 @@
           ],
           "devices": [{
               "devID": "d_1004",
-              "timestamp": 1556295309
+              "timestamp": 1556295309,
+              "topic": "smartgarden/g_1001/p_1002/d_1004"
             },
             {
               "devID": "d_1005",
