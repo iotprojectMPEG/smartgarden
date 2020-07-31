@@ -7,52 +7,54 @@
 Internet of Things project for smart gardening.
 ## Info
 ### University
-* Politecnico di Torino / Polytechnic University of Turin
+Politecnico di Torino / Polytechnic University of Turin
 
 ![](http://www.politocomunica.polito.it/var/politocomunica/storage/images/media/images/marchio_logotipo_politecnico/1371-1-ita-IT/marchio_logotipo_politecnico_medium.jpg)
 ### Course
-* Master of Science program in **ICT for Smart Societies**
-* 01QWRBH - **Programming for IoT applications**
+Master of Science program in **ICT for Smart Societies**
+
+01QWRBH - **Programming for IoT applications**
 
 <img src="https://didattica.polito.it/zxd/cms_data/image/6/ICT4SS_AzarSHABANI_Matr204782.jpg" width="200" />
 
 ## Documentation
-[SmartGarden Wiki](https://github.com/iotprojectMPEG/mainproject/wiki)
+Complete documentation of code can be found in docstrings of the scripts and on [SmartGarden Wiki](https://github.com/iotprojectMPEG/mainproject/wiki).
 
 ## Getting started
 ### Tools
 - Python 3.6 or higher
 - MQTT message broker
-### Configuration
+### Installation of packages
 It is recommended to setup a virtual environment in order to use specific versions of Python packages. The following instructions will help you in setting up the virtual environment with the help of [Poetry](https://python-poetry.org/). If you want to use a different software you can find the required packages in [pyproject.toml](https://github.com/iotprojectMPEG/mainproject/blob/master/pyproject.toml) under ```[tool.poetry.dependencies]```.
 #### Virtual environment with Poetry
-* Install [Poetry](https://github.com/python-poetry/poetry#Installation).
-* Configure it in order to create a .venv inside the project folder:
+* Install [Poetry](https://github.com/python-poetry/poetry#Installation):
+```
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+```
+* Recommended: Configure Poetry it in order to create a virtual environment in a ```.venv``` folder inside the project directory:
 ```sh
 poetry config virtualenvs.in-project true
 ```
-* cd in project director.
-* Create and install the virtual environment:
+* cd in project directory.
+* Create the virtual environment and install Python packages and dependencies:
 ``` sh
 poetry install
 ```
 * Activate the virtual environment:
-```
+
+Linux:
+``` sh
 source .venv/bin/activate
 ```
-#### JSON configuration
-* Rename the [api.json.example](https://github.com/iotprojectMPEG/mainproject/blob/master/catalog/api.json.example) in api.json:
+Windows:
 ``` sh
-mv catalog/api.json.example catalog/api.json
+.venv\Scripts\activate
 ```
-Then you can type in this file all secret information like channel IDs of ThingSpeak.
+### Config files
+* Rename [api.json.example](https://github.com/iotprojectMPEG/mainproject/blob/master/catalog/api.json.example) in **api.json**. Then you can fill this file with all secret information like channel IDs of ThingSpeak.
 * You can set all IP addresses, ports and Telegram token by running [set-ip.py](https://github.com/iotprojectMPEG/mainproject/blob/master/set-ip.py) and following the instructions on screen:
 ``` sh
 ./set-ip-py
-```
-* Add gardens, plants and devices to your resource catalog by manually editing  json files or by running:
-``` sh
-./interface/interface.py
 ```
 * Go to [Sensors installation](https://github.com/iotprojectMPEG/mainproject/blob/master/README.md#sensors-installation) in order to setup your sensors.
 ### Run the system
@@ -83,6 +85,7 @@ Then you can type in this file all secret information like channel IDs of ThingS
 ```
 
 #### QT Interface
+This allows you to add gardens, plants and devices.
 ``` sh
 ./interface/interface.py
 ```
