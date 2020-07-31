@@ -214,7 +214,6 @@ def values(bot, update, args):
                     update.message.reply_text(message)
 
 
-
 def status(bot, update, args):
     """Get a summary of all gardens.
 

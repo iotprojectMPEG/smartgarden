@@ -322,6 +322,7 @@ class WebServer():
     """
 
     exposed = True
+
     @cherrypy.tools.json_out()
     def GET(self, *uri, **params):
         """Define GET HTTP method for RESTful webserver."""
