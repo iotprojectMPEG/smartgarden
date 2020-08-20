@@ -11,7 +11,7 @@ import random
 from pathlib import Path
 parent_dir = Path(__file__).parent.parent.absolute()
 sys.path.insert(0, str(parent_dir))
-import updater
+import sensor_functions as sf
 
 P = Path(__file__).parent.absolute()
 INTENSITY = [(0, 10), (11, 33), (34, 64)]  # Knots.
@@ -63,12 +63,12 @@ class PubData(threading.Thread):
         threading.Thread.__init__(self)
         self.ThreadID = ThreadID
         self.name = name
-        (self.devID, self.url, self.port) = updater.read_file(CONF_FILE)
+        (self.devID, self.url, self.port) = sf.read_file(CONF_FILE)
         print(">>> Wind %s <<<\n" % self.devID)
         (self.gardenID, self.plantID,
-         self.resources) = updater.find_me(self.devID,
+         self.resources) = sf.find_me(self.devID,
                                            self.url, self.port)
-        (self.broker_ip, mqtt_port) = updater.broker_info(self.url, self.port)
+        (self.broker_ip, mqtt_port) = sf.broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
 
         self.topic = []
@@ -130,7 +130,7 @@ def main():
     connected = 0
     while connected == 0:
         try:
-            thread1 = updater.Alive(1, "Alive", CONF_FILE)
+            thread1 = sf.Alive(1, "Alive", CONF_FILE)
             connected = 1  # Catalog is available
         except Exception:
             print("Catalog is not reachable... retry in 5 seconds")
