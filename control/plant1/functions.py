@@ -4,17 +4,8 @@
 import datetime
 import json
 import requests
-from cmath import rect, phase
 from math import radians, degrees
-
-
-# def return_info(ID):
-#
-#     string = "http://" + url + ":" + str(port) + "/info"
-#     info = requests.get(string, data=json.dumps(data))
-#     print(info)
-#     return info
-
+from cmath import rect, phase
 
 
 def delay_h(h, delta):
@@ -102,10 +93,14 @@ def read_file(filename):
 
 
 def mean_angle(deg):
-    return degrees(phase(sum(rect(1, radians(d)) for d in deg)/len(deg)))
+    """Compute mean angle."""
+    res = degrees(phase(sum(rect(1, radians(d))
+                            for d in deg)/len(deg)))
+    return res
 
 
 def mean_time(times):
+    """Compute mean time."""
     t = (time.split(':') for time in times)
     seconds = ((float(s) + int(m) * 60 + int(h) * 3600)
                for h, m, s in t)
