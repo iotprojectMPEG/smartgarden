@@ -23,6 +23,7 @@ matplotlib = "3.2.1"
 python-telegram-bot = "11.1.0"
 requests = "2.23.0"
 numpy = "^1.19.0"
+flake8 = "^3.8.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
