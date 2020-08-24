@@ -83,7 +83,7 @@ class PubData(threading.Thread):
         print(">>> Rain %s <<<\n" % (self.devID))
         (self.gardenID, self.plantID,
          self.resources) = sf.find_me(self.devID,
-                                           self.url, self.port)
+                                      self.url, self.port)
         (self.broker_ip, mqtt_port) = sf.broker_info(self.url, self.port)
         self.mqtt_port = int(mqtt_port)
 
