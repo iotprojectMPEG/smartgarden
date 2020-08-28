@@ -78,7 +78,6 @@ class PubData(threading.Thread):
         while True:
             data = get_data(self.devID, self.resources)
             pub.my_publish(json.dumps(data))
-            # pub2.my_publish(json.dumps(temp))
             time.sleep(60)
 
         pub.stop()
