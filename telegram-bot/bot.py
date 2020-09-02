@@ -23,19 +23,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - '
 logger = logging.getLogger(__name__)
 
 
-class ChatDatabase(object):
-    """Database to store chat_ids."""
-
-    def __init__(self):
-        self.db = {}
-
-    def add_chat_id(self, username, chat_id):
-        self.db[username] = chat_id
-
-    def del_user(self, username):
-        del self.db[username]
-
-
 class MyPublisher(object):
     """MQTT Publisher."""
 
@@ -91,7 +78,8 @@ def help(bot, update):
 
     bot.sendMessage(chat_id=update.message.chat_id, text=help_message,
                     parse_mode=ParseMode.MARKDOWN)
-
+    bot.sendMessage(chat_id=update.message.chat_id, text=update.message.chat_id,
+                    parse_mode=ParseMode.MARKDOWN)
 
 def error(bot, update, error):
     """Log Errors caused by Updates."""
@@ -114,7 +102,7 @@ def irrigation(bot, update):
     irrigation_list = []
 
     for g in static["gardens"]:
-        users = [u.lower() for u in g["users"]]
+        users = [u["name"].lower() for u in g["users"]]
         if (update.message.from_user.username).lower() in users:
             for p in g["plants"]:
                 for d in p["devices"]:
@@ -188,7 +176,7 @@ def values(bot, update, args):
     tval = "5"
 
     for g in static["gardens"]:
-        users = [u.lower() for u in g["users"]]
+        users = [u["name"].lower() for u in g["users"]]
         for p in g["plants"]:
             if p["plantID"] == plantID:
                 if (update.message.from_user.username).lower() in users:
@@ -246,7 +234,8 @@ def status(bot, update, args):
     if param == 'id':
 
         for g in static["gardens"]:
-            if (update.message.from_user.username).lower() in g["users"]:
+            users = [u["name"].lower() for u in g["users"]]
+            if (update.message.from_user.username).lower() in users:
 
                 devices = []
                 status = '🏡 ' + g["gardenID"] + '   (' + g["name"] + ')'
@@ -278,7 +267,8 @@ def status(bot, update, args):
 
     else:
         for g in static["gardens"]:
-            if (update.message.from_user.username).lower() in g["users"]:
+            users = [u["name"].lower() for u in g["users"]]
+            if (update.message.from_user.username).lower() in users:
                 devices = []
                 status = '🏡 ' + g["name"]
                 for p in g["plants"]:
@@ -345,6 +335,10 @@ class MQTTsubscriber(object):
         self._paho_mqtt.on_connect = self.my_on_connect
         self._paho_mqtt.on_message = self.my_on_message_received
         self.loop_flag = 1
+        string = ("http://" + cat_url + ":" + cat_port +
+                  "/" + "api/telegramtoken")
+        token = json.loads(requests.get(string).text)
+        self.token = token["token"]
 
     def start(self):
         """Start subscriber."""
@@ -390,13 +384,22 @@ class MQTTsubscriber(object):
                 info_p = json.loads(requests.get(string).text)
                 plant_name = info_p["name"]
 
-                users = info_p["users"]
-                message = ("Automatic irrigation started on plant %s (%s)"
-                           % (plantID, plant_name))
+                users = [u["chat_id"] for u in info_p["users"]]
+
+                msg = ("💧 Automatic irrigation started on\n🌱 Plant %s (%s)"
+                       % (plantID, plant_name))
+
+                msg += "\n🕒 Duration: %d seconds" % item["v"]
 
                 for u in users:
-                    # Send notifications
-                    pass
+                    if u is not None:
+                        send_text = ('https://api.telegram.org/bot' +
+                                     self.token +
+                                     '/sendMessage?chat_id=' + str(u) +
+                                     '&text=' + msg)
+                        print(send_text)
+                        response = requests.get(send_text)
+                        print(response)
 
 
 def broker_info(url, port):
