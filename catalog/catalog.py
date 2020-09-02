@@ -275,14 +275,14 @@ class Catalog(object):
         self.load_file()
         for g in self.static["gardens"]:
             if g["gardenID"] == ID:
-                info = {"gardenID": ID, "plants": g["plants"],
-                        "name": g["name"]}
+                info = {"gardenID": ID, "name": g["name"], "users": g["users"],
+                        "plants": g["plants"]}
                 return info
 
             for p in g["plants"]:
                 if p["plantID"] == ID:
                     info = {"gardenID": g["gardenID"], "plantID": ID,
-                            "name": p["name"],
+                            "name": p["name"], "users": g["users"],
                             "thingspeakID": p["thingspeakID"],
                             "devices": p["devices"],
                             "hours": p["hours"],
@@ -302,7 +302,7 @@ class Catalog(object):
                             print("%s topic was not registered!" % ID)
 
                         info = {"gardenID": g["gardenID"],
-                                "plantID": p["plantID"],
+                                "plantID": p["plantID"], "users": g["users"],
                                 "thingspeakID": p["thingspeakID"],
                                 "devID": ID, "resources": d["resources"],
                                 "name": d["name"], "topic": topic}
