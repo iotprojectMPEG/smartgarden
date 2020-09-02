@@ -19,7 +19,6 @@ CONF = P / 'conf.json'
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - '
                            '"%(message)s', level=logging.INFO)
-
 logger = logging.getLogger(__name__)
 
 
@@ -62,24 +61,25 @@ class MyPublisher(object):
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     """Send a message when the command /start is issued."""
-    msg = "Ciao!"
+    msg = ("Welcome to the SmartGarden bot 🌱" +
+           "\nYou can send /help if you need help.")
     bot.sendMessage(chat_id=update.message.chat_id, text=msg,
                     parse_mode=ParseMode.MARKDOWN)
 
 
 def help(bot, update):
     """Send a message when the command /help is issued."""
-    help_message = ("*Welcome to your Smart Garden bot!*\n\n"
+    help_message = ("*This is your Smart Garden bot!*\n\n"
                     "You can perform the following actions:\n"
                     "- '/status': Get info about your gardens\n"
                     "- '/status id': Get ID info about your gardens\n"
+                    " - '/values id': Get environmental info for your plant\n"
                     "- '/plant id': Get info about your plants\n"
                     "- '/Irrigate': To irrigate \n")
 
     bot.sendMessage(chat_id=update.message.chat_id, text=help_message,
                     parse_mode=ParseMode.MARKDOWN)
-    bot.sendMessage(chat_id=update.message.chat_id, text=update.message.chat_id,
-                    parse_mode=ParseMode.MARKDOWN)
+
 
 def error(bot, update, error):
     """Log Errors caused by Updates."""
@@ -93,7 +93,6 @@ def irrigation(bot, update):
     url = config["cat_ip"]
     port = config["cat_port"]
     string = "http://" + url + ":" + port
-    # dynamic = json.loads(requests.get(string + '/dynamic').text)
     static = json.loads(requests.get(string + '/static').text)
     broker = json.loads(requests.get(string + '/broker').text)
     mqtt_port = broker["mqtt_port"]
@@ -145,7 +144,6 @@ def irrigation(bot, update):
 
         pub.stop()
 
-        # funzione...
     else:
         print("You don't have any garden")
 
@@ -321,7 +319,11 @@ class Notification(threading.Thread):
 
 
 class MQTTsubscriber(object):
-    """Standard MQTT publisher."""
+    """Standard MQTT publisher.
+
+    It is used to send notifications to users when an automatic irrigation is
+    performed.
+    """
 
     def __init__(self, clientID, serverIP, port, topic, cat_url, cat_port):
         """Initialise MQTT client."""
@@ -338,7 +340,7 @@ class MQTTsubscriber(object):
         string = ("http://" + cat_url + ":" + cat_port +
                   "/" + "api/telegramtoken")
         token = json.loads(requests.get(string).text)
-        self.token = token["token"]
+        self.token = token["token"]  # Used to send notifications to users
 
     def start(self):
         """Start subscriber."""
@@ -372,32 +374,34 @@ class MQTTsubscriber(object):
                 except Exception:
                     pass
 
-                # Ask catalog for gardenID from devID
+                # Ask catalog for gardenID from devID.
                 string = ("http://" + self.cat_url + ":" + self.cat_port +
                           "/info/" + devID)
                 info_d = json.loads(requests.get(string).text)
                 plantID = info_d["plantID"]
 
-                # Find plant name and users
+                # Find plant name and users.
                 string = ("http://" + self.cat_url + ":" + self.cat_port +
                           "/info/" + plantID)
                 info_p = json.loads(requests.get(string).text)
                 plant_name = info_p["name"]
 
+                # Take chat_id from users list.
                 users = [u["chat_id"] for u in info_p["users"]]
 
-                msg = ("💧 Automatic irrigation started on\n🌱 Plant %s (%s)"
+                # Build message.
+                msg = ("💧 Irrigation started on\n🌱 Plant %s (%s)"
                        % (plantID, plant_name))
-
                 msg += "\n🕒 Duration: %d seconds" % item["v"]
 
+                # Send notifications.
                 for u in users:
                     if u is not None:
+                        # Send message to users using REST API.
                         send_text = ('https://api.telegram.org/bot' +
                                      self.token +
                                      '/sendMessage?chat_id=' + str(u) +
                                      '&text=' + msg)
-                        print(send_text)
                         response = requests.get(send_text)
                         print(response)
 
@@ -416,8 +420,12 @@ def broker_info(url, port):
 
 
 def main():
-    """Start the bot."""
-    # Create the EventHandler and pass it your bot's token.
+    """Setup and start the bot.
+
+    Run the bot until you press Ctrl-C or the process receives SIGINT,
+    SIGTERM or SIGABRT. This should be used most of the time, since
+    start_polling() is non-blocking and will stop the bot gracefully.
+    """
 
     with open(CONF, "r") as f:
         config = json.loads(f.read())
@@ -429,27 +437,25 @@ def main():
 
     updater = Updater(token)
 
-    # Get the dispatcher to register handlers
+    # Get the dispatcher to register handlers.
     dp = updater.dispatcher
 
-    # on different commands - answer in Telegram
+    # Activate different commands.
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("status", status, pass_args=True))
     dp.add_handler(CommandHandler("values", values, pass_args=True))
     dp.add_handler(CommandHandler("irrigate", irrigation))
 
-    # log all errors
+    # Log all errors.
     dp.add_error_handler(error)
 
-    # Start the Bot
+    # Start the Bot.
     updater.start_polling()
 
     notification = Notification("not1", "notification")
     notification.start()
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
+
     updater.idle()
 
 
