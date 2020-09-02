@@ -10,17 +10,30 @@ import time
 import datetime
 import paho.mqtt.client as PahoMQTT
 import numpy as np
+import threading
 from pathlib import Path
 
 P = Path(__file__).parent.absolute()
 CONF = P / 'conf.json'
-CHAT_ID = None  # For spot.
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - '
                            '"%(message)s', level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+
+class ChatDatabase(object):
+    """Database to store chat_ids."""
+
+    def __init__(self):
+        self.db = {}
+
+    def add_chat_id(self, username, chat_id):
+        self.db[username] = chat_id
+
+    def del_user(self, username):
+        del self.db[username]
 
 
 class MyPublisher(object):
@@ -292,6 +305,113 @@ def status(bot, update, args):
                 pass
 
 
+class Notification(threading.Thread):
+    def __init__(self, ThreadID, name):
+        """Initialise thread with MQTT data."""
+        threading.Thread.__init__(self)
+        self.ThreadID = ThreadID
+        self.name = name
+        with open(CONF, "r") as f:
+            config = json.loads(f.read())
+        self.cat_url = config["cat_ip"]
+        self.cat_port = config["cat_port"]
+        self.topic = config["topic"]
+        (self.broker_ip, mqtt_port) = broker_info(self.cat_url, self.cat_port)
+        self.mqtt_port = int(mqtt_port)
+
+    def run(self):
+        """Run thread."""
+        sub = MQTTsubscriber("telegrambot", self.broker_ip, self.mqtt_port,
+                             self.topic, self.cat_url, self.cat_port)
+        sub.start()
+
+        while sub.loop_flag:
+            print("Waiting for connection...")
+            time.sleep(1)
+
+
+class MQTTsubscriber(object):
+    """Standard MQTT publisher."""
+
+    def __init__(self, clientID, serverIP, port, topic, cat_url, cat_port):
+        """Initialise MQTT client."""
+        self.clientID = clientID + '_sub'
+        self.messageBroker = serverIP
+        self.port = port
+        self.topic = topic
+        self.cat_url = cat_url
+        self.cat_port = cat_port
+        self._paho_mqtt = PahoMQTT.Client(self.clientID, False)
+        self._paho_mqtt.on_connect = self.my_on_connect
+        self._paho_mqtt.on_message = self.my_on_message_received
+        self.loop_flag = 1
+
+    def start(self):
+        """Start subscriber."""
+        self._paho_mqtt.connect(self.messageBroker, self.port)
+        self._paho_mqtt.loop_start()
+        self._paho_mqtt.subscribe(self.topic, 2)
+
+    def stop(self):
+        """Stop subscriber."""
+        self._paho_mqtt.unsubscribe(self.topic)
+        self._paho_mqtt.loop_stop()
+        self._paho_mqtt.disconnect()
+
+    def my_on_connect(self, client, userdata, flags, rc):
+        """Define custom on_connect function."""
+        print("S - Connected to %s - Res code: %d" % (self.messageBroker, rc))
+        self.loop_flag = 0
+
+    def my_on_message_received(self, client, userdata, msg):
+        """Define custom on_message function."""
+
+        # Decode received message.
+        msg.payload = msg.payload.decode("utf-8")
+        message = json.loads(msg.payload)
+
+        for item in message["e"]:
+            if item["n"] == "irrigation":
+
+                try:
+                    devID = message["bn"]
+                except Exception:
+                    pass
+
+                # Ask catalog for gardenID from devID
+                string = ("http://" + self.cat_url + ":" + self.cat_port +
+                          "/info/" + devID)
+                info_d = json.loads(requests.get(string).text)
+                plantID = info_d["plantID"]
+
+                # Find plant name and users
+                string = ("http://" + self.cat_url + ":" + self.cat_port +
+                          "/info/" + plantID)
+                info_p = json.loads(requests.get(string).text)
+                plant_name = info_p["name"]
+
+                users = info_p["users"]
+                message = ("Automatic irrigation started on plant %s (%s)"
+                           % (plantID, plant_name))
+
+                for u in users:
+                    # Send notifications
+                    pass
+
+
+def broker_info(url, port):
+    """Get broker information.
+
+    Send GET request to catalog in order to obtain MQTT broker IP and
+    port.
+    """
+    string = "http://" + url + ":" + port + "/broker"
+    broker = requests.get(string)
+    broker_ip = json.loads(broker.text)["IP"]
+    mqtt_port = json.loads(broker.text)["mqtt_port"]
+    return (broker_ip, mqtt_port)
+
+
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
@@ -322,6 +442,8 @@ def main():
     # Start the Bot
     updater.start_polling()
 
+    notification = Notification("not1", "notification")
+    notification.start()
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
