@@ -13,10 +13,10 @@
       "location": "Torino",
       "users": [{
                 "name": "paolograsso",
-                "chat_id": 24161907
+                "chat_id": null
       }, {
                 "name": "edofax",
-                "chat_id": 89734397
+                "chat_id": null
       }],
       "plants": [{
           "plantID": "p_1001",
@@ -159,10 +159,10 @@
       "location": "Palermo",
       "users": [{
                 "name": "marzia1326",
-                "chat_id": 575667867
+                "chat_id": null
       }, {
                 "name": "genren",
-                "chat_id": 176228429
+                "chat_id": null
       }],
       "plants": [{
         "plantID": "p_1003",

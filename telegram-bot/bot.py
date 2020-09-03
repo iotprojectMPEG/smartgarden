@@ -66,6 +66,20 @@ def start(bot, update):
     bot.sendMessage(chat_id=update.message.chat_id, text=msg,
                     parse_mode=ParseMode.MARKDOWN)
 
+    # Send chat_id to catalog.
+    data = {
+        "name": update.message.from_user.username.lower(),
+        "chat_id": update.message.chat_id
+    }
+    with open(CONF, "r") as f:
+        config = json.loads(f.read())
+    url = config["cat_ip"]
+    port = config["cat_port"]
+    string = "http://" + url + ":" + port
+    # dynamic = json.loads(requests.get(string + '/dynamic').text)
+    requests.post(string + '/update/user', data=json.dumps(data))
+    print("Chat ID for user %s has been updated." % (data["name"]))
+
 
 def help(bot, update):
     """Send a message when the command /help is issued."""
