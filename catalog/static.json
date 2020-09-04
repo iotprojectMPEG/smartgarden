@@ -11,7 +11,13 @@
       "gardenID": "g_1001",
       "name": "Casa in montagna",
       "location": "Torino",
-      "users": ["edo_fax","paolograsso"],
+      "users": [{
+                "name": "paolograsso",
+                "chat_id": null
+      }, {
+                "name": "edofax",
+                "chat_id": null
+      }],
       "plants": [{
           "plantID": "p_1001",
           "name": "Dionaea muscipula",
@@ -151,7 +157,13 @@
       "gardenID": "g_1002",
       "name": "Giardino al mare",
       "location": "Palermo",
-      "users": ["marzia1326","genren"],
+      "users": [{
+                "name": "marzia1326",
+                "chat_id": null
+      }, {
+                "name": "genren",
+                "chat_id": null
+      }],
       "plants": [{
         "plantID": "p_1003",
         "name": "Aloe vera",

@@ -10,16 +10,15 @@ import time
 import datetime
 import paho.mqtt.client as PahoMQTT
 import numpy as np
+import threading
 from pathlib import Path
 
 P = Path(__file__).parent.absolute()
 CONF = P / 'conf.json'
-CHAT_ID = None  # For spot.
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - '
                            '"%(message)s', level=logging.INFO)
-
 logger = logging.getLogger(__name__)
 
 
@@ -62,17 +61,33 @@ class MyPublisher(object):
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
     """Send a message when the command /start is issued."""
-    msg = "Ciao!"
+    msg = ("Welcome to the SmartGarden bot 🌱" +
+           "\nYou can send /help if you need help.")
     bot.sendMessage(chat_id=update.message.chat_id, text=msg,
                     parse_mode=ParseMode.MARKDOWN)
+
+    # Send chat_id to catalog.
+    data = {
+        "name": update.message.from_user.username.lower(),
+        "chat_id": update.message.chat_id
+    }
+    with open(CONF, "r") as f:
+        config = json.loads(f.read())
+    url = config["cat_ip"]
+    port = config["cat_port"]
+    string = "http://" + url + ":" + port
+    # dynamic = json.loads(requests.get(string + '/dynamic').text)
+    requests.post(string + '/update/user', data=json.dumps(data))
+    print("Chat ID for user %s has been updated." % (data["name"]))
 
 
 def help(bot, update):
     """Send a message when the command /help is issued."""
-    help_message = ("*Welcome to your Smart Garden bot!*\n\n"
+    help_message = ("*This is your Smart Garden bot!*\n\n"
                     "You can perform the following actions:\n"
                     "- '/status': Get info about your gardens\n"
                     "- '/status id': Get ID info about your gardens\n"
+                    " - '/values id': Get environmental info for your plant\n"
                     "- '/plant id': Get info about your plants\n"
                     "- '/Irrigate': To irrigate \n")
 
@@ -92,7 +107,6 @@ def irrigation(bot, update):
     url = config["cat_ip"]
     port = config["cat_port"]
     string = "http://" + url + ":" + port
-    # dynamic = json.loads(requests.get(string + '/dynamic').text)
     static = json.loads(requests.get(string + '/static').text)
     broker = json.loads(requests.get(string + '/broker').text)
     mqtt_port = broker["mqtt_port"]
@@ -101,7 +115,7 @@ def irrigation(bot, update):
     irrigation_list = []
 
     for g in static["gardens"]:
-        users = [u.lower() for u in g["users"]]
+        users = [u["name"].lower() for u in g["users"]]
         if (update.message.from_user.username).lower() in users:
             for p in g["plants"]:
                 for d in p["devices"]:
@@ -144,7 +158,6 @@ def irrigation(bot, update):
 
         pub.stop()
 
-        # funzione...
     else:
         print("You don't have any garden")
 
@@ -175,7 +188,7 @@ def values(bot, update, args):
     tval = "5"
 
     for g in static["gardens"]:
-        users = [u.lower() for u in g["users"]]
+        users = [u["name"].lower() for u in g["users"]]
         for p in g["plants"]:
             if p["plantID"] == plantID:
                 if (update.message.from_user.username).lower() in users:
@@ -233,7 +246,8 @@ def status(bot, update, args):
     if param == 'id':
 
         for g in static["gardens"]:
-            if (update.message.from_user.username).lower() in g["users"]:
+            users = [u["name"].lower() for u in g["users"]]
+            if (update.message.from_user.username).lower() in users:
 
                 devices = []
                 status = '🏡 ' + g["gardenID"] + '   (' + g["name"] + ')'
@@ -265,7 +279,8 @@ def status(bot, update, args):
 
     else:
         for g in static["gardens"]:
-            if (update.message.from_user.username).lower() in g["users"]:
+            users = [u["name"].lower() for u in g["users"]]
+            if (update.message.from_user.username).lower() in users:
                 devices = []
                 status = '🏡 ' + g["name"]
                 for p in g["plants"]:
@@ -292,9 +307,139 @@ def status(bot, update, args):
                 pass
 
 
+class Notification(threading.Thread):
+    def __init__(self, ThreadID, name):
+        """Initialise thread with MQTT data."""
+        threading.Thread.__init__(self)
+        self.ThreadID = ThreadID
+        self.name = name
+        with open(CONF, "r") as f:
+            config = json.loads(f.read())
+        self.cat_url = config["cat_ip"]
+        self.cat_port = config["cat_port"]
+        self.topic = config["topic"]
+        (self.broker_ip, mqtt_port) = broker_info(self.cat_url, self.cat_port)
+        self.mqtt_port = int(mqtt_port)
+
+    def run(self):
+        """Run thread."""
+        sub = MQTTsubscriber("telegrambot", self.broker_ip, self.mqtt_port,
+                             self.topic, self.cat_url, self.cat_port)
+        sub.start()
+
+        while sub.loop_flag:
+            print("Waiting for connection...")
+            time.sleep(1)
+
+
+class MQTTsubscriber(object):
+    """Standard MQTT publisher.
+
+    It is used to send notifications to users when an automatic irrigation is
+    performed.
+    """
+
+    def __init__(self, clientID, serverIP, port, topic, cat_url, cat_port):
+        """Initialise MQTT client."""
+        self.clientID = clientID + '_sub'
+        self.messageBroker = serverIP
+        self.port = port
+        self.topic = topic
+        self.cat_url = cat_url
+        self.cat_port = cat_port
+        self._paho_mqtt = PahoMQTT.Client(self.clientID, False)
+        self._paho_mqtt.on_connect = self.my_on_connect
+        self._paho_mqtt.on_message = self.my_on_message_received
+        self.loop_flag = 1
+        string = ("http://" + cat_url + ":" + cat_port +
+                  "/" + "api/telegramtoken")
+        token = json.loads(requests.get(string).text)
+        self.token = token["token"]  # Used to send notifications to users
+
+    def start(self):
+        """Start subscriber."""
+        self._paho_mqtt.connect(self.messageBroker, self.port)
+        self._paho_mqtt.loop_start()
+        self._paho_mqtt.subscribe(self.topic, 2)
+
+    def stop(self):
+        """Stop subscriber."""
+        self._paho_mqtt.unsubscribe(self.topic)
+        self._paho_mqtt.loop_stop()
+        self._paho_mqtt.disconnect()
+
+    def my_on_connect(self, client, userdata, flags, rc):
+        """Define custom on_connect function."""
+        print("S - Connected to %s - Res code: %d" % (self.messageBroker, rc))
+        self.loop_flag = 0
+
+    def my_on_message_received(self, client, userdata, msg):
+        """Define custom on_message function."""
+
+        # Decode received message.
+        msg.payload = msg.payload.decode("utf-8")
+        message = json.loads(msg.payload)
+
+        for item in message["e"]:
+            if item["n"] == "irrigation":
+
+                try:
+                    devID = message["bn"]
+                except Exception:
+                    pass
+
+                # Ask catalog for gardenID from devID.
+                string = ("http://" + self.cat_url + ":" + self.cat_port +
+                          "/info/" + devID)
+                info_d = json.loads(requests.get(string).text)
+                plantID = info_d["plantID"]
+
+                # Find plant name and users.
+                string = ("http://" + self.cat_url + ":" + self.cat_port +
+                          "/info/" + plantID)
+                info_p = json.loads(requests.get(string).text)
+                plant_name = info_p["name"]
+
+                # Take chat_id from users list.
+                users = [u["chat_id"] for u in info_p["users"]]
+
+                # Build message.
+                msg = ("💧 Irrigation started on\n🌱 Plant %s (%s)"
+                       % (plantID, plant_name))
+                msg += "\n🕒 Duration: %d seconds" % item["v"]
+
+                # Send notifications.
+                for u in users:
+                    if u is not None:
+                        # Send message to users using REST API.
+                        send_text = ('https://api.telegram.org/bot' +
+                                     self.token +
+                                     '/sendMessage?chat_id=' + str(u) +
+                                     '&text=' + msg)
+                        response = requests.get(send_text)
+                        print(response)
+
+
+def broker_info(url, port):
+    """Get broker information.
+
+    Send GET request to catalog in order to obtain MQTT broker IP and
+    port.
+    """
+    string = "http://" + url + ":" + port + "/broker"
+    broker = requests.get(string)
+    broker_ip = json.loads(broker.text)["IP"]
+    mqtt_port = json.loads(broker.text)["mqtt_port"]
+    return (broker_ip, mqtt_port)
+
+
 def main():
-    """Start the bot."""
-    # Create the EventHandler and pass it your bot's token.
+    """Setup and start the bot.
+
+    Run the bot until you press Ctrl-C or the process receives SIGINT,
+    SIGTERM or SIGABRT. This should be used most of the time, since
+    start_polling() is non-blocking and will stop the bot gracefully.
+    """
 
     with open(CONF, "r") as f:
         config = json.loads(f.read())
@@ -306,25 +451,25 @@ def main():
 
     updater = Updater(token)
 
-    # Get the dispatcher to register handlers
+    # Get the dispatcher to register handlers.
     dp = updater.dispatcher
 
-    # on different commands - answer in Telegram
+    # Activate different commands.
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("status", status, pass_args=True))
     dp.add_handler(CommandHandler("values", values, pass_args=True))
     dp.add_handler(CommandHandler("irrigate", irrigation))
 
-    # log all errors
+    # Log all errors.
     dp.add_error_handler(error)
 
-    # Start the Bot
+    # Start the Bot.
     updater.start_polling()
 
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
+    notification = Notification("not1", "notification")
+    notification.start()
+
     updater.idle()
 
 

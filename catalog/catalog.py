@@ -410,6 +410,15 @@ class Catalog(object):
                         c = c + 1
         self.write_dynamic()
 
+    def update_user(self, name, chat_id):
+        """Update user chat_id."""
+        self.load_file()
+        for g in self.static["gardens"]:
+            for u in g["users"]:
+                if u["name"] == name:
+                    u["chat_id"] = chat_id  # Update chat_id
+                    self.write_static()
+
 
 class Webserver(object):
     """CherryPy webserver."""
@@ -497,33 +506,18 @@ class Webserver(object):
             cat.edit_hour_delay(body["plantID"], body["hour"],
                                 body["new_hour"])
             return 200
-        # # Change irrigation parameters (duration and hours) on dynamic part.
-        # # If static == 0 change duration and delay of irrigation on dynamic.
-        # # if static == 1 change old to new hour in static and dynamic parts.
-        # if uri[0] == 'edit_hour':
-        #     body = json.loads(cherrypy.request.body.read())
-        #     cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
-        #
-        #     # Change duration and delay on dynamic part.
-        #     if body["static"] == 0:
-        #         cat.edit_hour(body["plantID"], body["hour"], body["mod"],
-        #                       body["modh"], body["reset"])
-        #
-        #         print(json.dumps(body))
-        #         return 200
-        #
-        #     elif body["static"] == 1:  # Change on static and dynamic.
-        #         cat.edit_static_hour(body["plantID"], body["hour"],
-        #                              body["new_hour"])
-        #         return 200
 
-        # Change irrigation times (hours) e.g. 19:00 -> 18:20.
         if uri[0] == 'update':
             if uri[1] == 'time':
                 body = json.loads(cherrypy.request.body.read())  # Read body
                 cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
                 print(body)
                 cat.change_hour(body["plantID"], body["hours"])
+
+            if uri[1] == 'user':
+                body = json.loads(cherrypy.request.body.read())  # Read body
+                cat = Catalog(JSON_STATIC, JSON_DYNAMIC)
+                cat.update_user(body["name"], body["chat_id"])
 
 
 class MySubscriber:
